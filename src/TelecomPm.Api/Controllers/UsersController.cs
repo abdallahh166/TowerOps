@@ -176,5 +176,22 @@ public sealed class UsersController : ApiControllerBase
         var result = await Mediator.Send(query, cancellationToken);
         return HandleResult(result);
     }
-}
 
+    private string ResolveDeletionActor()
+    {
+        if (_currentUserService.IsAuthenticated)
+        {
+            if (!string.IsNullOrWhiteSpace(_currentUserService.Email))
+            {
+                return _currentUserService.Email;
+            }
+
+            if (_currentUserService.UserId != Guid.Empty)
+            {
+                return _currentUserService.UserId.ToString();
+            }
+        }
+
+        return "System";
+    }
+}

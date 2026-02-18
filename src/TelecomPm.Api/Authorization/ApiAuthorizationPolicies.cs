@@ -12,7 +12,7 @@ public static class ApiAuthorizationPolicies
     public const string CanViewEscalations = "CanViewEscalations";
     public const string CanViewKpis = "CanViewKpis";
 
-    public static AuthorizationOptions Configure(AuthorizationOptions options)
+    public static void Configure(AuthorizationOptions options)
     {
         options.AddPolicy(CanManageWorkOrders, policy =>
             policy.RequireRole(
@@ -52,6 +52,5 @@ public static class ApiAuthorizationPolicies
                 UserRole.Manager.ToString(),
                 UserRole.Supervisor.ToString()));
 
-        return options;
     }
 }

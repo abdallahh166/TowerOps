@@ -112,7 +112,6 @@ public class ReportGenerationServiceTests
             Guid.NewGuid(),
             "Eng 1",
             DateTime.UtcNow,
-            VisitType.PreventiveMaintenance,
             VisitType.PreventiveMaintenance);
     }
 
@@ -126,7 +125,7 @@ public class ReportGenerationServiceTests
             "Cairo",
             "Nasr City",
             Coordinates.Create(30.01, 31.01),
-            Address.Create("Street 1", "Cairo", "Cairo", "Egypt", "12345"),
-            SiteType.Tower);
+            Address.Create("Street 1", "Cairo", "Cairo", "Egypt"),
+            SiteType.Macro);
     }
 }
