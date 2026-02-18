@@ -1,0 +1,75 @@
+﻿namespace TelecomPM.Infrastructure;
+
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using TelecomPM.Application.Common.Interfaces;
+using TelecomPM.Domain.Interfaces.Repositories;
+using TelecomPM.Domain.Interfaces.Services;
+using TelecomPM.Domain.Services;
+using TelecomPM.Infrastructure.Persistence;
+using TelecomPM.Infrastructure.Persistence.Repositories;
+using TelecomPM.Infrastructure.Services;
+
+public static class DependencyInjection
+{
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+        {
+            var interceptors = new[]
+            {
+                serviceProvider.GetRequiredService<TelecomPM.Infrastructure.Persistence.Interceptors.AuditInterceptor>()
+            };
+
+            options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"),
+                b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
+                .AddInterceptors(interceptors);
+        });
+
+        // Register interceptors
+        services.AddScoped<TelecomPM.Infrastructure.Persistence.Interceptors.AuditInterceptor>();
+
+        // Unit of Work
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // Email Service
+        services.AddScoped<IEmailService, EmailService>();
+
+        // Repositories
+        services.AddScoped<IVisitRepository, VisitRepository>();
+        services.AddScoped<ISiteRepository, SiteRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IOfficeRepository, OfficeRepository>();
+        services.AddScoped<IMaterialRepository, MaterialRepository>();
+        services.AddScoped<IWorkOrderRepository, WorkOrderRepository>();
+
+        // Domain event dispatcher
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+
+        // Infrastructure Services (External concerns & I/O)
+        services.AddScoped<IDateTimeService, DateTimeService>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IFileStorageService, BlobStorageService>();
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IExcelExportService, ExcelExportService>();
+        services.AddScoped<IReportGenerationService, ReportGenerationService>();
+
+        // Domain Services with Infrastructure dependencies (Repository-dependent)
+        services.AddScoped<IVisitNumberGeneratorService, VisitNumberGeneratorService>();
+        services.AddScoped<IMaterialStockService, MaterialStockService>();
+        services.AddScoped<IVisitValidationService, VisitValidationService>();
+        services.AddScoped<IVisitDurationCalculatorService, VisitDurationCalculatorService>();
+        services.AddScoped<ISiteAssignmentService, SiteAssignmentService>();
+        services.AddScoped<IPhotoChecklistGeneratorService, PhotoChecklistGeneratorService>();
+
+        // HttpContextAccessor for CurrentUserService
+        services.AddHttpContextAccessor();
+
+        return services;
+    }
+}
