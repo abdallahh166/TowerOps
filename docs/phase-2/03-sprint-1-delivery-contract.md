@@ -26,3 +26,10 @@
 - Show stored UTC timestamps
 - Show audit log entries
 - Show policy rejection for unauthorized role
+
+
+## Implementation References
+- Controller: `src/TelecomPm.Api/Controllers/WorkOrdersController.cs`
+- Commands: `CreateWorkOrderCommand`, `AssignWorkOrderCommand`
+- Domain: `src/TelecomPM.Domain/Entities/WorkOrders/WorkOrder.cs`
+- Policy wiring: `src/TelecomPm.Api/Authorization/ApiAuthorizationPolicies.cs`

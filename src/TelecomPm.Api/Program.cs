@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using TelecomPM.Api.Filters;
 using TelecomPM.Api.Middleware;
-using TelecomPM.Domain.Enums;
+using TelecomPM.Api.Authorization;
 using TelecomPM.Application;
 using TelecomPM.Infrastructure;
 using TelecomPM.Infrastructure.Persistence;
@@ -92,21 +92,7 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("CanManageWorkOrders", policy =>
-        policy.RequireRole(
-            UserRole.Admin.ToString(),
-            UserRole.Manager.ToString(),
-            UserRole.Supervisor.ToString()));
-
-    options.AddPolicy("CanViewWorkOrders", policy =>
-        policy.RequireRole(
-            UserRole.Admin.ToString(),
-            UserRole.Manager.ToString(),
-            UserRole.Supervisor.ToString(),
-            UserRole.PMEngineer.ToString()));
-});
+builder.Services.AddAuthorization(ApiAuthorizationPolicies.Configure);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

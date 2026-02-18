@@ -2,6 +2,7 @@ namespace TelecomPm.Api.Controllers;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TelecomPM.Api.Authorization;
 using TelecomPm.Api.Contracts.WorkOrders;
 using TelecomPM.Application.Commands.WorkOrders.AssignWorkOrder;
 using TelecomPM.Application.Commands.WorkOrders.CreateWorkOrder;
@@ -13,7 +14,7 @@ using TelecomPM.Application.Queries.WorkOrders.GetWorkOrderById;
 public sealed class WorkOrdersController : ApiControllerBase
 {
     [HttpPost]
-    [Authorize(Policy = "CanManageWorkOrders")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageWorkOrders)]
     public async Task<IActionResult> Create([FromBody] CreateWorkOrderRequest request, CancellationToken cancellationToken)
     {
         var command = new CreateWorkOrderCommand
@@ -35,7 +36,7 @@ public sealed class WorkOrdersController : ApiControllerBase
     }
 
     [HttpGet("{workOrderId:guid}")]
-    [Authorize(Policy = "CanViewWorkOrders")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanViewWorkOrders)]
     public async Task<IActionResult> GetById(Guid workOrderId, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(new GetWorkOrderByIdQuery { WorkOrderId = workOrderId }, cancellationToken);
@@ -43,7 +44,7 @@ public sealed class WorkOrdersController : ApiControllerBase
     }
 
     [HttpPost("{workOrderId:guid}/assign")]
-    [Authorize(Policy = "CanManageWorkOrders")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageWorkOrders)]
     public async Task<IActionResult> Assign(Guid workOrderId, [FromBody] AssignWorkOrderRequest request, CancellationToken cancellationToken)
     {
         var command = new AssignWorkOrderCommand

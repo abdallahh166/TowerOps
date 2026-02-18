@@ -51,6 +51,10 @@ public static class DependencyInjection
         // Domain event dispatcher
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
+        services.Configure<PushNotificationOptions>(configuration.GetSection("PushNotifications"));
+        services.Configure<TwilioOptions>(configuration.GetSection("Twilio"));
+        services.AddHttpClient(nameof(NotificationService));
+
         // Infrastructure Services (External concerns & I/O)
         services.AddScoped<IDateTimeService, DateTimeService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
