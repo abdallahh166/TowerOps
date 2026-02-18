@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\TelecomPm.Application\TelecomPm.Application.csproj" />
+    <ProjectReference Include="..\..\src\TelecomPm.Api\TelecomPm.Api.csproj" />
   </ItemGroup>
 </Project>
 

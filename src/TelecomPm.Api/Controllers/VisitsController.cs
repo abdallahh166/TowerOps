@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TelecomPM.Api.Authorization;
 using TelecomPm.Api.Contracts.Visits;
 using TelecomPM.Application.Commands.Visits.AddChecklistItem;
 using TelecomPM.Application.Commands.Visits.AddIssue;
@@ -171,7 +172,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/approve")]
-    [Authorize(Policy = "CanReviewVisits")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanReviewVisits)]
     public async Task<IActionResult> Approve(
         Guid visitId,
         [FromBody] ApproveVisitRequest request,
@@ -189,7 +190,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/reject")]
-    [Authorize(Policy = "CanReviewVisits")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanReviewVisits)]
     public async Task<IActionResult> Reject(
         Guid visitId,
         [FromBody] RejectVisitRequest request,
@@ -207,7 +208,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/request-correction")]
-    [Authorize(Policy = "CanReviewVisits")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanReviewVisits)]
     public async Task<IActionResult> RequestCorrection(
         Guid visitId,
         [FromBody] RequestCorrectionRequest request,

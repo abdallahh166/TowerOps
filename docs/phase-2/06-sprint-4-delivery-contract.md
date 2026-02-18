@@ -23,3 +23,13 @@
 
 ## Release Handoff
 - Phase 2 exit verification and UAT execution with no blocker defects.
+
+
+## Status Update
+- ✅ `GET /api/kpi/operations` implemented with filter parameters (`fromDateUtc`, `toDateUtc`, `officeCode`, `slaClass`).
+- ✅ `CanReviewVisits` and `CanViewKpis` policies are wired in authorization configuration.
+- ✅ CORS remains configuration-driven (`Cors:AllowedOrigins`).
+
+## Verification Notes
+- Add integration tests for auth policy allow/deny flows per role.
+- Validate UTC timestamp persistence with work order domain tests and persistence integration tests.

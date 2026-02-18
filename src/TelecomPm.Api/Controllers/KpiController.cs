@@ -2,6 +2,7 @@ namespace TelecomPm.Api.Controllers;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TelecomPM.Api.Authorization;
 using TelecomPM.Application.Queries.Kpi.GetOperationsDashboard;
 using TelecomPM.Domain.Enums;
 
@@ -11,7 +12,7 @@ using TelecomPM.Domain.Enums;
 public sealed class KpiController : ApiControllerBase
 {
     [HttpGet("operations")]
-    [Authorize(Policy = "CanViewKpis")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanViewKpis)]
     public async Task<IActionResult> GetOperationsDashboard(
         [FromQuery] DateTime? fromDateUtc,
         [FromQuery] DateTime? toDateUtc,
