@@ -1,12 +1,14 @@
 using FluentAssertions;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TelecomPm.Api.Contracts.Auth;
 using TelecomPm.Api.Controllers;
-using TelecomPm.Api.Services;
-using TelecomPM.Domain.Entities.Users;
-using TelecomPM.Domain.Enums;
-using TelecomPM.Domain.Interfaces.Repositories;
+using TelecomPM.Application.Commands.Auth.Login;
+using TelecomPM.Application.Common;
+using TelecomPM.Application.DTOs.Auth;
 using Xunit;
 
 namespace TelecomPM.Application.Tests.Services;
@@ -16,17 +18,19 @@ public class AuthControllerTests
     [Fact]
     public async Task Login_WithValidCredentials_ReturnsToken()
     {
-        var user = User.Create("User A", "user@example.com", "01000000000", UserRole.Manager, Guid.NewGuid());
+        var sender = new Mock<ISender>();
+        sender.Setup(s => s.Send(It.IsAny<LoginCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success(new AuthTokenDto
+            {
+                AccessToken = "jwt-token",
+                ExpiresAtUtc = DateTime.UtcNow.AddMinutes(30),
+                UserId = Guid.NewGuid(),
+                Email = "user@example.com",
+                Role = "Manager",
+                OfficeId = Guid.NewGuid()
+            }));
 
-        var repo = new Mock<IUserRepository>();
-        repo.Setup(r => r.GetByEmailAsNoTrackingAsync("user@example.com", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
-
-        var tokenService = new Mock<IJwtTokenService>();
-        tokenService.Setup(t => t.GenerateToken(user))
-            .Returns(("jwt-token", DateTime.UtcNow.AddMinutes(30)));
-
-        var controller = new AuthController(repo.Object, tokenService.Object);
+        var controller = BuildController(sender.Object);
 
         var response = await controller.Login(new LoginRequest
         {
@@ -35,18 +39,17 @@ public class AuthControllerTests
         }, CancellationToken.None);
 
         var ok = response.Should().BeOfType<OkObjectResult>().Subject;
-        ok.Value.Should().NotBeNull();
+        ok.Value.Should().BeOfType<LoginResponse>();
     }
 
     [Fact]
-    public async Task Login_WithWrongPhone_ReturnsUnauthorized()
+    public async Task Login_WithInvalidCredentials_ReturnsUnauthorized()
     {
-        var user = User.Create("User A", "user@example.com", "01000000000", UserRole.Manager, Guid.NewGuid());
-        var repo = new Mock<IUserRepository>();
-        repo.Setup(r => r.GetByEmailAsNoTrackingAsync("user@example.com", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
+        var sender = new Mock<ISender>();
+        sender.Setup(s => s.Send(It.IsAny<LoginCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Failure<AuthTokenDto>("Invalid credentials."));
 
-        var controller = new AuthController(repo.Object, Mock.Of<IJwtTokenService>());
+        var controller = BuildController(sender.Object);
 
         var response = await controller.Login(new LoginRequest
         {
@@ -55,5 +58,25 @@ public class AuthControllerTests
         }, CancellationToken.None);
 
         response.Should().BeOfType<UnauthorizedObjectResult>();
+    }
+
+    private static AuthController BuildController(ISender sender)
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton(sender);
+        var provider = services.BuildServiceProvider();
+
+        var controller = new AuthController
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    RequestServices = provider
+                }
+            }
+        };
+
+        return controller;
     }
 }

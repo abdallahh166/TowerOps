@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Domain.Entities.Users;
 
 public sealed class JwtTokenService : IJwtTokenService

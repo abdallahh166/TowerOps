@@ -67,10 +67,6 @@ public static class DependencyInjection
         // Domain Services with Infrastructure dependencies (Repository-dependent)
         services.AddScoped<IVisitNumberGeneratorService, VisitNumberGeneratorService>();
         services.AddScoped<IMaterialStockService, MaterialStockService>();
-        services.AddScoped<IVisitValidationService, VisitValidationService>();
-        services.AddScoped<IVisitDurationCalculatorService, VisitDurationCalculatorService>();
-        services.AddScoped<ISiteAssignmentService, SiteAssignmentService>();
-        services.AddScoped<IPhotoChecklistGeneratorService, PhotoChecklistGeneratorService>();
 
         // HttpContextAccessor for CurrentUserService
         services.AddHttpContextAccessor();

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using TelecomPM.Domain.Exceptions;
 using DomainUnauthorizedAccessException = TelecomPM.Domain.Exceptions.UnauthorizedAccessException;
+using AppValidationException = TelecomPM.Application.Exceptions.ValidationException;
 
 public class ExceptionHandlingMiddleware
 {
@@ -40,6 +41,13 @@ public class ExceptionHandlingMiddleware
         var (statusCode, responseBody) = exception switch
         {
             ValidationException validationException => (
+                (int)HttpStatusCode.BadRequest,
+                (object)new
+                {
+                    Message = "Validation failed",
+                    validationException.Errors
+                }),
+            AppValidationException validationException => (
                 (int)HttpStatusCode.BadRequest,
                 (object)new
                 {
@@ -83,4 +91,3 @@ public class ExceptionHandlingMiddleware
         await context.Response.WriteAsync(JsonSerializer.Serialize(responseBody));
     }
 }
-

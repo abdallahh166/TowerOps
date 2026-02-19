@@ -19,8 +19,9 @@ public class VisitSpecificationTests
 
         var list = new List<Visit> { v1, v2 };
         var spec = new VisitsByEngineerSpecification(engineerId);
+        spec.Criteria.Should().NotBeNull();
 
-        var result = list.Where(spec.Criteria.Compile()).ToList();
+        var result = list.Where(spec.Criteria!.Compile()).ToList();
         result.Should().ContainSingle().Which.Id.Should().Be(v1.Id);
     }
 }

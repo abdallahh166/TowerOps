@@ -33,7 +33,6 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddControllers(options =>
     {
-        options.Filters.Add<ApiExceptionFilter>();
         options.Filters.Add<ValidateModelStateFilter>();
     })
     .AddJsonOptions(options =>

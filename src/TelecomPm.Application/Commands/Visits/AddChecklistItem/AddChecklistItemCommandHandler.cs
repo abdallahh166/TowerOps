@@ -4,54 +4,37 @@ using AutoMapper;
 using MediatR;
 using TelecomPM.Application.Common;
 using TelecomPM.Application.DTOs.Visits;
+using TelecomPM.Application.Services;
 using TelecomPM.Domain.Entities.Visits;
-using TelecomPM.Domain.Interfaces.Repositories;
 
 public class AddChecklistItemCommandHandler : IRequestHandler<AddChecklistItemCommand, Result<VisitChecklistDto>>
 {
-    private readonly IVisitRepository _visitRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IEditableVisitMutationService _editableVisitMutationService;
     private readonly IMapper _mapper;
 
-    public AddChecklistItemCommandHandler(
-        IVisitRepository visitRepository,
-        IUnitOfWork unitOfWork,
-        IMapper mapper)
+    public AddChecklistItemCommandHandler(IEditableVisitMutationService editableVisitMutationService, IMapper mapper)
     {
-        _visitRepository = visitRepository;
-        _unitOfWork = unitOfWork;
+        _editableVisitMutationService = editableVisitMutationService;
         _mapper = mapper;
     }
 
-    public async Task<Result<VisitChecklistDto>> Handle(AddChecklistItemCommand request, CancellationToken cancellationToken)
-    {
-        var visit = await _visitRepository.GetByIdAsync(request.VisitId, cancellationToken);
-        if (visit == null)
-            return Result.Failure<VisitChecklistDto>("Visit not found");
+    public Task<Result<VisitChecklistDto>> Handle(AddChecklistItemCommand request, CancellationToken cancellationToken)
+        => _editableVisitMutationService.ExecuteAsync(
+            request.VisitId,
+            visit =>
+            {
+                var checklistItem = VisitChecklist.Create(
+                    visit.Id,
+                    request.Category,
+                    request.ItemName,
+                    request.Description,
+                    request.IsMandatory);
 
-        if (!visit.CanBeEdited())
-            return Result.Failure<VisitChecklistDto>("Visit cannot be edited");
+                visit.AddChecklistItem(checklistItem);
 
-        try
-        {
-            var checklistItem = VisitChecklist.Create(
-                visit.Id,
-                request.Category,
-                request.ItemName,
-                request.Description,
-                request.IsMandatory);
-
-            visit.AddChecklistItem(checklistItem);
-
-            await _visitRepository.UpdateAsync(visit, cancellationToken);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            var dto = _mapper.Map<VisitChecklistDto>(checklistItem);
-            return Result.Success(dto);
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<VisitChecklistDto>($"Failed to add checklist item: {ex.Message}");
-        }
-    }
+                var dto = _mapper.Map<VisitChecklistDto>(checklistItem);
+                return Task.FromResult(dto);
+            },
+            "Failed to add checklist item",
+            cancellationToken);
 }

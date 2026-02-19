@@ -2,6 +2,7 @@ using FluentAssertions;
 using TelecomPM.Application.Services;
 using TelecomPM.Domain.Entities.Sites;
 using TelecomPM.Domain.Enums;
+using TelecomPM.Domain.ValueObjects;
 
 namespace TelecomPM.Domain.Tests.Services;
 
@@ -9,7 +10,16 @@ public class PhotoChecklistGeneratorServiceTests
 {
     private static Site CreateSiteWithComponents(bool gen, bool solar, int acCount, bool twoG, bool threeG, bool fourG, bool shared)
     {
-        var site = (Site)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(Site));
+        var site = Site.Create(
+            "TNT001",
+            "Site1",
+            "OMC",
+            Guid.NewGuid(),
+            "Cairo",
+            "Nasr City",
+            Coordinates.Create(30, 31),
+            Address.Create("Street", "Cairo", "Cairo"),
+            SiteType.Macro);
         var tower = SiteTowerInfo.Create(Guid.Empty, TowerType.GFTower, 45, "TEData");
         tower.UpdateStructure(1, 4);
         typeof(Site).GetProperty("TowerInfo")!.SetValue(site, tower);
@@ -43,5 +53,3 @@ public class PhotoChecklistGeneratorServiceTests
         richList.Count.Should().BeGreaterThan(baseList.Count);
     }
 }
-
-
