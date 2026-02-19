@@ -8,7 +8,6 @@ using System.Text.Json.Serialization;
 using TelecomPM.Api.Filters;
 using TelecomPM.Api.Middleware;
 using TelecomPM.Api.Authorization;
-using TelecomPM.Api.Services;
 using TelecomPM.Application;
 using TelecomPM.Infrastructure;
 using TelecomPM.Infrastructure.Persistence;

@@ -19,16 +19,7 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `CanViewEscalations`: Admin, Manager, Supervisor, PMEngineer
 - `CanViewKpis`: Admin, Manager, Supervisor
 
-## Access Model
-- All business controllers are protected with `[Authorize]` and selected actions enforce role policies.
-- `AuthController` login endpoint is `[AllowAnonymous]`.
-
 ## Endpoint Catalog by Controller
-
-### `AuthController` (`/api/auth`)
-- `POST /login` (AllowAnonymous)
-  - Credentials currently validated by `email + phoneNumber` against active user profile.
-  - Returns JWT access token with `NameIdentifier`, `Email`, `Role`, `OfficeId` claims.
 
 ### `VisitsController` (`/api/visits`)
 - `GET /{visitId}`
