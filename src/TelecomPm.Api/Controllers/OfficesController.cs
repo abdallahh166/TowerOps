@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using TelecomPm.Api.Contracts.Offices;
 using TelecomPM.Application.Commands.Offices.CreateOffice;
 using TelecomPM.Application.Commands.Offices.UpdateOffice;
@@ -16,6 +17,7 @@ using TelecomPM.Application.Queries.Offices.GetOfficeStatistics;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public sealed class OfficesController : ApiControllerBase
 {
     [HttpPost]

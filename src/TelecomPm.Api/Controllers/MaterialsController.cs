@@ -4,10 +4,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using TelecomPM.Application.Queries.Materials.GetLowStockMaterials;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public sealed class MaterialsController : ApiControllerBase
 {
     [HttpGet("low-stock/{officeId:guid}")]

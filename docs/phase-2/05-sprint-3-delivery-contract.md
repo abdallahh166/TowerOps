@@ -30,3 +30,14 @@
 
 ## Next Handoff
 - Sprint 4: SLA breach engine + KPI endpoints + release hardening.
+
+
+## Status Update
+- ✅ Escalation endpoints implemented in `EscalationsController`.
+- ✅ Escalation authorization policies now wired in API startup via `ApiAuthorizationPolicies`.
+- ✅ Visit review actions use `CanReviewVisits` policy.
+
+## Implementation References
+- `src/TelecomPm.Api/Controllers/EscalationsController.cs`
+- `src/TelecomPm.Api/Controllers/VisitsController.cs`
+- `src/TelecomPm.Api/Authorization/ApiAuthorizationPolicies.cs`

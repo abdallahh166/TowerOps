@@ -148,8 +148,8 @@ Average consumed material value per WO.
 - Low-stock visibility for materials.
 
 ## 5.2 Key gaps for subcontractor production model
-1. **No explicit Work Order aggregate**
-   - Need WO as primary contractual object and link it to visits.
+1. **Work Order aggregate exists (baseline), needs maturity hardening**
+   - `WorkOrder` aggregate and APIs are implemented; next step is deepening SLA/audit/acceptance governance.
 2. **No explicit customer acceptance stage**
    - Add acceptance status/event after supervisor approval.
 3. **SLA clocks not first-class domain concept**

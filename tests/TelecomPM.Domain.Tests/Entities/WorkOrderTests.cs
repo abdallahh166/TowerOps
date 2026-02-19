@@ -66,4 +66,16 @@ public class WorkOrderTests
         act.Should().Throw<DomainException>()
             .WithMessage("*Engineer ID is required*");
     }
+    [Fact]
+    public void CreateAndAssign_ShouldPersistUtcTimestamps()
+    {
+        var workOrder = WorkOrder.Create("WO-UTC-1", "S-TNT-010", "TNT", SlaClass.P2, "UTC validation");
+
+        workOrder.CreatedAt.Kind.Should().Be(DateTimeKind.Utc);
+        workOrder.Assign(Guid.NewGuid(), "Engineer UTC", "Dispatcher");
+
+        workOrder.AssignedAtUtc.Should().NotBeNull();
+        workOrder.AssignedAtUtc!.Value.Kind.Should().Be(DateTimeKind.Utc);
+    }
+
 }

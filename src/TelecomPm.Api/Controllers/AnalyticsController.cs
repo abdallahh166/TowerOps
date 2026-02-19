@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using TelecomPM.Application.Queries.Reports.GetEngineerPerformanceReport;
 using TelecomPM.Application.Queries.Reports.GetSiteMaintenanceReport;
 using TelecomPM.Application.Queries.Reports.GetOfficeStatisticsReport;
@@ -13,6 +14,7 @@ using TelecomPM.Application.Queries.Reports.GetIssueAnalyticsReport;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public sealed class AnalyticsController : ApiControllerBase
 {
     [HttpGet("engineer-performance/{engineerId:guid}")]
