@@ -3,7 +3,7 @@ namespace TelecomPm.Api.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TelecomPM.Api.Authorization;
-using TelecomPM.Application.Queries.Kpi.GetOperationsDashboard;
+using TelecomPm.Api.Mappings;
 using TelecomPM.Domain.Enums;
 
 [ApiController]
@@ -20,14 +20,7 @@ public sealed class KpiController : ApiControllerBase
         [FromQuery] SlaClass? slaClass,
         CancellationToken cancellationToken)
     {
-        var query = new GetOperationsDashboardQuery
-        {
-            FromDateUtc = fromDateUtc,
-            ToDateUtc = toDateUtc,
-            OfficeCode = officeCode,
-            SlaClass = slaClass
-        };
-
+        var query = KpiContractMapper.ToOperationsDashboardQuery(fromDateUtc, toDateUtc, officeCode, slaClass);
         var result = await Mediator.Send(query, cancellationToken);
         return HandleResult(result);
     }

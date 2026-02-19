@@ -7,12 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using TelecomPm.Api.Contracts.Users;
 using TelecomPm.Api.Mappings;
-using TelecomPM.Application.Commands.Users.DeleteUser;
-using TelecomPM.Application.Commands.Users.ActivateUser;
-using TelecomPM.Application.Commands.Users.DeactivateUser;
 using TelecomPM.Application.Common.Interfaces;
-using TelecomPM.Application.Queries.Users.GetUserById;
-using TelecomPM.Application.Queries.Users.GetUsersByOffice;
 using TelecomPM.Domain.Enums;
 
 [ApiController]
@@ -49,8 +44,7 @@ public sealed class UsersController : ApiControllerBase
         Guid userId,
         CancellationToken cancellationToken)
     {
-        var query = new GetUserByIdQuery { UserId = userId };
-        var result = await Mediator.Send(query, cancellationToken);
+        var result = await Mediator.Send(userId.ToByIdQuery(), cancellationToken);
         return HandleResult(result);
     }
 
@@ -69,12 +63,7 @@ public sealed class UsersController : ApiControllerBase
         Guid userId,
         CancellationToken cancellationToken)
     {
-        var command = new DeleteUserCommand 
-        { 
-            UserId = userId,
-            DeletedBy = ResolveDeletionActor()
-        };
-        var result = await Mediator.Send(command, cancellationToken);
+        var result = await Mediator.Send(userId.ToDeleteCommand(ResolveDeletionActor()), cancellationToken);
         return HandleResult(result);
     }
 
@@ -93,8 +82,7 @@ public sealed class UsersController : ApiControllerBase
         Guid userId,
         CancellationToken cancellationToken)
     {
-        var command = new ActivateUserCommand { UserId = userId };
-        var result = await Mediator.Send(command, cancellationToken);
+        var result = await Mediator.Send(userId.ToActivateCommand(), cancellationToken);
         return HandleResult(result);
     }
 
@@ -103,8 +91,7 @@ public sealed class UsersController : ApiControllerBase
         Guid userId,
         CancellationToken cancellationToken)
     {
-        var command = new DeactivateUserCommand { UserId = userId };
-        var result = await Mediator.Send(command, cancellationToken);
+        var result = await Mediator.Send(userId.ToDeactivateCommand(), cancellationToken);
         return HandleResult(result);
     }
 
@@ -113,8 +100,7 @@ public sealed class UsersController : ApiControllerBase
         Guid officeId,
         CancellationToken cancellationToken)
     {
-        var query = new GetUsersByOfficeQuery { OfficeId = officeId };
-        var result = await Mediator.Send(query, cancellationToken);
+        var result = await Mediator.Send(officeId.ToOfficeQuery(), cancellationToken);
         return HandleResult(result);
     }
 

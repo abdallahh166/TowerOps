@@ -28,5 +28,6 @@ Date: 2026-02-19
 - Infrastructure duplicate registrations for domain services removed.
 
 ## Next Refactor Batch
-- Apply contract mapper/AutoMapper strategy across all controllers (users/offices/visits).
-- Extract shared editable-visit mutation workflow used by multiple visit command handlers.
+- ✅ Apply contract mapper strategy across controllers (users/offices/visits plus remaining API endpoints).
+- ✅ Extract shared editable-visit mutation workflow used by multiple visit command handlers.
+- ▶ Next: enforce mapper/test template for new controllers by default and keep DoD closure evidence updated per sprint.

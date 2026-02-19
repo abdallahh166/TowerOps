@@ -64,6 +64,41 @@ public class UsersContractMapperTests
     }
 
     [Fact]
+    public void ToByIdQuery_FromUserId_MapsUserId()
+    {
+        var userId = Guid.NewGuid();
+
+        var query = userId.ToByIdQuery();
+
+        query.UserId.Should().Be(userId);
+    }
+
+    [Fact]
+    public void ToDeleteActivateDeactivateCommands_MapRouteIds()
+    {
+        var userId = Guid.NewGuid();
+
+        var deleteCommand = userId.ToDeleteCommand("admin@example.com");
+        var activateCommand = userId.ToActivateCommand();
+        var deactivateCommand = userId.ToDeactivateCommand();
+
+        deleteCommand.UserId.Should().Be(userId);
+        deleteCommand.DeletedBy.Should().Be("admin@example.com");
+        activateCommand.UserId.Should().Be(userId);
+        deactivateCommand.UserId.Should().Be(userId);
+    }
+
+    [Fact]
+    public void ToOfficeQuery_FromOfficeId_MapsOfficeId()
+    {
+        var officeId = Guid.NewGuid();
+
+        var query = officeId.ToOfficeQuery();
+
+        query.OfficeId.Should().Be(officeId);
+    }
+
+    [Fact]
     public void ToQuery_FromRole_MapsRole()
     {
         var query = UserRole.Manager.ToQuery();
