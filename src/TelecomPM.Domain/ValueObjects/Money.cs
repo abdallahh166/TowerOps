@@ -63,7 +63,7 @@ public sealed class Money : ValueObject
         return Amount > other.Amount;
     }
 
-    protected override IEnumerable<object?> GetEqualityComponents()
+    protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Amount;
         yield return Currency;

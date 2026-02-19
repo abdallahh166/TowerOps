@@ -126,80 +126,22 @@ public async Task CreateVisit_WithValidData_ReturnsSuccess()
 - Transactions are managed automatically
 - Domain events trigger notifications
 
-/*
-TelecomPM.Application/
-├── Commands/
-│   ├── Visits/
-│   │   ├── CreateVisit/
-│   │   │   ├── CreateVisitCommand.cs
-│   │   │   ├── CreateVisitCommandHandler.cs
-│   │   │   └── CreateVisitCommandValidator.cs
-│   │   ├── StartVisit/
-│   │   ├── CompleteVisit/
-│   │   ├── SubmitVisit/
-│   │   ├── ApproveVisit/
-│   │   ├── RejectVisit/
-│   │   ├── AddPhoto/
-│   │   ├── AddReading/
-│   │   └── LogMaterial/
-│   │
-│   ├── Sites/
-│   │   ├── CreateSite/
-│   │   ├── UpdateSite/
-│   │   └── AssignSiteToEngineer/
-│   │
-│   ├── Materials/
-│   │   ├── AddMaterial/
-│   │   ├── UpdateStock/
-│   │   └── ApproveMaterialUsage/
-│   │
-│   └── Users/
-│       ├── CreateUser/
-│       └── UpdateUser/
-│
-├── Queries/
-│   ├── Visits/
-│   │   ├── GetVisitById/
-│   │   ├── GetEngineerVisits/
-│   │   ├── GetPendingReviews/
-│   │   └── GetScheduledVisits/
-│   │
-│   ├── Sites/
-│   │   ├── GetSiteById/
-│   │   ├── GetOfficeSites/
-│   │   └── GetSitesNeedingMaintenance/
-│   │
-│   ├── Materials/
-│   │   └── GetLowStockMaterials/
-│   │
-│   └── Reports/
-│       ├── GetVisitReport/
-│       └── GetMaterialConsumptionReport/
-│
-├── DTOs/
-│   ├── Visits/
-│   ├── Sites/
-│   ├── Materials/
-│   └── Common/
-│
-├── Mappings/
-│   └── MappingProfile.cs
-│
-├── EventHandlers/
-│   ├── VisitEventHandlers/
-│   └── MaterialEventHandlers/
-│
-├── Services/
-│   ├── Interfaces/
-│   └── Implementations/
-│
-├── Behaviors/
-│   ├── ValidationBehavior.cs
-│   ├── LoggingBehavior.cs
-│   └── PerformanceBehavior.cs
-│
-├── Exceptions/
-│   └── ApplicationExceptions.cs
-│
-└── DependencyInjection.cs
-*/
+## Current Command/Query Coverage (high-level)
+
+Implemented command groups include:
+- Visits (lifecycle, evidence, checklist, issues)
+- WorkOrders (create, assign)
+- Escalations (create with routing validation)
+- Users (CRUD + role + activation/deactivation + specializations)
+- Offices (CRUD + statistics + contact)
+- Materials (create/update/reserve/consume/approve/restock)
+
+Implemented query groups include:
+- Visits (detail, engineer visits, pending reviews, scheduled, evidence status)
+- Sites (by office/engineer/region/complexity/unassigned/maintenance)
+- WorkOrders and Escalations (by id)
+- Reports/Analytics/KPI (operations dashboard, trends, performance, usage summaries)
+- Users/Materials/Offices with operational reporting views
+
+## Documentation maintenance rule
+- Treat this file as release-level summary, and rely on code structure as source of truth for exact command/query inventory.

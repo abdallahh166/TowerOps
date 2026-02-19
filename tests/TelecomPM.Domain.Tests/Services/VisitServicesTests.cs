@@ -13,7 +13,7 @@ public class VisitServicesTests
     [Fact]
     public void VisitDurationCalculator_ShouldRespectSiteMinutes()
     {
-        var site = (Site)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(Site));
+        var site = CreateSite();
         typeof(Site).GetProperty("EstimatedVisitDurationMinutes")!.SetValue(site, 125);
 
         var svc = new TelecomPM.Infrastructure.Services.VisitDurationCalculatorService();
@@ -24,7 +24,7 @@ public class VisitServicesTests
     public void VisitValidationService_ShouldReportMissingPhotosAndReadings()
     {
         var visit = Visit.Create("V1", Guid.NewGuid(), "TNT001", "Site1", Guid.NewGuid(), "Eng", DateTime.Today, VisitType.PreventiveMaintenance);
-        var site = (Site)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(Site));
+        var site = CreateSite();
 
         var validation = new TelecomPM.Infrastructure.Services.VisitValidationService().ValidateVisitCompletion(visit, site);
         validation.Errors.Should().NotBeEmpty();
@@ -37,6 +37,20 @@ public class VisitServicesTests
         var svc = new VisitNumberGeneratorService(fakeRepo);
         var next = await svc.GenerateNextVisitNumberAsync();
         next.Should().MatchRegex($"^V{DateTime.UtcNow.Year}\\d{{6}}$");
+    }
+
+    private static Site CreateSite()
+    {
+        return Site.Create(
+            "TNT001",
+            "Site1",
+            "OMC",
+            Guid.NewGuid(),
+            "Cairo",
+            "Nasr City",
+            Coordinates.Create(30, 31),
+            Address.Create("Street", "Cairo", "Cairo"),
+            SiteType.Macro);
     }
 
     private sealed class FakeVisitRepository : TelecomPM.Domain.Interfaces.Repositories.IVisitRepository

@@ -30,3 +30,27 @@
 
 ## Next Handoff
 - Sprint 3: Approval policy engine + escalation rules execution.
+
+
+## Sample Payloads
+`POST /api/visits/{visitId}/checklist-items`
+```json
+{
+  "category": "Power",
+  "itemName": "Rectifier Visual Check",
+  "description": "Check wiring and alarms",
+  "isMandatory": true
+}
+```
+
+`POST /api/visits/{visitId}/issues/{issueId}/resolve`
+```json
+{
+  "resolution": "Replaced damaged cable lug",
+  "resolvedBy": "engineer@telecompm.com"
+}
+```
+
+## Implementation References
+- Controller: `src/TelecomPm.Api/Controllers/VisitsController.cs`
+- Query handler: `GetVisitEvidenceStatusQueryHandler`

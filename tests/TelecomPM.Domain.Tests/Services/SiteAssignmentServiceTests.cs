@@ -4,6 +4,7 @@ using TelecomPM.Domain.Entities.Users;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Interfaces.Repositories;
 using TelecomPM.Application.Services;
+using TelecomPM.Domain.ValueObjects;
 
 namespace TelecomPM.Domain.Tests.Services;
 
@@ -259,8 +260,16 @@ public class SiteAssignmentServiceTests
         var siteRepo = new FakeSiteRepository();
         var service = new SiteAssignmentService(userRepo, siteRepo);
 
-        var site = (Site)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(Site));
-        typeof(Site).GetProperty("OfficeId")!.SetValue(site, officeId);
+        var site = Site.Create(
+            "TNT001",
+            "Site1",
+            "OMC",
+            officeId,
+            "Cairo",
+            "Nasr City",
+            Coordinates.Create(30, 31),
+            Address.Create("Street", "Cairo", "Cairo"),
+            SiteType.Macro);
 
         var sharing = SiteSharing.Create(Guid.Empty);
         sharing.EnableSharing(string.Empty, new List<string>());

@@ -3,55 +3,34 @@ namespace TelecomPM.Application.Commands.Visits.UpdateChecklistItem;
 using AutoMapper;
 using MediatR;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using TelecomPM.Application.Common;
 using TelecomPM.Application.DTOs.Visits;
-using TelecomPM.Domain.Interfaces.Repositories;
+using TelecomPM.Application.Services;
 
 public class UpdateChecklistItemCommandHandler : IRequestHandler<UpdateChecklistItemCommand, Result<VisitChecklistDto>>
 {
-    private readonly IVisitRepository _visitRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IEditableVisitMutationService _editableVisitMutationService;
     private readonly IMapper _mapper;
 
-    public UpdateChecklistItemCommandHandler(
-        IVisitRepository visitRepository,
-        IUnitOfWork unitOfWork,
-        IMapper mapper)
+    public UpdateChecklistItemCommandHandler(IEditableVisitMutationService editableVisitMutationService, IMapper mapper)
     {
-        _visitRepository = visitRepository;
-        _unitOfWork = unitOfWork;
+        _editableVisitMutationService = editableVisitMutationService;
         _mapper = mapper;
     }
 
-    public async Task<Result<VisitChecklistDto>> Handle(UpdateChecklistItemCommand request, CancellationToken cancellationToken)
-    {
-        var visit = await _visitRepository.GetByIdAsync(request.VisitId, cancellationToken);
-        if (visit == null)
-            return Result.Failure<VisitChecklistDto>("Visit not found");
+    public Task<Result<VisitChecklistDto>> Handle(UpdateChecklistItemCommand request, CancellationToken cancellationToken)
+        => _editableVisitMutationService.ExecuteAsync(
+            request.VisitId,
+            visit =>
+            {
+                visit.UpdateChecklistItem(request.ChecklistItemId, request.Status, request.Notes);
 
-        if (!visit.CanBeEdited())
-            return Result.Failure<VisitChecklistDto>("Visit cannot be edited");
+                var checklistItem = visit.Checklists.FirstOrDefault(c => c.Id == request.ChecklistItemId)
+                    ?? throw new InvalidOperationException("Checklist item not found");
 
-        try
-        {
-            visit.UpdateChecklistItem(request.ChecklistItemId, request.Status, request.Notes);
-
-            await _visitRepository.UpdateAsync(visit, cancellationToken);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            var checklistItem = visit.Checklists.FirstOrDefault(c => c.Id == request.ChecklistItemId);
-            if (checklistItem == null)
-                return Result.Failure<VisitChecklistDto>("Checklist item not found");
-
-            var dto = _mapper.Map<VisitChecklistDto>(checklistItem);
-            return Result.Success(dto);
-        }
-        catch (System.Exception ex)
-        {
-            return Result.Failure<VisitChecklistDto>($"Failed to update checklist item: {ex.Message}");
-        }
-    }
+                var dto = _mapper.Map<VisitChecklistDto>(checklistItem);
+                return Task.FromResult(dto);
+            },
+            "Failed to update checklist item",
+            cancellationToken);
 }
-

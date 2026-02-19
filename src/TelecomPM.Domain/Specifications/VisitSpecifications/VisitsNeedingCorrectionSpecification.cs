@@ -11,6 +11,6 @@ public sealed class VisitsNeedingCorrectionSpecification : BaseSpecification<Vis
                     v.Status == VisitStatus.NeedsCorrection && 
                     !v.IsDeleted)
     {
-        ApplyOrderBy(v => v.UpdatedAt);
+        ApplyOrderBy(v => (object?)v.UpdatedAt ?? DateTime.MinValue);
     }
 }

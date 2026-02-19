@@ -3,6 +3,7 @@ using FluentAssertions;
 using Moq;
 using TelecomPM.Application.Commands.Visits.AddChecklistItem;
 using TelecomPM.Application.DTOs.Visits;
+using TelecomPM.Application.Services;
 using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Interfaces.Repositories;
@@ -44,7 +45,8 @@ public class AddChecklistItemCommandHandlerTests
                 CompletedAt = source.CompletedAt
             });
 
-        var handler = new AddChecklistItemCommandHandler(visitRepo.Object, unitOfWork.Object, mapper.Object);
+        var mutationService = new EditableVisitMutationService(visitRepo.Object, unitOfWork.Object);
+        var handler = new AddChecklistItemCommandHandler(mutationService, mapper.Object);
         var command = new AddChecklistItemCommand
         {
             VisitId = visit.Id,

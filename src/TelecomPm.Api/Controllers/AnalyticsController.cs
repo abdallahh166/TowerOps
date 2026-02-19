@@ -3,16 +3,14 @@ namespace TelecomPm.Api.Controllers;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TelecomPM.Application.Queries.Reports.GetEngineerPerformanceReport;
-using TelecomPM.Application.Queries.Reports.GetSiteMaintenanceReport;
-using TelecomPM.Application.Queries.Reports.GetOfficeStatisticsReport;
-using TelecomPM.Application.Queries.Reports.GetMaterialUsageSummary;
+using TelecomPm.Api.Mappings;
 using TelecomPM.Application.Queries.Reports.GetVisitCompletionTrends;
-using TelecomPM.Application.Queries.Reports.GetIssueAnalyticsReport;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public sealed class AnalyticsController : ApiControllerBase
 {
     [HttpGet("engineer-performance/{engineerId:guid}")]
@@ -22,14 +20,7 @@ public sealed class AnalyticsController : ApiControllerBase
         [FromQuery] DateTime? toDate,
         CancellationToken cancellationToken)
     {
-        var query = new GetEngineerPerformanceReportQuery
-        {
-            EngineerId = engineerId,
-            FromDate = fromDate,
-            ToDate = toDate
-        };
-
-        var result = await Mediator.Send(query, cancellationToken);
+        var result = await Mediator.Send(engineerId.ToEngineerPerformanceQuery(fromDate, toDate), cancellationToken);
         return HandleResult(result);
     }
 
@@ -40,14 +31,7 @@ public sealed class AnalyticsController : ApiControllerBase
         [FromQuery] DateTime? toDate,
         CancellationToken cancellationToken)
     {
-        var query = new GetSiteMaintenanceReportQuery
-        {
-            SiteId = siteId,
-            FromDate = fromDate,
-            ToDate = toDate
-        };
-
-        var result = await Mediator.Send(query, cancellationToken);
+        var result = await Mediator.Send(siteId.ToSiteMaintenanceQuery(fromDate, toDate), cancellationToken);
         return HandleResult(result);
     }
 
@@ -58,14 +42,7 @@ public sealed class AnalyticsController : ApiControllerBase
         [FromQuery] DateTime? toDate,
         CancellationToken cancellationToken)
     {
-        var query = new GetOfficeStatisticsReportQuery
-        {
-            OfficeId = officeId,
-            FromDate = fromDate,
-            ToDate = toDate
-        };
-
-        var result = await Mediator.Send(query, cancellationToken);
+        var result = await Mediator.Send(officeId.ToOfficeStatisticsQuery(fromDate, toDate), cancellationToken);
         return HandleResult(result);
     }
 
@@ -76,14 +53,7 @@ public sealed class AnalyticsController : ApiControllerBase
         [FromQuery] DateTime? toDate,
         CancellationToken cancellationToken)
     {
-        var query = new GetMaterialUsageSummaryQuery
-        {
-            MaterialId = materialId,
-            FromDate = fromDate,
-            ToDate = toDate
-        };
-
-        var result = await Mediator.Send(query, cancellationToken);
+        var result = await Mediator.Send(materialId.ToMaterialUsageQuery(fromDate, toDate), cancellationToken);
         return HandleResult(result);
     }
 
@@ -102,15 +72,7 @@ public sealed class AnalyticsController : ApiControllerBase
             trendPeriod = TrendPeriod.Monthly;
         }
 
-        var query = new GetVisitCompletionTrendsQuery
-        {
-            OfficeId = officeId,
-            EngineerId = engineerId,
-            FromDate = fromDate ?? DateTime.UtcNow.AddMonths(-3),
-            ToDate = toDate ?? DateTime.UtcNow,
-            Period = trendPeriod
-        };
-
+        var query = AnalyticsContractMapper.ToVisitCompletionTrendsQuery(officeId, engineerId, fromDate, toDate, trendPeriod);
         var result = await Mediator.Send(query, cancellationToken);
         return HandleResult(result);
     }
@@ -123,16 +85,7 @@ public sealed class AnalyticsController : ApiControllerBase
         [FromQuery] DateTime? toDate,
         CancellationToken cancellationToken)
     {
-        var query = new GetIssueAnalyticsReportQuery
-        {
-            OfficeId = officeId,
-            SiteId = siteId,
-            FromDate = fromDate,
-            ToDate = toDate
-        };
-
-        var result = await Mediator.Send(query, cancellationToken);
+        var result = await Mediator.Send(officeId.ToIssueAnalyticsQuery(siteId, fromDate, toDate), cancellationToken);
         return HandleResult(result);
     }
 }
-

@@ -14,6 +14,6 @@ public sealed class SiteWithFullDetailsSpecification : BaseSpecification<Site>
         AddInclude(s => s.Transmission);
         AddInclude(s => s.CoolingSystem);
         AddInclude(s => s.FireSafety);
-        AddInclude(s => s.SharingInfo);
+        AddInclude(s => s.SharingInfo!);
     }
 }

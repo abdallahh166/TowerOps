@@ -30,11 +30,23 @@ public class GetMaterialUsageReportQueryHandler : IRequestHandler<GetMaterialUsa
     public async Task<Result<MaterialUsageReportDto>> Handle(GetMaterialUsageReportQuery request, CancellationToken cancellationToken)
     {
         // Get materials
-        var materials = request.MaterialId.HasValue
-            ? new List<Domain.Entities.Materials.Material> { await _materialRepository.GetByIdAsNoTrackingAsync(request.MaterialId.Value, cancellationToken)! }
-            : (await _materialRepository.GetByOfficeIdAsNoTrackingAsync(request.OfficeId ?? Guid.Empty, cancellationToken)).ToList();
+        var materials = new List<Domain.Entities.Materials.Material>();
+        if (request.MaterialId.HasValue)
+        {
+            var material = await _materialRepository.GetByIdAsNoTrackingAsync(request.MaterialId.Value, cancellationToken);
+            if (material is not null)
+            {
+                materials.Add(material);
+            }
+        }
+        else
+        {
+            materials = (await _materialRepository.GetByOfficeIdAsNoTrackingAsync(request.OfficeId ?? Guid.Empty, cancellationToken)).ToList();
+        }
 
-        materials = materials.Where(m => m != null && (!request.OfficeId.HasValue || m.OfficeId == request.OfficeId.Value)).ToList()!;
+        materials = materials
+            .Where(m => !request.OfficeId.HasValue || m.OfficeId == request.OfficeId.Value)
+            .ToList();
 
         // Get transactions in date range
         var allTransactions = materials
@@ -79,4 +91,3 @@ public class GetMaterialUsageReportQueryHandler : IRequestHandler<GetMaterialUsa
         return Result.Success(report);
     }
 }
-

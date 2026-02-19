@@ -7,7 +7,7 @@ public sealed class MaterialReservation
     public Guid Id { get; private set; }
     public Guid MaterialId { get; private set; }
     public Guid VisitId { get; private set; }
-    public MaterialQuantity Quantity { get; private set; }
+    public MaterialQuantity Quantity { get; private set; } = null!;
     public DateTime ReservedAt { get; private set; }
     public bool IsConsumed { get; private set; }
 

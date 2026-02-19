@@ -47,9 +47,14 @@ public static class DependencyInjection
         services.AddScoped<IOfficeRepository, OfficeRepository>();
         services.AddScoped<IMaterialRepository, MaterialRepository>();
         services.AddScoped<IWorkOrderRepository, WorkOrderRepository>();
+        services.AddScoped<IEscalationRepository, EscalationRepository>();
 
         // Domain event dispatcher
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+
+        services.Configure<PushNotificationOptions>(configuration.GetSection("PushNotifications"));
+        services.Configure<TwilioOptions>(configuration.GetSection("Twilio"));
+        services.AddHttpClient(nameof(NotificationService));
 
         // Infrastructure Services (External concerns & I/O)
         services.AddScoped<IDateTimeService, DateTimeService>();
@@ -62,10 +67,6 @@ public static class DependencyInjection
         // Domain Services with Infrastructure dependencies (Repository-dependent)
         services.AddScoped<IVisitNumberGeneratorService, VisitNumberGeneratorService>();
         services.AddScoped<IMaterialStockService, MaterialStockService>();
-        services.AddScoped<IVisitValidationService, VisitValidationService>();
-        services.AddScoped<IVisitDurationCalculatorService, VisitDurationCalculatorService>();
-        services.AddScoped<ISiteAssignmentService, SiteAssignmentService>();
-        services.AddScoped<IPhotoChecklistGeneratorService, PhotoChecklistGeneratorService>();
 
         // HttpContextAccessor for CurrentUserService
         services.AddHttpContextAccessor();

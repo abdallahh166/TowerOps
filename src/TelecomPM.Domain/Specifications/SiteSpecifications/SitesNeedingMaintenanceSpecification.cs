@@ -12,6 +12,6 @@ public sealed class SitesNeedingMaintenanceSpecification : BaseSpecification<Sit
                     s.Status == SiteStatus.OnAir && 
                     !s.IsDeleted)
     {
-        ApplyOrderBy(s => s.LastVisitDate);
+        ApplyOrderBy(s => (object?)s.LastVisitDate ?? DateTime.MinValue);
     }
 }
