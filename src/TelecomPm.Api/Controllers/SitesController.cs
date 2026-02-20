@@ -85,6 +85,21 @@ public sealed class SitesController : ApiControllerBase
         return HandleResult(result);
     }
 
+    [HttpPost("import")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> Import([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        if (request.File is null || request.File.Length == 0)
+            return BadRequest("Excel file is required.");
+
+        await using var stream = request.File.OpenReadStream();
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms, cancellationToken);
+
+        var result = await Mediator.Send(ms.ToArray().ToCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
     [HttpGet("{siteId:guid}")]
     public async Task<IActionResult> GetById(Guid siteId, CancellationToken cancellationToken)
     {
