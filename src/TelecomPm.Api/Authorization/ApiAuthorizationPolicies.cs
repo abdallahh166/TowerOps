@@ -13,6 +13,7 @@ public static class ApiAuthorizationPolicies
     public const string CanViewKpis = "CanViewKpis";
     public const string CanManageUsers = "CanManageUsers";
     public const string CanManageOffices = "CanManageOffices";
+    public const string CanManageSites = "CanManageSites";
     public const string CanViewAnalytics = "CanViewAnalytics";
     public const string CanViewSites = "CanViewSites";
     public const string CanViewReports = "CanViewReports";
@@ -67,6 +68,12 @@ public static class ApiAuthorizationPolicies
             policy.RequireRole(
                 UserRole.Admin.ToString(),
                 UserRole.Manager.ToString()));
+
+        options.AddPolicy(CanManageSites, policy =>
+            policy.RequireRole(
+                UserRole.Admin.ToString(),
+                UserRole.Manager.ToString(),
+                UserRole.Supervisor.ToString()));
 
         options.AddPolicy(CanViewAnalytics, policy =>
             policy.RequireRole(

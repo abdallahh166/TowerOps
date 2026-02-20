@@ -23,6 +23,14 @@ public record UpdateSiteRequest
     [StringLength(100)]
     public string? SubRegion { get; init; }
 
+    public SiteType? SiteType { get; init; }
+
+    [StringLength(200)]
+    public string? Subcontractor { get; init; }
+
+    [StringLength(100)]
+    public string? MaintenanceArea { get; init; }
+
     public SiteStatus? Status { get; init; }
 
     public SiteComplexity? Complexity { get; init; }

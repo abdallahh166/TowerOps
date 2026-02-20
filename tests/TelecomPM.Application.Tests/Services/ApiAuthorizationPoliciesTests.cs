@@ -27,6 +27,7 @@ public class ApiAuthorizationPoliciesTests
         options.GetPolicy(ApiAuthorizationPolicies.CanViewKpis).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanManageUsers).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanManageOffices).Should().NotBeNull();
+        options.GetPolicy(ApiAuthorizationPolicies.CanManageSites).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewAnalytics).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewSites).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewReports).Should().NotBeNull();
@@ -40,6 +41,7 @@ public class ApiAuthorizationPoliciesTests
     [InlineData(typeof(KpiController), ApiAuthorizationPolicies.CanViewKpis)]
     [InlineData(typeof(UsersController), ApiAuthorizationPolicies.CanManageUsers)]
     [InlineData(typeof(OfficesController), ApiAuthorizationPolicies.CanManageOffices)]
+    [InlineData(typeof(SitesController), ApiAuthorizationPolicies.CanManageSites)]
     [InlineData(typeof(AnalyticsController), ApiAuthorizationPolicies.CanViewAnalytics)]
     [InlineData(typeof(SitesController), ApiAuthorizationPolicies.CanViewSites)]
     [InlineData(typeof(ReportsController), ApiAuthorizationPolicies.CanViewReports)]
