@@ -10,7 +10,7 @@ public static class AuthContractMapper
         => new()
         {
             Email = request.Email,
-            PhoneNumber = request.PhoneNumber
+            Password = request.Password
         };
 
     public static LoginResponse ToResponse(this AuthTokenDto dto)

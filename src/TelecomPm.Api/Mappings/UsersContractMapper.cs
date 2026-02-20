@@ -21,6 +21,7 @@ public static class UsersContractMapper
             Name = request.Name,
             Email = request.Email,
             PhoneNumber = request.PhoneNumber,
+            Password = request.Password,
             Role = request.Role,
             OfficeId = request.OfficeId,
             MaxAssignedSites = request.MaxAssignedSites,

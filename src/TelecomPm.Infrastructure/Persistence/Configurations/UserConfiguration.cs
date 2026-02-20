@@ -1,4 +1,4 @@
-﻿namespace TelecomPM.Infrastructure.Persistence.Configurations;
+namespace TelecomPM.Infrastructure.Persistence.Configurations;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -30,6 +30,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.PhoneNumber)
             .IsRequired()
             .HasMaxLength(50);
+
+        builder.Property(u => u.PasswordHash)
+            .IsRequired()
+            .HasMaxLength(500);
 
         builder.Property(u => u.Role)
             .IsRequired()

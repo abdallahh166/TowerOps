@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.AspNetCore.Identity;
 using TelecomPM.Domain.Entities.Sites;
 using TelecomPM.Domain.Entities.Users;
 using TelecomPM.Domain.Enums;
@@ -254,6 +255,11 @@ public class SiteAssignmentServiceTests
 
         e3.SetEngineerCapacity(5, new List<string> { "Complex Sites" });
         e3.UpdatePerformanceRating(4);
+
+        var hasher = new PasswordHasher<User>();
+        e1.SetPassword("P@ssw0rd123!", hasher);
+        e2.SetPassword("P@ssw0rd123!", hasher);
+        e3.SetPassword("P@ssw0rd123!", hasher);
 
         var users = new List<User> { e1, e2, e3 };
         var userRepo = new FakeUserRepository(users);

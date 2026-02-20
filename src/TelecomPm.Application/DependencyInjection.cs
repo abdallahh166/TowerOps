@@ -1,11 +1,13 @@
-﻿namespace TelecomPM.Application;
+namespace TelecomPM.Application;
 
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using TelecomPM.Application.Common.Behaviors;
 using TelecomPM.Application.Services;
+using TelecomPM.Domain.Entities.Users;
 using TelecomPM.Domain.Services;
 
 public static class DependencyInjection
@@ -41,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IEditableVisitMutationService, EditableVisitMutationService>();
         services.AddScoped<IVisitApprovalPolicyService, VisitApprovalPolicyService>();
         services.AddScoped<IEscalationRoutingService, EscalationRoutingService>();
+        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
         return services;
     }

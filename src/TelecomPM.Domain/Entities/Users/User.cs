@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using TelecomPM.Domain.Common;
 using TelecomPM.Domain.Entities.Sites;
 using TelecomPM.Domain.Enums;
@@ -13,6 +14,7 @@ public sealed class User : AggregateRoot<Guid>
     public string Name { get; private set; } = string.Empty;
     public string Email { get; private set; } = string.Empty;
     public string PhoneNumber { get; private set; } = string.Empty;
+    public string PasswordHash { get; private set; } = string.Empty;
     public UserRole Role { get; private set; }
     public Guid OfficeId { get; private set; }
     public bool IsActive { get; private set; }
@@ -69,6 +71,26 @@ public sealed class User : AggregateRoot<Guid>
         var user = new User(name, email, phoneNumber, role, officeId);
         user.AddDomainEvent(new UserCreatedEvent(user.Id, name, email, role, officeId));
         return user;
+    }
+
+    public void SetPassword(string plainPassword, IPasswordHasher<User> hasher)
+    {
+        if (string.IsNullOrWhiteSpace(plainPassword))
+            throw new DomainException("Password is required");
+
+        if (hasher is null)
+            throw new DomainException("Password hasher is required");
+
+        PasswordHash = hasher.HashPassword(this, plainPassword);
+    }
+
+    public bool VerifyPassword(string plainPassword, IPasswordHasher<User> hasher)
+    {
+        if (string.IsNullOrWhiteSpace(plainPassword) || hasher is null || string.IsNullOrWhiteSpace(PasswordHash))
+            return false;
+
+        var result = hasher.VerifyHashedPassword(this, PasswordHash, plainPassword);
+        return result == PasswordVerificationResult.Success || result == PasswordVerificationResult.SuccessRehashNeeded;
     }
 
     public void UpdateProfile(string name, string phoneNumber)

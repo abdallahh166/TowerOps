@@ -17,6 +17,7 @@ public class UsersContractMapperTests
             Name = "User A",
             Email = "user@example.com",
             PhoneNumber = "01000000000",
+            Password = "P@ssw0rd123!",
             Role = UserRole.PMEngineer,
             OfficeId = officeId,
             MaxAssignedSites = 5,
@@ -28,6 +29,7 @@ public class UsersContractMapperTests
         command.Name.Should().Be(request.Name);
         command.Email.Should().Be(request.Email);
         command.PhoneNumber.Should().Be(request.PhoneNumber);
+        command.Password.Should().Be(request.Password);
         command.Role.Should().Be(request.Role);
         command.OfficeId.Should().Be(request.OfficeId);
         command.MaxAssignedSites.Should().Be(request.MaxAssignedSites);

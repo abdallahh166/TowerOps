@@ -35,7 +35,7 @@ public class AuthControllerTests
         var response = await controller.Login(new LoginRequest
         {
             Email = "user@example.com",
-            PhoneNumber = "01000000000"
+            Password = "P@ssw0rd123!"
         }, CancellationToken.None);
 
         var ok = response.Should().BeOfType<OkObjectResult>().Subject;
@@ -54,7 +54,7 @@ public class AuthControllerTests
         var response = await controller.Login(new LoginRequest
         {
             Email = "user@example.com",
-            PhoneNumber = "01111111111"
+            Password = "WrongPass123!"
         }, CancellationToken.None);
 
         response.Should().BeOfType<UnauthorizedObjectResult>();
