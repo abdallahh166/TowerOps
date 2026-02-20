@@ -218,4 +218,45 @@ public sealed class VisitsController : ApiControllerBase
         var result = await Mediator.Send(request.ToCommand(visitId, stream), cancellationToken);
         return HandleResult(result);
     }
+
+    [HttpPost("{visitId:guid}/cancel")]
+    public async Task<IActionResult> Cancel(
+        Guid visitId,
+        [FromBody] CancelVisitRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("{visitId:guid}/reschedule")]
+    public async Task<IActionResult> Reschedule(
+        Guid visitId,
+        [FromBody] RescheduleVisitRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpDelete("{visitId:guid}/photos/{photoId:guid}")]
+    public async Task<IActionResult> RemovePhoto(
+        Guid visitId,
+        Guid photoId,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(visitId.ToRemovePhotoCommand(photoId), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPatch("{visitId:guid}/readings/{readingId:guid}")]
+    public async Task<IActionResult> UpdateReading(
+        Guid visitId,
+        Guid readingId,
+        [FromBody] UpdateVisitReadingRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(visitId, readingId), cancellationToken);
+        return HandleResult(result);
+    }
 }

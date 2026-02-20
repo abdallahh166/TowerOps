@@ -9,14 +9,18 @@ using TelecomPM.Application.Commands.Visits.AddIssue;
 using TelecomPM.Application.Commands.Visits.AddPhoto;
 using TelecomPM.Application.Commands.Visits.AddReading;
 using TelecomPM.Application.Commands.Visits.ApproveVisit;
+using TelecomPM.Application.Commands.Visits.CancelVisit;
 using TelecomPM.Application.Commands.Visits.CompleteVisit;
 using TelecomPM.Application.Commands.Visits.CreateVisit;
 using TelecomPM.Application.Commands.Visits.RejectVisit;
+using TelecomPM.Application.Commands.Visits.RemovePhoto;
 using TelecomPM.Application.Commands.Visits.RequestCorrection;
+using TelecomPM.Application.Commands.Visits.RescheduleVisit;
 using TelecomPM.Application.Commands.Visits.ResolveIssue;
 using TelecomPM.Application.Commands.Visits.StartVisit;
 using TelecomPM.Application.Commands.Visits.SubmitVisit;
 using TelecomPM.Application.Commands.Visits.UpdateChecklistItem;
+using TelecomPM.Application.Commands.Visits.UpdateReading;
 using TelecomPM.Application.Queries.Visits.GetEngineerVisits;
 using TelecomPM.Application.Queries.Visits.GetPendingReviews;
 using TelecomPM.Application.Queries.Visits.GetScheduledVisits;
@@ -170,5 +174,35 @@ public static class VisitsContractMapper
             Description = request.Description,
             Latitude = request.Latitude,
             Longitude = request.Longitude
+        };
+
+    public static CancelVisitCommand ToCommand(this CancelVisitRequest request, Guid visitId)
+        => new()
+        {
+            VisitId = visitId,
+            Reason = request.Reason
+        };
+
+    public static RescheduleVisitCommand ToCommand(this RescheduleVisitRequest request, Guid visitId)
+        => new()
+        {
+            VisitId = visitId,
+            NewScheduledDate = request.NewScheduledDate,
+            Reason = request.Reason
+        };
+
+    public static RemovePhotoCommand ToRemovePhotoCommand(this Guid visitId, Guid photoId)
+        => new()
+        {
+            VisitId = visitId,
+            PhotoId = photoId
+        };
+
+    public static UpdateReadingCommand ToCommand(this UpdateVisitReadingRequest request, Guid visitId, Guid readingId)
+        => new()
+        {
+            VisitId = visitId,
+            ReadingId = readingId,
+            Value = request.Value
         };
 }
