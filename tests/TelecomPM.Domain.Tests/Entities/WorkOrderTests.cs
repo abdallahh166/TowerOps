@@ -111,7 +111,7 @@ public class WorkOrderTests
         Action act = () => workOrder.Close();
 
         act.Should().Throw<DomainException>()
-            .WithMessage("*closed from PendingReview or PendingCustomerAcceptance state*");
+            .WithMessage("*closed from PendingInternalReview or PendingCustomerAcceptance state*");
     }
 
     [Fact]
@@ -139,9 +139,67 @@ public class WorkOrderTests
         workOrder.Status.Should().Be(WorkOrderStatus.InProgress);
 
         workOrder.Complete();
-        workOrder.Status.Should().Be(WorkOrderStatus.PendingReview);
+        workOrder.Status.Should().Be(WorkOrderStatus.PendingInternalReview);
 
         workOrder.Close();
         workOrder.Status.Should().Be(WorkOrderStatus.Closed);
+    }
+
+    [Fact]
+    public void SubmitForCustomerAcceptance_FromPendingInternalReview_ShouldMoveToPendingCustomerAcceptance()
+    {
+        var workOrder = WorkOrder.Create("WO-1011", "S-TNT-012", "TNT", SlaClass.P2, "Issue");
+        workOrder.Assign(Guid.NewGuid(), "Engineer F", "Dispatcher");
+        workOrder.Start();
+        workOrder.Complete();
+
+        workOrder.SubmitForCustomerAcceptance();
+
+        workOrder.Status.Should().Be(WorkOrderStatus.PendingCustomerAcceptance);
+    }
+
+    [Fact]
+    public void AcceptByCustomer_FromPendingCustomerAcceptance_ShouldMoveToClosed()
+    {
+        var workOrder = WorkOrder.Create("WO-1012", "S-TNT-013", "TNT", SlaClass.P2, "Issue");
+        workOrder.Assign(Guid.NewGuid(), "Engineer G", "Dispatcher");
+        workOrder.Start();
+        workOrder.Complete();
+        workOrder.SubmitForCustomerAcceptance();
+
+        workOrder.AcceptByCustomer("Customer Ops");
+
+        workOrder.Status.Should().Be(WorkOrderStatus.Closed);
+    }
+
+    [Fact]
+    public void RejectByCustomer_FromPendingCustomerAcceptance_ShouldMoveToRework()
+    {
+        var workOrder = WorkOrder.Create("WO-1013", "S-TNT-014", "TNT", SlaClass.P2, "Issue");
+        workOrder.Assign(Guid.NewGuid(), "Engineer H", "Dispatcher");
+        workOrder.Start();
+        workOrder.Complete();
+        workOrder.SubmitForCustomerAcceptance();
+
+        workOrder.RejectByCustomer("Need additional fixes");
+
+        workOrder.Status.Should().Be(WorkOrderStatus.Rework);
+    }
+
+    [Fact]
+    public void CustomerAcceptanceTransitions_FromInvalidState_ShouldThrowDomainException()
+    {
+        var workOrder = WorkOrder.Create("WO-1014", "S-TNT-015", "TNT", SlaClass.P2, "Issue");
+
+        Action submit = () => workOrder.SubmitForCustomerAcceptance();
+        Action accept = () => workOrder.AcceptByCustomer("Customer Ops");
+        Action reject = () => workOrder.RejectByCustomer("Not acceptable");
+
+        submit.Should().Throw<DomainException>()
+            .WithMessage("*submitted for customer acceptance from PendingInternalReview state*");
+        accept.Should().Throw<DomainException>()
+            .WithMessage("*accepted by customer from PendingCustomerAcceptance state*");
+        reject.Should().Throw<DomainException>()
+            .WithMessage("*rejected by customer from PendingCustomerAcceptance state*");
     }
 }

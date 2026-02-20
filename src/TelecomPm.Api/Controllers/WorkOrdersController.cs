@@ -71,4 +71,28 @@ public sealed class WorkOrdersController : ApiControllerBase
         var result = await Mediator.Send(id.ToCancelCommand(), cancellationToken);
         return HandleResult(result);
     }
+
+    [HttpPatch("{id:guid}/submit-for-acceptance")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageWorkOrders)]
+    public async Task<IActionResult> SubmitForAcceptance(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(id.ToSubmitForCustomerAcceptanceCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPatch("{id:guid}/customer-accept")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageWorkOrders)]
+    public async Task<IActionResult> CustomerAccept(Guid id, [FromBody] CustomerAcceptWorkOrderRequest request, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToAcceptByCustomerCommand(id), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPatch("{id:guid}/customer-reject")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageWorkOrders)]
+    public async Task<IActionResult> CustomerReject(Guid id, [FromBody] CustomerRejectWorkOrderRequest request, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToRejectByCustomerCommand(id), cancellationToken);
+        return HandleResult(result);
+    }
 }

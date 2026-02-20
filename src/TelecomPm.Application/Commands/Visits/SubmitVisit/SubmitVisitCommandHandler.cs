@@ -7,6 +7,7 @@ using TelecomPM.Application.Common;
 using TelecomPM.Domain.Exceptions;
 using TelecomPM.Domain.Interfaces.Repositories;
 using TelecomPM.Domain.Services;
+using TelecomPM.Domain.ValueObjects;
 
 namespace TelecomPM.Application.Commands.Visits.SubmitVisit;
 
@@ -15,17 +16,20 @@ public class SubmitVisitCommandHandler : IRequestHandler<SubmitVisitCommand, Res
     private readonly IVisitRepository _visitRepository;
     private readonly ISiteRepository _siteRepository;
     private readonly IVisitValidationService _validationService;
+    private readonly IEvidencePolicyService _evidencePolicyService;
     private readonly IUnitOfWork _unitOfWork;
 
     public SubmitVisitCommandHandler(
         IVisitRepository visitRepository,
         ISiteRepository siteRepository,
         IVisitValidationService validationService,
+        IEvidencePolicyService evidencePolicyService,
         IUnitOfWork unitOfWork)
     {
         _visitRepository = visitRepository;
         _siteRepository = siteRepository;
         _validationService = validationService;
+        _evidencePolicyService = evidencePolicyService;
         _unitOfWork = unitOfWork;
     }
 
@@ -45,6 +49,14 @@ public class SubmitVisitCommandHandler : IRequestHandler<SubmitVisitCommand, Res
         {
             var errors = string.Join(", ", validationResult.Errors.SelectMany(e => e.Value));
             return Result.Failure($"Visit validation failed: {errors}");
+        }
+
+        var evidencePolicy = EvidencePolicy.DefaultFor(visit.Type);
+        var evidenceResult = _evidencePolicyService.Validate(visit, evidencePolicy);
+        if (!evidenceResult.IsValid)
+        {
+            var errors = string.Join(", ", evidenceResult.Errors.SelectMany(e => e.Value));
+            return Result.Failure($"Evidence policy validation failed: {errors}");
         }
 
         try

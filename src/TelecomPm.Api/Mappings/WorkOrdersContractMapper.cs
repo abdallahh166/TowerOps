@@ -1,12 +1,15 @@
 namespace TelecomPm.Api.Mappings;
 
 using TelecomPm.Api.Contracts.WorkOrders;
+using TelecomPM.Application.Commands.WorkOrders.AcceptByCustomer;
 using TelecomPM.Application.Commands.WorkOrders.AssignWorkOrder;
 using TelecomPM.Application.Commands.WorkOrders.CancelWorkOrder;
 using TelecomPM.Application.Commands.WorkOrders.CloseWorkOrder;
 using TelecomPM.Application.Commands.WorkOrders.CompleteWorkOrder;
 using TelecomPM.Application.Commands.WorkOrders.CreateWorkOrder;
+using TelecomPM.Application.Commands.WorkOrders.RejectByCustomer;
 using TelecomPM.Application.Commands.WorkOrders.StartWorkOrder;
+using TelecomPM.Application.Commands.WorkOrders.SubmitForCustomerAcceptance;
 using TelecomPM.Application.Queries.WorkOrders.GetWorkOrderById;
 
 public static class WorkOrdersContractMapper
@@ -44,4 +47,13 @@ public static class WorkOrdersContractMapper
 
     public static CancelWorkOrderCommand ToCancelCommand(this Guid workOrderId)
         => new() { WorkOrderId = workOrderId };
+
+    public static SubmitForCustomerAcceptanceCommand ToSubmitForCustomerAcceptanceCommand(this Guid workOrderId)
+        => new() { WorkOrderId = workOrderId };
+
+    public static AcceptByCustomerCommand ToAcceptByCustomerCommand(this CustomerAcceptWorkOrderRequest request, Guid workOrderId)
+        => new() { WorkOrderId = workOrderId, AcceptedBy = request.AcceptedBy };
+
+    public static RejectByCustomerCommand ToRejectByCustomerCommand(this CustomerRejectWorkOrderRequest request, Guid workOrderId)
+        => new() { WorkOrderId = workOrderId, Reason = request.Reason };
 }

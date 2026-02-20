@@ -101,15 +101,48 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         if (Status != WorkOrderStatus.InProgress)
             throw new DomainException("Work order can only be completed from InProgress state");
 
-        Status = WorkOrderStatus.PendingReview;
+        Status = WorkOrderStatus.PendingInternalReview;
     }
 
     public void Close()
     {
-        if (Status != WorkOrderStatus.PendingReview && Status != WorkOrderStatus.PendingCustomerAcceptance)
-            throw new DomainException("Work order can only be closed from PendingReview or PendingCustomerAcceptance state");
+        if (Status != WorkOrderStatus.PendingInternalReview && Status != WorkOrderStatus.PendingCustomerAcceptance)
+            throw new DomainException("Work order can only be closed from PendingInternalReview or PendingCustomerAcceptance state");
 
         Status = WorkOrderStatus.Closed;
+    }
+
+    public void SubmitForCustomerAcceptance()
+    {
+        if (Status != WorkOrderStatus.PendingInternalReview)
+            throw new DomainException("Work order can only be submitted for customer acceptance from PendingInternalReview state");
+
+        Status = WorkOrderStatus.PendingCustomerAcceptance;
+        AddDomainEvent(new WorkOrderSubmittedForCustomerAcceptanceEvent(Id, WoNumber));
+    }
+
+    public void AcceptByCustomer(string acceptedBy)
+    {
+        if (Status != WorkOrderStatus.PendingCustomerAcceptance)
+            throw new DomainException("Work order can only be accepted by customer from PendingCustomerAcceptance state");
+
+        if (string.IsNullOrWhiteSpace(acceptedBy))
+            throw new DomainException("Accepted by is required");
+
+        Status = WorkOrderStatus.Closed;
+        AddDomainEvent(new WorkOrderAcceptedByCustomerEvent(Id, WoNumber, acceptedBy.Trim()));
+    }
+
+    public void RejectByCustomer(string reason)
+    {
+        if (Status != WorkOrderStatus.PendingCustomerAcceptance)
+            throw new DomainException("Work order can only be rejected by customer from PendingCustomerAcceptance state");
+
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new DomainException("Rejection reason is required");
+
+        Status = WorkOrderStatus.Rework;
+        AddDomainEvent(new WorkOrderRejectedByCustomerEvent(Id, WoNumber, reason.Trim()));
     }
 
     public void Cancel()

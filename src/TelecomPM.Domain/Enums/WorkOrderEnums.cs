@@ -13,7 +13,7 @@ public enum WorkOrderStatus
     Created = 1,
     Assigned = 2,
     InProgress = 3,
-    PendingReview = 4,
+    PendingInternalReview = 4,
     PendingCustomerAcceptance = 5,
     Closed = 6,
     Rejected = 7,

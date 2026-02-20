@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IEditableVisitMutationService, EditableVisitMutationService>();
         services.AddScoped<IVisitApprovalPolicyService, VisitApprovalPolicyService>();
         services.AddScoped<IEscalationRoutingService, EscalationRoutingService>();
+        services.AddScoped<IEvidencePolicyService, EvidencePolicyService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
         return services;
