@@ -3,6 +3,7 @@ namespace TelecomPm.Api.Mappings;
 using TelecomPm.Api.Contracts.Sites;
 using TelecomPM.Application.Commands.Sites.AssignEngineerToSite;
 using TelecomPM.Application.Commands.Sites.CreateSite;
+using TelecomPM.Application.Commands.Sites.ImportSiteData;
 using TelecomPM.Application.Commands.Sites.UnassignEngineerFromSite;
 using TelecomPM.Application.Commands.Sites.UpdateSite;
 using TelecomPM.Application.Commands.Sites.UpdateSiteStatus;
@@ -84,5 +85,11 @@ public static class SitesContractMapper
         => new()
         {
             SiteId = siteId
+        };
+
+    public static ImportSiteDataCommand ToCommand(this byte[] fileContent)
+        => new()
+        {
+            FileContent = fileContent
         };
 }
