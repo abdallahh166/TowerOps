@@ -22,6 +22,10 @@ public record CreateUserRequest
     public string PhoneNumber { get; init; } = string.Empty;
 
     [Required]
+    [StringLength(200, MinimumLength = 8)]
+    public string Password { get; init; } = string.Empty;
+
+    [Required]
     public UserRole Role { get; init; }
 
     [Required]
@@ -32,4 +36,3 @@ public record CreateUserRequest
 
     public List<string>? Specializations { get; init; }
 }
-

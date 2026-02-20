@@ -1,9 +1,6 @@
 namespace TelecomPM.Application.Commands.Users.CreateUser;
 
 using FluentValidation;
-using System;
-using System.Linq;
-using System.Text.RegularExpressions;
 using TelecomPM.Domain.Enums;
 
 public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
@@ -22,6 +19,11 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         RuleFor(x => x.PhoneNumber)
             .NotEmpty().WithMessage("Phone number is required")
             .Matches(@"^\+20(10|11|12|15)\d{8}$").WithMessage("Invalid phone number format. Expected format: +20 10/11/12/15 XXXXXXXX");
+
+        RuleFor(x => x.Password)
+            .NotEmpty().WithMessage("Password is required")
+            .MinimumLength(8).WithMessage("Password must be at least 8 characters")
+            .MaximumLength(200).WithMessage("Password must not exceed 200 characters");
 
         RuleFor(x => x.Role)
             .IsInEnum().WithMessage("Invalid user role");
@@ -43,4 +45,3 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
             .When(x => x.Specializations != null);
     }
 }
-

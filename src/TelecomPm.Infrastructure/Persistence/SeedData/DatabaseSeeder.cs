@@ -1,5 +1,6 @@
 namespace TelecomPM.Infrastructure.Persistence.SeedData;
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -178,6 +179,13 @@ public class DatabaseSeeder
         engineers[1].SetEngineerCapacity(8, new List<string> { "Cooling Systems", "Fire Safety" });
         engineers[2].SetEngineerCapacity(12, new List<string> { "Radio Equipment", "Transmission" });
 
+        var hasher = new PasswordHasher<User>();
+        const string defaultPassword = "P@ssw0rd123!";
+        foreach (var user in users)
+        {
+            user.SetPassword(defaultPassword, hasher);
+        }
+
         await _context.Users.AddRangeAsync(users);
         _logger.LogInformation("Seeded {Count} users", users.Count);
     }
@@ -256,4 +264,3 @@ public class DatabaseSeeder
         _logger.LogInformation("Seeded {Count} materials", materials.Count);
     }
 }
-

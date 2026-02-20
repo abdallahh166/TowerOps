@@ -2,6 +2,7 @@ namespace TelecomPM.Application.Commands.Users.CreateUser;
 
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,17 +17,20 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Resul
     private readonly IOfficeRepository _officeRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly IPasswordHasher<User> _passwordHasher;
 
     public CreateUserCommandHandler(
         IUserRepository userRepository,
         IOfficeRepository officeRepository,
         IUnitOfWork unitOfWork,
-        IMapper mapper)
+        IMapper mapper,
+        IPasswordHasher<User> passwordHasher)
     {
         _userRepository = userRepository;
         _officeRepository = officeRepository;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<Result<UserDto>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -50,6 +54,8 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Resul
                 request.Role,
                 request.OfficeId);
 
+            user.SetPassword(request.Password, _passwordHasher);
+
             // Set engineer-specific properties if role is PMEngineer
             if (request.Role == Domain.Enums.UserRole.PMEngineer && request.MaxAssignedSites.HasValue)
             {
@@ -72,4 +78,3 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Resul
         }
     }
 }
-
