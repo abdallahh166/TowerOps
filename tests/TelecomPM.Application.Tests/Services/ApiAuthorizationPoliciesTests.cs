@@ -32,6 +32,7 @@ public class ApiAuthorizationPoliciesTests
         options.GetPolicy(ApiAuthorizationPolicies.CanViewSites).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewReports).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewMaterials).Should().NotBeNull();
+        options.GetPolicy(ApiAuthorizationPolicies.CanManageMaterials).Should().NotBeNull();
     }
 
     [Theory]
@@ -46,6 +47,7 @@ public class ApiAuthorizationPoliciesTests
     [InlineData(typeof(SitesController), ApiAuthorizationPolicies.CanViewSites)]
     [InlineData(typeof(ReportsController), ApiAuthorizationPolicies.CanViewReports)]
     [InlineData(typeof(MaterialsController), ApiAuthorizationPolicies.CanViewMaterials)]
+    [InlineData(typeof(MaterialsController), ApiAuthorizationPolicies.CanManageMaterials)]
     public void Controllers_ShouldReferenceExpectedPolicies(Type controllerType, string policy)
     {
         var methods = controllerType
