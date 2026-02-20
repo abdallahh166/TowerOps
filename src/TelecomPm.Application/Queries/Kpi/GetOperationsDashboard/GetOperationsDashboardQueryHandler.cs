@@ -3,8 +3,6 @@ namespace TelecomPM.Application.Queries.Kpi.GetOperationsDashboard;
 using MediatR;
 using TelecomPM.Application.Common;
 using TelecomPM.Application.DTOs.Kpi;
-using TelecomPM.Domain.Entities.Visits;
-using TelecomPM.Domain.Entities.WorkOrders;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Interfaces.Repositories;
 using TelecomPM.Domain.Specifications.VisitSpecifications;
@@ -64,10 +62,6 @@ public sealed class GetOperationsDashboardQueryHandler : IRequestHandler<GetOper
                 nowUtc: nowUtc),
             cancellationToken);
 
-        var filteredVisitsCount = await _visitRepository.CountAsync(
-            new OperationsDashboardVisitsSpecification(request.FromDateUtc, request.ToDateUtc),
-            cancellationToken);
-
         var reviewedVisitsCount = await _visitRepository.CountAsync(
             new OperationsDashboardVisitsSpecification(
                 request.FromDateUtc,
@@ -75,41 +69,56 @@ public sealed class GetOperationsDashboardQueryHandler : IRequestHandler<GetOper
                 reviewedOnly: true),
             cancellationToken);
 
-        var rejectedVisits = await _visitRepository.CountAsync(
+        var totalSubmittedVisits = await _visitRepository.CountAsync(
             new OperationsDashboardVisitsSpecification(
                 request.FromDateUtc,
                 request.ToDateUtc,
-                rejectedOnly: true),
-            cancellationToken);
-
-        var approvedVisitsWithDuration = await _visitRepository.FindAsNoTrackingAsync(
-            new OperationsDashboardVisitsSpecification(
-                request.FromDateUtc,
-                request.ToDateUtc,
-                approvedWithDurationOnly: true),
-            cancellationToken);
-
-        var approvedVisits = approvedVisitsWithDuration.Count;
-
-        var visitsWithCorrections = await _visitRepository.CountAsync(
-            new OperationsDashboardVisitsSpecification(
-                request.FromDateUtc,
-                request.ToDateUtc,
-                withCorrectionsOnly: true),
+                submittedOnly: true),
             cancellationToken);
 
         var evidenceCompleteVisits = await _visitRepository.CountAsync(
             new OperationsDashboardVisitsSpecification(
                 request.FromDateUtc,
                 request.ToDateUtc,
+                submittedOnly: true,
                 evidenceCompleteOnly: true),
             cancellationToken);
 
-        var mttrSamples = approvedVisitsWithDuration
-            .Select(v => v.ActualDuration!.Duration.TotalHours)
-            .ToList();
+        var closedWorkOrders = await _workOrderRepository.CountClosedAsync(
+            request.OfficeCode,
+            request.SlaClass,
+            request.FromDateUtc,
+            request.ToDateUtc,
+            cancellationToken);
 
-        var closedWorkOrders = totalWorkOrders - openWorkOrders;
+        var closedWithReworkOrReopened = await _workOrderRepository.CountClosedWithReworkOrReopenedHistoryAsync(
+            request.OfficeCode,
+            request.SlaClass,
+            request.FromDateUtc,
+            request.ToDateUtc,
+            cancellationToken);
+
+        var reopenedClosedWorkOrders = await _workOrderRepository.CountClosedWithReopenedHistoryAsync(
+            request.OfficeCode,
+            request.SlaClass,
+            request.FromDateUtc,
+            request.ToDateUtc,
+            cancellationToken);
+
+        var ftfRatePercent = Percentage(
+            Math.Max(closedWorkOrders - closedWithReworkOrReopened, 0),
+            Math.Max(closedWorkOrders, 1));
+
+        var reopenRatePercent = Percentage(reopenedClosedWorkOrders, Math.Max(closedWorkOrders, 1));
+
+        var mttrHours = await _workOrderRepository.GetClosedMeanTimeToRepairHoursAsync(
+            request.OfficeCode,
+            request.SlaClass,
+            request.FromDateUtc,
+            request.ToDateUtc,
+            cancellationToken);
+
+        var evidenceCompletenessPercent = Percentage(evidenceCompleteVisits, Math.Max(totalSubmittedVisits, 1));
 
         var dto = new OperationsKpiDashboardDto
         {
@@ -124,10 +133,15 @@ public sealed class GetOperationsDashboardQueryHandler : IRequestHandler<GetOper
             AtRiskWorkOrders = atRiskWorkOrders,
             SlaCompliancePercentage = Percentage(closedWorkOrders - breachedWorkOrders, Math.Max(closedWorkOrders, 1)),
             TotalReviewedVisits = reviewedVisitsCount,
-            FirstTimeFixPercentage = Percentage(Math.Max(approvedVisits - visitsWithCorrections, 0), Math.Max(reviewedVisitsCount, 1)),
-            ReopenRatePercentage = Percentage(rejectedVisits, Math.Max(reviewedVisitsCount, 1)),
-            EvidenceCompletenessPercentage = Percentage(evidenceCompleteVisits, Math.Max(filteredVisitsCount, 1)),
-            MeanTimeToRepairHours = mttrSamples.Count == 0 ? 0 : (decimal)mttrSamples.Average()
+            FtfRatePercent = ftfRatePercent,
+            MttrHours = mttrHours,
+            ReopenRatePercent = reopenRatePercent,
+            EvidenceCompletenessPercent = evidenceCompletenessPercent,
+            // Backward-compatible aliases
+            FirstTimeFixPercentage = ftfRatePercent,
+            ReopenRatePercentage = reopenRatePercent,
+            EvidenceCompletenessPercentage = evidenceCompletenessPercent,
+            MeanTimeToRepairHours = mttrHours
         };
 
         return Result.Success(dto);

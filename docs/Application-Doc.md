@@ -72,8 +72,42 @@ public async Task<IActionResult> CreateVisit(CreateVisitCommand command)
 - `ApproveVisitCommand`
 - `RejectVisitCommand`
 - `RequestCorrectionCommand`
+- `CancelVisitCommand`
+- `RescheduleVisitCommand`
 - `AddPhotoCommand`
+- `RemovePhotoCommand`
 - `AddReadingCommand`
+- `UpdateReadingCommand`
+
+### WorkOrder Commands
+- `CreateWorkOrderCommand`
+- `AssignWorkOrderCommand`
+- `StartWorkOrderCommand`
+- `CompleteWorkOrderCommand`
+- `CloseWorkOrderCommand`
+- `CancelWorkOrderCommand`
+- `SubmitForCustomerAcceptanceCommand`
+- `AcceptByCustomerCommand`
+- `RejectByCustomerCommand`
+
+### Escalation Commands
+- `CreateEscalationCommand`
+- `ReviewEscalationCommand`
+- `ApproveEscalationCommand`
+- `RejectEscalationCommand`
+- `CloseEscalationCommand`
+
+### Material Commands
+- `CreateMaterialCommand`
+- `UpdateMaterialCommand`
+- `DeleteMaterialCommand`
+- `AddStockCommand`
+- `ReserveStockCommand`
+- `ConsumeStockCommand`
+
+### Audit & Approval Commands (Sprint 5/6)
+- `LogAuditEntryCommand`
+- `CreateApprovalRecordCommand`
 
 ### Queries Available
 

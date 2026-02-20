@@ -148,15 +148,13 @@ Average consumed material value per WO.
 - Low-stock visibility for materials.
 
 ## 5.2 Key gaps for subcontractor production model
-1. **Work Order aggregate exists (baseline), needs maturity hardening**
-   - `WorkOrder` aggregate and APIs are implemented; next step is deepening SLA/audit/acceptance governance.
-2. **No explicit customer acceptance stage**
-   - Add acceptance status/event after supervisor approval.
-3. **SLA clocks not first-class domain concept**
-   - Add SLA policy model + breach computation pipeline.
-4. **Role/policy hardening needed for production governance**
+1. **WorkOrder governance is implemented end-to-end**
+   - `WorkOrder` lifecycle APIs now include internal review, customer acceptance/rejection, and closure paths.
+   - SLA clock service and breach domain event are implemented.
+   - Audit trail (`AuditLog`) and approval records (`ApprovalRecord`) are implemented.
+2. **Role/policy hardening needed for production governance**
    - Enforce strict role-based endpoint access and approvals.
-5. **Contract-ready KPI pack still partial**
+3. **Contract-ready KPI pack still partial**
    - Add fixed KPI definitions and dashboard-level governance.
 
 ---
@@ -164,10 +162,10 @@ Average consumed material value per WO.
 ## 6) Suggested domain refactoring (clear and actionable)
 
 ## 6.1 New aggregates/value objects
-- `WorkOrder` aggregate
-- `SlaPolicy` value object/entity
-- `CustomerAcceptance` entity
-- `EvidencePolicy` (minimum requirements by visit type/site type)
+- `WorkOrder` aggregate: **DONE**
+- `SlaPolicy` / SLA engine model: **DONE**
+- `CustomerAcceptance` stage: **DONE**
+- `EvidencePolicy` (minimum requirements by visit type/site type): **DONE**
 
 ## 6.2 Lifecycle proposal
 `WorkOrder` states:

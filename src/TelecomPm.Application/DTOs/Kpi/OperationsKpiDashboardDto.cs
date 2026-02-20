@@ -17,6 +17,12 @@ public record OperationsKpiDashboardDto
     public decimal SlaCompliancePercentage { get; init; }
 
     public int TotalReviewedVisits { get; init; }
+    public decimal FtfRatePercent { get; init; }
+    public decimal MttrHours { get; init; }
+    public decimal ReopenRatePercent { get; init; }
+    public decimal EvidenceCompletenessPercent { get; init; }
+
+    // Backward-compatible aliases
     public decimal FirstTimeFixPercentage { get; init; }
     public decimal ReopenRatePercentage { get; init; }
     public decimal EvidenceCompletenessPercentage { get; init; }

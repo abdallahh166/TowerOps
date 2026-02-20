@@ -18,6 +18,14 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `CanManageEscalations`: Admin, Manager, Supervisor
 - `CanViewEscalations`: Admin, Manager, Supervisor, PMEngineer
 - `CanViewKpis`: Admin, Manager, Supervisor
+- `CanManageUsers`: Admin, Manager
+- `CanManageOffices`: Admin, Manager
+- `CanManageSites`: Admin, Manager, Supervisor
+- `CanViewSites`: Admin, Manager, Supervisor, PMEngineer
+- `CanViewAnalytics`: Admin, Manager, Supervisor, PMEngineer
+- `CanViewReports`: Admin, Manager, Supervisor, PMEngineer
+- `CanViewMaterials`: Admin, Manager, Supervisor, PMEngineer
+- `CanManageMaterials`: Admin, Manager, Supervisor
 
 ## Access Model
 - All business controllers are protected with `[Authorize]` and selected actions enforce role policies.
@@ -27,7 +35,7 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 
 ### `AuthController` (`/api/auth`)
 - `POST /login` (AllowAnonymous)
-  - Credentials currently validated by `email + phoneNumber` against active user profile.
+  - Credentials validated by `email + password` for active users.
   - Returns JWT access token with `NameIdentifier`, `Email`, `Role`, `OfficeId` claims.
 
 ### `VisitsController` (`/api/visits`)
@@ -48,53 +56,81 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `POST /{visitId}/issues`
 - `POST /{visitId}/issues/{issueId}/resolve`
 - `POST /{visitId}/readings`
+- `PATCH /{visitId}/readings/{readingId}`
 - `POST /{visitId}/photos`
+- `DELETE /{visitId}/photos/{photoId}`
+- `POST /{visitId}/cancel`
+- `POST /{visitId}/reschedule`
 
 ### `WorkOrdersController` (`/api/workorders`)
 - `POST /` (**CanManageWorkOrders**)
 - `GET /{workOrderId}` (**CanViewWorkOrders**)
 - `POST /{workOrderId}/assign` (**CanManageWorkOrders**)
+- `PATCH /{id}/start` (**CanManageWorkOrders**)
+- `PATCH /{id}/complete` (**CanManageWorkOrders**)
+- `PATCH /{id}/close` (**CanManageWorkOrders**)
+- `PATCH /{id}/cancel` (**CanManageWorkOrders**)
+- `PATCH /{id}/submit-for-acceptance` (**CanManageWorkOrders**)
+- `PATCH /{id}/customer-accept` (**CanManageWorkOrders**)
+- `PATCH /{id}/customer-reject` (**CanManageWorkOrders**)
 
 ### `EscalationsController` (`/api/escalations`)
 - `POST /` (**CanManageEscalations**)
-- `GET /{escalationId}` (**CanViewEscalations**)
+- `GET /{escalationId}` (**CanManageEscalations**)
+- `PATCH /{id}/review` (**CanManageEscalations**)
+- `PATCH /{id}/approve` (**CanManageEscalations**)
+- `PATCH /{id}/reject` (**CanManageEscalations**)
+- `PATCH /{id}/close` (**CanManageEscalations**)
 
 ### `KpiController` (`/api/kpi`)
 - `GET /operations` (**CanViewKpis**)
   - Filters: `fromDateUtc`, `toDateUtc`, `officeCode`, `slaClass`
 
 ### `SitesController` (`/api/sites`)
-- `GET /{siteId}`
-- `GET /office/{officeId}`
-- `GET /maintenance`
+- `POST /` (**CanManageSites**)
+- `PUT /{siteId}` (**CanManageSites**)
+- `PATCH /{siteId}/status` (**CanManageSites**)
+- `POST /{siteId}/assign` (**CanManageSites**)
+- `POST /{siteId}/unassign` (**CanManageSites**)
+- `GET /{siteId}` (**CanViewSites**)
+- `GET /office/{officeId}` (**CanViewSites**)
+- `GET /maintenance` (**CanViewSites**)
 
 ### `MaterialsController` (`/api/materials`)
+- `POST /` (**CanManageMaterials**)
+- `PUT /{id}` (**CanManageMaterials**)
+- `DELETE /{id}` (**CanManageMaterials**)
+- `POST /{id}/stock/add` (**CanManageMaterials**)
+- `POST /{id}/stock/reserve` (**CanManageMaterials**)
+- `POST /{id}/stock/consume` (**CanManageMaterials**)
+- `GET /{id}` (**CanViewMaterials**)
+- `GET /` (**CanViewMaterials**)
 - `GET /low-stock/{officeId}`
 
 ### `ReportsController` (`/api/reports`)
 - `GET /visits/{visitId}`
 
 ### `UsersController` (`/api/users`)
-- `POST /`
+- `POST /` (**CanManageUsers**)
 - `GET /{userId}`
-- `PUT /{userId}`
-- `DELETE /{userId}`
-- `PATCH /{userId}/role`
-- `PATCH /{userId}/activate`
-- `PATCH /{userId}/deactivate`
+- `PUT /{userId}` (**CanManageUsers**)
+- `DELETE /{userId}` (**CanManageUsers**)
+- `PATCH /{userId}/role` (**CanManageUsers**)
+- `PATCH /{userId}/activate` (**CanManageUsers**)
+- `PATCH /{userId}/deactivate` (**CanManageUsers**)
 - `GET /office/{officeId}`
 - `GET /role/{role}`
 - `GET /{userId}/performance`
 
 ### `OfficesController` (`/api/offices`)
-- `POST /`
+- `POST /` (**CanManageOffices**)
 - `GET /{officeId}`
 - `GET /`
 - `GET /region/{region}`
 - `GET /{officeId}/statistics`
-- `PUT /{officeId}`
-- `PATCH /{officeId}/contact`
-- `DELETE /{officeId}`
+- `PUT /{officeId}` (**CanManageOffices**)
+- `PATCH /{officeId}/contact` (**CanManageOffices**)
+- `DELETE /{officeId}` (**CanManageOffices**)
 
 ### `AnalyticsController` (`/api/analytics`)
 - `GET /engineer-performance/{engineerId}`
@@ -103,6 +139,7 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `GET /material-usage/{materialId}`
 - `GET /visit-completion-trends`
 - `GET /issue-analytics`
+  - All analytics endpoints require **CanViewAnalytics**
 
 ## Run locally
 ```bash
