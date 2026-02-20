@@ -85,6 +85,38 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         Status = WorkOrderStatus.Assigned;
     }
 
+    public void Start()
+    {
+        if (Status != WorkOrderStatus.Assigned)
+            throw new DomainException("Work order can only be started from Assigned state");
+
+        Status = WorkOrderStatus.InProgress;
+    }
+
+    public void Complete()
+    {
+        if (Status != WorkOrderStatus.InProgress)
+            throw new DomainException("Work order can only be completed from InProgress state");
+
+        Status = WorkOrderStatus.PendingReview;
+    }
+
+    public void Close()
+    {
+        if (Status != WorkOrderStatus.PendingReview && Status != WorkOrderStatus.PendingCustomerAcceptance)
+            throw new DomainException("Work order can only be closed from PendingReview or PendingCustomerAcceptance state");
+
+        Status = WorkOrderStatus.Closed;
+    }
+
+    public void Cancel()
+    {
+        if (Status == WorkOrderStatus.Closed || Status == WorkOrderStatus.Cancelled)
+            throw new DomainException("Closed or cancelled work order cannot be cancelled");
+
+        Status = WorkOrderStatus.Cancelled;
+    }
+
     private static TimeSpan GetResponseSla(SlaClass slaClass)
     {
         return slaClass switch

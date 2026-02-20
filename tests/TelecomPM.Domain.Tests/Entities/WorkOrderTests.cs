@@ -78,4 +78,70 @@ public class WorkOrderTests
         workOrder.AssignedAtUtc!.Value.Kind.Should().Be(DateTimeKind.Utc);
     }
 
+    [Fact]
+    public void Start_FromCreated_ShouldThrowDomainException()
+    {
+        var workOrder = WorkOrder.Create("WO-1006", "S-TNT-006", "TNT", SlaClass.P2, "No assignment");
+
+        Action act = () => workOrder.Start();
+
+        act.Should().Throw<DomainException>()
+            .WithMessage("*started from Assigned state*");
+    }
+
+    [Fact]
+    public void Complete_FromAssigned_ShouldThrowDomainException()
+    {
+        var workOrder = WorkOrder.Create("WO-1007", "S-TNT-007", "TNT", SlaClass.P2, "Issue");
+        workOrder.Assign(Guid.NewGuid(), "Engineer B", "Dispatcher");
+
+        Action act = () => workOrder.Complete();
+
+        act.Should().Throw<DomainException>()
+            .WithMessage("*completed from InProgress state*");
+    }
+
+    [Fact]
+    public void Close_FromInProgress_ShouldThrowDomainException()
+    {
+        var workOrder = WorkOrder.Create("WO-1008", "S-TNT-008", "TNT", SlaClass.P2, "Issue");
+        workOrder.Assign(Guid.NewGuid(), "Engineer C", "Dispatcher");
+        workOrder.Start();
+
+        Action act = () => workOrder.Close();
+
+        act.Should().Throw<DomainException>()
+            .WithMessage("*closed from PendingReview or PendingCustomerAcceptance state*");
+    }
+
+    [Fact]
+    public void Cancel_FromClosed_ShouldThrowDomainException()
+    {
+        var workOrder = WorkOrder.Create("WO-1009", "S-TNT-009", "TNT", SlaClass.P2, "Issue");
+        workOrder.Assign(Guid.NewGuid(), "Engineer D", "Dispatcher");
+        workOrder.Start();
+        workOrder.Complete();
+        workOrder.Close();
+
+        Action act = () => workOrder.Cancel();
+
+        act.Should().Throw<DomainException>()
+            .WithMessage("*cannot be cancelled*");
+    }
+
+    [Fact]
+    public void StartCompleteClose_ShouldTransitionStatuses()
+    {
+        var workOrder = WorkOrder.Create("WO-1010", "S-TNT-011", "TNT", SlaClass.P2, "Issue");
+        workOrder.Assign(Guid.NewGuid(), "Engineer E", "Dispatcher");
+
+        workOrder.Start();
+        workOrder.Status.Should().Be(WorkOrderStatus.InProgress);
+
+        workOrder.Complete();
+        workOrder.Status.Should().Be(WorkOrderStatus.PendingReview);
+
+        workOrder.Close();
+        workOrder.Status.Should().Be(WorkOrderStatus.Closed);
+    }
 }

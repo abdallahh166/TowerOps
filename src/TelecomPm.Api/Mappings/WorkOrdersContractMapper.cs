@@ -2,7 +2,11 @@ namespace TelecomPm.Api.Mappings;
 
 using TelecomPm.Api.Contracts.WorkOrders;
 using TelecomPM.Application.Commands.WorkOrders.AssignWorkOrder;
+using TelecomPM.Application.Commands.WorkOrders.CancelWorkOrder;
+using TelecomPM.Application.Commands.WorkOrders.CloseWorkOrder;
+using TelecomPM.Application.Commands.WorkOrders.CompleteWorkOrder;
 using TelecomPM.Application.Commands.WorkOrders.CreateWorkOrder;
+using TelecomPM.Application.Commands.WorkOrders.StartWorkOrder;
 using TelecomPM.Application.Queries.WorkOrders.GetWorkOrderById;
 
 public static class WorkOrdersContractMapper
@@ -28,4 +32,16 @@ public static class WorkOrdersContractMapper
             EngineerName = request.EngineerName,
             AssignedBy = request.AssignedBy
         };
+
+    public static StartWorkOrderCommand ToStartCommand(this Guid workOrderId)
+        => new() { WorkOrderId = workOrderId };
+
+    public static CompleteWorkOrderCommand ToCompleteCommand(this Guid workOrderId)
+        => new() { WorkOrderId = workOrderId };
+
+    public static CloseWorkOrderCommand ToCloseCommand(this Guid workOrderId)
+        => new() { WorkOrderId = workOrderId };
+
+    public static CancelWorkOrderCommand ToCancelCommand(this Guid workOrderId)
+        => new() { WorkOrderId = workOrderId };
 }
