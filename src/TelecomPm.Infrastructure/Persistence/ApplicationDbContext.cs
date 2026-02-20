@@ -54,6 +54,9 @@ public class ApplicationDbContext : DbContext
     // Work Orders
     public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
 
+    // Escalations
+    public DbSet<Escalation> Escalations => Set<Escalation>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
