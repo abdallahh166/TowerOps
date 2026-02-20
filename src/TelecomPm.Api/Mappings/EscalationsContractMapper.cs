@@ -1,7 +1,11 @@
 namespace TelecomPm.Api.Mappings;
 
 using TelecomPm.Api.Contracts.Escalations;
+using TelecomPM.Application.Commands.Escalations.ApproveEscalation;
+using TelecomPM.Application.Commands.Escalations.CloseEscalation;
 using TelecomPM.Application.Commands.Escalations.CreateEscalation;
+using TelecomPM.Application.Commands.Escalations.RejectEscalation;
+using TelecomPM.Application.Commands.Escalations.ReviewEscalation;
 using TelecomPM.Application.Queries.Escalations.GetEscalationById;
 
 public static class EscalationsContractMapper
@@ -23,5 +27,17 @@ public static class EscalationsContractMapper
         };
 
     public static GetEscalationByIdQuery ToEscalationByIdQuery(this Guid escalationId)
+        => new() { EscalationId = escalationId };
+
+    public static ReviewEscalationCommand ToReviewEscalationCommand(this Guid escalationId)
+        => new() { EscalationId = escalationId };
+
+    public static ApproveEscalationCommand ToApproveEscalationCommand(this Guid escalationId)
+        => new() { EscalationId = escalationId };
+
+    public static RejectEscalationCommand ToRejectEscalationCommand(this Guid escalationId)
+        => new() { EscalationId = escalationId };
+
+    public static CloseEscalationCommand ToCloseEscalationCommand(this Guid escalationId)
         => new() { EscalationId = escalationId };
 }

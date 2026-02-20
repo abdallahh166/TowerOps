@@ -121,4 +121,12 @@ public sealed class Escalation : AggregateRoot<Guid>
 
         Status = EscalationStatus.Rejected;
     }
+
+    public void Close()
+    {
+        if (Status != EscalationStatus.Approved && Status != EscalationStatus.Rejected)
+            throw new DomainException("Only approved or rejected escalation can be closed");
+
+        Status = EscalationStatus.Closed;
+    }
 }

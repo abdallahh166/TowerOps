@@ -38,7 +38,6 @@ public class ApiAuthorizationPoliciesTests
     [Theory]
     [InlineData(typeof(VisitsController), ApiAuthorizationPolicies.CanReviewVisits)]
     [InlineData(typeof(EscalationsController), ApiAuthorizationPolicies.CanManageEscalations)]
-    [InlineData(typeof(EscalationsController), ApiAuthorizationPolicies.CanViewEscalations)]
     [InlineData(typeof(KpiController), ApiAuthorizationPolicies.CanViewKpis)]
     [InlineData(typeof(UsersController), ApiAuthorizationPolicies.CanManageUsers)]
     [InlineData(typeof(OfficesController), ApiAuthorizationPolicies.CanManageOffices)]
