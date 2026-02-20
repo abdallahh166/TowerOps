@@ -4,6 +4,8 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http.Resilience;
+using Polly;
 using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Domain.Interfaces.Repositories;
 using TelecomPM.Domain.Interfaces.Services;
@@ -54,7 +56,24 @@ public static class DependencyInjection
 
         services.Configure<PushNotificationOptions>(configuration.GetSection("PushNotifications"));
         services.Configure<TwilioOptions>(configuration.GetSection("Twilio"));
-        services.AddHttpClient(nameof(NotificationService));
+        services.AddHttpClient(nameof(NotificationService))
+            .AddResilienceHandler("notification-http-resilience", builder =>
+            {
+                builder.AddRetry(new HttpRetryStrategyOptions
+                {
+                    MaxRetryAttempts = 3,
+                    BackoffType = DelayBackoffType.Exponential
+                });
+
+                builder.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
+                {
+                    MinimumThroughput = 5,
+                    FailureRatio = 1.0,
+                    BreakDuration = TimeSpan.FromSeconds(30)
+                });
+
+                builder.AddTimeout(TimeSpan.FromSeconds(10));
+            });
 
         // Infrastructure Services (External concerns & I/O)
         services.AddScoped<IDateTimeService, DateTimeService>();
