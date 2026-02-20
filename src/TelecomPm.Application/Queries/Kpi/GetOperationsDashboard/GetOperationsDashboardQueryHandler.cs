@@ -7,6 +7,8 @@ using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Entities.WorkOrders;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Interfaces.Repositories;
+using TelecomPM.Domain.Specifications.VisitSpecifications;
+using TelecomPM.Domain.Specifications.WorkOrderSpecifications;
 
 public sealed class GetOperationsDashboardQueryHandler : IRequestHandler<GetOperationsDashboardQuery, Result<OperationsKpiDashboardDto>>
 {
@@ -25,36 +27,89 @@ public sealed class GetOperationsDashboardQueryHandler : IRequestHandler<GetOper
     {
         var nowUtc = DateTime.UtcNow;
 
-        var workOrders = await _workOrderRepository.GetAllAsNoTrackingAsync(cancellationToken);
-        var filteredWorkOrders = workOrders
-            .Where(wo => string.IsNullOrWhiteSpace(request.OfficeCode) || wo.OfficeCode.Equals(request.OfficeCode, StringComparison.OrdinalIgnoreCase))
-            .Where(wo => !request.SlaClass.HasValue || wo.SlaClass == request.SlaClass.Value)
-            .Where(wo => !request.FromDateUtc.HasValue || wo.CreatedAt >= request.FromDateUtc.Value)
-            .Where(wo => !request.ToDateUtc.HasValue || wo.CreatedAt <= request.ToDateUtc.Value)
-            .ToList();
+        var totalWorkOrders = await _workOrderRepository.CountAsync(
+            new OperationsDashboardWorkOrdersSpecification(
+                request.OfficeCode,
+                request.SlaClass,
+                request.FromDateUtc,
+                request.ToDateUtc),
+            cancellationToken);
 
-        var visits = await _visitRepository.GetAllAsNoTrackingAsync(cancellationToken);
-        var filteredVisits = visits
-            .Where(v => !request.FromDateUtc.HasValue || v.CreatedAt >= request.FromDateUtc.Value)
-            .Where(v => !request.ToDateUtc.HasValue || v.CreatedAt <= request.ToDateUtc.Value)
-            .ToList();
+        var openWorkOrders = await _workOrderRepository.CountAsync(
+            new OperationsDashboardWorkOrdersSpecification(
+                request.OfficeCode,
+                request.SlaClass,
+                request.FromDateUtc,
+                request.ToDateUtc,
+                onlyOpen: true),
+            cancellationToken);
 
-        var breachedWorkOrders = filteredWorkOrders.Count(wo => IsBreached(wo, nowUtc));
-        var atRiskWorkOrders = filteredWorkOrders.Count(wo => IsAtRisk(wo, nowUtc));
-        var openWorkOrders = filteredWorkOrders.Count(wo => wo.Status is not WorkOrderStatus.Closed and not WorkOrderStatus.Cancelled);
-        var closedWorkOrders = filteredWorkOrders.Count - openWorkOrders;
+        var breachedWorkOrders = await _workOrderRepository.CountAsync(
+            new OperationsDashboardWorkOrdersSpecification(
+                request.OfficeCode,
+                request.SlaClass,
+                request.FromDateUtc,
+                request.ToDateUtc,
+                onlyBreached: true,
+                nowUtc: nowUtc),
+            cancellationToken);
 
-        var reviewedVisits = filteredVisits.Where(v => v.Status is VisitStatus.Approved or VisitStatus.Rejected).ToList();
-        var approvedVisits = reviewedVisits.Count(v => v.Status == VisitStatus.Approved);
-        var rejectedVisits = reviewedVisits.Count(v => v.Status == VisitStatus.Rejected);
+        var atRiskWorkOrders = await _workOrderRepository.CountAsync(
+            new OperationsDashboardWorkOrdersSpecification(
+                request.OfficeCode,
+                request.SlaClass,
+                request.FromDateUtc,
+                request.ToDateUtc,
+                onlyAtRisk: true,
+                nowUtc: nowUtc),
+            cancellationToken);
 
-        var visitsWithCorrections = filteredVisits.Count(v => v.ApprovalHistory.Any(h => h.Action == ApprovalAction.RequestCorrection));
-        var evidenceCompleteVisits = filteredVisits.Count(v => v.IsReadingsComplete && v.IsPhotosComplete && v.IsChecklistComplete);
+        var filteredVisitsCount = await _visitRepository.CountAsync(
+            new OperationsDashboardVisitsSpecification(request.FromDateUtc, request.ToDateUtc),
+            cancellationToken);
 
-        var mttrSamples = filteredVisits
-            .Where(v => v.Status == VisitStatus.Approved && v.ActualDuration is not null)
+        var reviewedVisitsCount = await _visitRepository.CountAsync(
+            new OperationsDashboardVisitsSpecification(
+                request.FromDateUtc,
+                request.ToDateUtc,
+                reviewedOnly: true),
+            cancellationToken);
+
+        var rejectedVisits = await _visitRepository.CountAsync(
+            new OperationsDashboardVisitsSpecification(
+                request.FromDateUtc,
+                request.ToDateUtc,
+                rejectedOnly: true),
+            cancellationToken);
+
+        var approvedVisitsWithDuration = await _visitRepository.FindAsNoTrackingAsync(
+            new OperationsDashboardVisitsSpecification(
+                request.FromDateUtc,
+                request.ToDateUtc,
+                approvedWithDurationOnly: true),
+            cancellationToken);
+
+        var approvedVisits = approvedVisitsWithDuration.Count;
+
+        var visitsWithCorrections = await _visitRepository.CountAsync(
+            new OperationsDashboardVisitsSpecification(
+                request.FromDateUtc,
+                request.ToDateUtc,
+                withCorrectionsOnly: true),
+            cancellationToken);
+
+        var evidenceCompleteVisits = await _visitRepository.CountAsync(
+            new OperationsDashboardVisitsSpecification(
+                request.FromDateUtc,
+                request.ToDateUtc,
+                evidenceCompleteOnly: true),
+            cancellationToken);
+
+        var mttrSamples = approvedVisitsWithDuration
             .Select(v => v.ActualDuration!.Duration.TotalHours)
             .ToList();
+
+        var closedWorkOrders = totalWorkOrders - openWorkOrders;
 
         var dto = new OperationsKpiDashboardDto
         {
@@ -63,35 +118,19 @@ public sealed class GetOperationsDashboardQueryHandler : IRequestHandler<GetOper
             ToDateUtc = request.ToDateUtc,
             OfficeCode = request.OfficeCode,
             SlaClass = request.SlaClass,
-            TotalWorkOrders = filteredWorkOrders.Count,
+            TotalWorkOrders = totalWorkOrders,
             OpenWorkOrders = openWorkOrders,
             BreachedWorkOrders = breachedWorkOrders,
             AtRiskWorkOrders = atRiskWorkOrders,
             SlaCompliancePercentage = Percentage(closedWorkOrders - breachedWorkOrders, Math.Max(closedWorkOrders, 1)),
-            TotalReviewedVisits = reviewedVisits.Count,
-            FirstTimeFixPercentage = Percentage(Math.Max(approvedVisits - visitsWithCorrections, 0), Math.Max(reviewedVisits.Count, 1)),
-            ReopenRatePercentage = Percentage(rejectedVisits, Math.Max(reviewedVisits.Count, 1)),
-            EvidenceCompletenessPercentage = Percentage(evidenceCompleteVisits, Math.Max(filteredVisits.Count, 1)),
+            TotalReviewedVisits = reviewedVisitsCount,
+            FirstTimeFixPercentage = Percentage(Math.Max(approvedVisits - visitsWithCorrections, 0), Math.Max(reviewedVisitsCount, 1)),
+            ReopenRatePercentage = Percentage(rejectedVisits, Math.Max(reviewedVisitsCount, 1)),
+            EvidenceCompletenessPercentage = Percentage(evidenceCompleteVisits, Math.Max(filteredVisitsCount, 1)),
             MeanTimeToRepairHours = mttrSamples.Count == 0 ? 0 : (decimal)mttrSamples.Average()
         };
 
         return Result.Success(dto);
-    }
-
-    private static bool IsBreached(WorkOrder workOrder, DateTime nowUtc)
-    {
-        if (workOrder.Status is WorkOrderStatus.Closed or WorkOrderStatus.Cancelled)
-            return false;
-
-        return nowUtc > workOrder.ResolutionDeadlineUtc;
-    }
-
-    private static bool IsAtRisk(WorkOrder workOrder, DateTime nowUtc)
-    {
-        if (workOrder.Status is WorkOrderStatus.Closed or WorkOrderStatus.Cancelled)
-            return false;
-
-        return nowUtc <= workOrder.ResolutionDeadlineUtc && nowUtc >= workOrder.ResolutionDeadlineUtc.AddHours(-2);
     }
 
     private static decimal Percentage(int numerator, int denominator)
