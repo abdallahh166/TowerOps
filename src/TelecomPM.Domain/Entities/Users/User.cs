@@ -18,6 +18,7 @@ public sealed class User : AggregateRoot<Guid>
     public UserRole Role { get; private set; }
     public Guid OfficeId { get; private set; }
     public bool IsActive { get; private set; }
+    public bool MustChangePassword { get; private set; }
     public DateTime? LastLoginAt { get; private set; }
     
     // For PM Engineers
@@ -50,6 +51,7 @@ public sealed class User : AggregateRoot<Guid>
         Role = role;
         OfficeId = officeId;
         IsActive = true;
+        MustChangePassword = false;
     }
 
     public static User Create(
@@ -178,6 +180,18 @@ public sealed class User : AggregateRoot<Guid>
     public void RecordLogin()
     {
         LastLoginAt = DateTime.UtcNow;
+    }
+
+    public void RequirePasswordChange()
+    {
+        MustChangePassword = true;
+        MarkAsUpdated(Email);
+    }
+
+    public void ClearPasswordChangeRequirement()
+    {
+        MustChangePassword = false;
+        MarkAsUpdated(Email);
     }
 
     public bool CanBeAssignedMoreSites()

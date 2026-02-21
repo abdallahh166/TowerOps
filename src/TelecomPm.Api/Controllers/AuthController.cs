@@ -21,4 +21,43 @@ public sealed class AuthController : ApiControllerBase
 
         return Ok(result.Value.ToResponse());
     }
+
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword(
+        [FromBody] ForgotPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(), cancellationToken);
+        if (result.IsFailure)
+            return HandleResult(result);
+
+        return Ok(new { message = "If the account exists, an OTP was sent to the registered email." });
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword(
+        [FromBody] ResetPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(), cancellationToken);
+        if (result.IsFailure)
+            return HandleResult(result);
+
+        return Ok(new { message = "Password has been reset successfully." });
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword(
+        [FromBody] ChangePasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(), cancellationToken);
+        if (result.IsFailure)
+            return HandleResult(result);
+
+        return Ok(new { message = "Password changed successfully." });
+    }
 }

@@ -47,7 +47,8 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, Result<A
             UserId = user.Id,
             Email = user.Email,
             Role = user.Role.ToString(),
-            OfficeId = user.OfficeId
+            OfficeId = user.OfficeId,
+            RequiresPasswordChange = user.MustChangePassword
         });
     }
 }

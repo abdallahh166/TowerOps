@@ -42,6 +42,10 @@ public class NotificationHttpClientResilienceTests
 
         var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<IHttpClientFactory>();
+        var settingsService = new Mock<ISystemSettingsService>();
+        settingsService
+            .Setup(s => s.GetAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((string _, string fallback, CancellationToken _) => fallback);
 
         var sut = new NotificationService(
             Mock.Of<IEmailService>(),
@@ -54,6 +58,7 @@ public class NotificationHttpClientResilienceTests
                 FromPhoneNumber = "+201000000000",
                 EndpointBaseUrl = "https://twilio.test"
             }),
+            settingsService.Object,
             Mock.Of<ILogger<NotificationService>>());
 
         await sut.SendSmsAsync("+201111111111", "hello");

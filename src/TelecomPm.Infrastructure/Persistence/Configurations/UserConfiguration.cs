@@ -40,6 +40,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion<string>()
             .HasMaxLength(50);
 
+        builder.Property(u => u.MustChangePassword)
+            .IsRequired()
+            .HasDefaultValue(false);
+
         var stringListComparer = ValueComparerFactory.CreateReadOnlyStringCollectionComparer();
         var guidListComparer = ValueComparerFactory.CreateReadOnlyGuidCollectionComparer();
 

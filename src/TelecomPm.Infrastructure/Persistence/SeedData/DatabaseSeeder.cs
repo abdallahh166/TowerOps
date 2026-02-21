@@ -10,20 +10,29 @@ using TelecomPM.Domain.Entities.Materials;
 using TelecomPM.Domain.Entities.ChecklistTemplates;
 using TelecomPM.Domain.Entities.Offices;
 using TelecomPM.Domain.Entities.Sites;
+using TelecomPM.Domain.Entities.ApplicationRoles;
+using TelecomPM.Domain.Entities.SystemSettings;
 using TelecomPM.Domain.Entities.Users;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.ValueObjects;
+using TelecomPM.Application.Common.Interfaces;
+using TelecomPM.Application.Security;
 using TelecomPM.Infrastructure.Persistence;
 
 public class DatabaseSeeder
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<DatabaseSeeder> _logger;
+    private readonly ISettingsEncryptionService _settingsEncryptionService;
 
-    public DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder> logger)
+    public DatabaseSeeder(
+        ApplicationDbContext context,
+        ILogger<DatabaseSeeder> logger,
+        ISettingsEncryptionService settingsEncryptionService)
     {
         _context = context;
         _logger = logger;
+        _settingsEncryptionService = settingsEncryptionService;
     }
 
     public async Task SeedAsync()
@@ -47,6 +56,12 @@ public class DatabaseSeeder
                 await _context.SaveChangesAsync();
             }
 
+            if (!await _context.ApplicationRoles.AnyAsync())
+            {
+                await SeedApplicationRolesAsync();
+                await _context.SaveChangesAsync();
+            }
+
             // Seed materials
             if (!await _context.Materials.AnyAsync())
             {
@@ -57,6 +72,12 @@ public class DatabaseSeeder
             if (!await _context.ChecklistTemplates.AnyAsync())
             {
                 await SeedChecklistTemplatesAsync();
+                await _context.SaveChangesAsync();
+            }
+
+            if (!await _context.SystemSettings.AnyAsync())
+            {
+                await SeedSystemSettingsAsync();
                 await _context.SaveChangesAsync();
             }
 
@@ -379,5 +400,138 @@ public class DatabaseSeeder
         template.AddItem("All", "Evidence Package Complete", null, true, i++);
         template.AddItem("All", "Photos Adequate", null, true, i++);
         template.AddItem("All", "Readings Verified", null, true, i++);
+    }
+
+    private async Task SeedSystemSettingsAsync()
+    {
+        const string seededBy = "SystemSeeder";
+
+        var settings = new List<SystemSetting>
+        {
+            // SLA
+            CreateSetting("SLA:P1:ResponseMinutes", "60", "SLA", "int", "Response deadline for P1 in minutes", false, seededBy),
+            CreateSetting("SLA:P2:ResponseMinutes", "240", "SLA", "int", "Response deadline for P2 in minutes", false, seededBy),
+            CreateSetting("SLA:P3:ResponseMinutes", "1440", "SLA", "int", "Response deadline for P3 in minutes", false, seededBy),
+            CreateSetting("SLA:P4:ResponseMinutes", "2880", "SLA", "int", "Response deadline for P4 in minutes", false, seededBy),
+
+            // Evidence
+            CreateSetting("Evidence:BM:MinPhotos", "3", "Evidence", "int", "Minimum BM photos", false, seededBy),
+            CreateSetting("Evidence:CM:MinPhotos", "2", "Evidence", "int", "Minimum CM photos", false, seededBy),
+            CreateSetting("Evidence:BM:ChecklistCompletionPercent", "80", "Evidence", "int", "Minimum BM checklist completion", false, seededBy),
+            CreateSetting("Evidence:CM:ChecklistCompletionPercent", "60", "Evidence", "int", "Minimum CM checklist completion", false, seededBy),
+            CreateSetting("Evidence:RequiredReadingTypes", "BatteryVoltage,RectifierOutput", "Evidence", "string", "Required reading types", false, seededBy),
+
+            // Company
+            CreateSetting("Company:Name", "MobiEgypt", "Company", "string", "Company display name", false, seededBy),
+            CreateSetting("Company:DefaultTimezone", "Africa/Cairo", "Company", "string", "Default company timezone", false, seededBy),
+            CreateSetting("Company:LogoUrl", string.Empty, "Company", "string", "Public logo URL", false, seededBy),
+
+            // Notifications (encrypted)
+            CreateSetting("Notifications:Twilio:AccountSid", string.Empty, "Notifications", "secret", "Twilio account SID", true, seededBy),
+            CreateSetting("Notifications:Twilio:AuthToken", string.Empty, "Notifications", "secret", "Twilio auth token", true, seededBy),
+            CreateSetting("Notifications:Twilio:FromNumber", string.Empty, "Notifications", "secret", "Twilio sender number", true, seededBy),
+            CreateSetting("Notifications:Firebase:ServerKey", string.Empty, "Notifications", "secret", "Firebase server key", true, seededBy),
+            CreateSetting("Notifications:Email:SmtpHost", string.Empty, "Notifications", "secret", "SMTP host", true, seededBy),
+            CreateSetting("Notifications:Email:SmtpPort", "587", "Notifications", "secret", "SMTP port", true, seededBy),
+            CreateSetting("Notifications:Email:Username", string.Empty, "Notifications", "secret", "SMTP username", true, seededBy),
+            CreateSetting("Notifications:Email:Password", string.Empty, "Notifications", "secret", "SMTP password", true, seededBy),
+            CreateSetting("Notifications:Email:FromAddress", string.Empty, "Notifications", "secret", "SMTP from address", true, seededBy),
+
+            // Import
+            CreateSetting("Import:SkipInvalidRows", "true", "Import", "bool", "Skip invalid rows during imports", false, seededBy),
+            CreateSetting("Import:MaxRows", "5000", "Import", "int", "Maximum rows per import file", false, seededBy),
+            CreateSetting("Import:DefaultDateFormat", "dd/MM/yyyy", "Import", "string", "Default import date format", false, seededBy)
+        };
+
+        await _context.SystemSettings.AddRangeAsync(settings);
+        _logger.LogInformation("Seeded {Count} system settings", settings.Count);
+    }
+
+    private async Task SeedApplicationRolesAsync()
+    {
+        var roles = new List<ApplicationRole>
+        {
+            ApplicationRole.Create(
+                UserRole.Admin.ToString(),
+                "Administrator",
+                "System administrator with full access.",
+                isSystem: true,
+                isActive: true,
+                RolePermissionDefaults.GetDefaultPermissions(UserRole.Admin.ToString())),
+
+            ApplicationRole.Create(
+                UserRole.Manager.ToString(),
+                "Business Manager",
+                "Business manager role.",
+                isSystem: false,
+                isActive: true,
+                RolePermissionDefaults.GetDefaultPermissions(UserRole.Manager.ToString())),
+
+            ApplicationRole.Create(
+                UserRole.Supervisor.ToString(),
+                "Supervisor",
+                "Supervises field operations.",
+                isSystem: false,
+                isActive: true,
+                RolePermissionDefaults.GetDefaultPermissions(UserRole.Supervisor.ToString())),
+
+            ApplicationRole.Create(
+                UserRole.PMEngineer.ToString(),
+                "Field Engineer",
+                "Performs site visits and submissions.",
+                isSystem: true,
+                isActive: true,
+                RolePermissionDefaults.GetDefaultPermissions(UserRole.PMEngineer.ToString())),
+
+            ApplicationRole.Create(
+                UserRole.Technician.ToString(),
+                "Technician",
+                "Field technician with read/assist access.",
+                isSystem: false,
+                isActive: true,
+                RolePermissionDefaults.GetDefaultPermissions(UserRole.Technician.ToString())),
+
+            ApplicationRole.Create(
+                "Viewer",
+                "Viewer",
+                "Read-only access profile.",
+                isSystem: false,
+                isActive: true,
+                new[]
+                {
+                    PermissionConstants.SitesView,
+                    PermissionConstants.VisitsView,
+                    PermissionConstants.WorkOrdersView,
+                    PermissionConstants.ReportsView,
+                    PermissionConstants.KpiView,
+                    PermissionConstants.MaterialsView
+                })
+        };
+
+        await _context.ApplicationRoles.AddRangeAsync(roles);
+        _logger.LogInformation("Seeded {Count} application roles", roles.Count);
+    }
+
+    private SystemSetting CreateSetting(
+        string key,
+        string value,
+        string group,
+        string dataType,
+        string description,
+        bool isEncrypted,
+        string updatedBy)
+    {
+        var storedValue = isEncrypted
+            ? _settingsEncryptionService.Encrypt(value)
+            : value;
+
+        return SystemSetting.Create(
+            key,
+            storedValue,
+            group,
+            dataType,
+            description,
+            isEncrypted,
+            updatedBy);
     }
 }

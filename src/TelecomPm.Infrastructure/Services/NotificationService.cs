@@ -13,6 +13,7 @@ public class NotificationService : INotificationService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly PushNotificationOptions _pushOptions;
     private readonly TwilioOptions _twilioOptions;
+    private readonly ISystemSettingsService _systemSettingsService;
     private readonly ILogger<NotificationService> _logger;
 
     public NotificationService(
@@ -20,12 +21,14 @@ public class NotificationService : INotificationService
         IHttpClientFactory httpClientFactory,
         IOptions<PushNotificationOptions> pushOptions,
         IOptions<TwilioOptions> twilioOptions,
+        ISystemSettingsService systemSettingsService,
         ILogger<NotificationService> logger)
     {
         _emailService = emailService;
         _httpClientFactory = httpClientFactory;
         _pushOptions = pushOptions.Value;
         _twilioOptions = twilioOptions.Value;
+        _systemSettingsService = systemSettingsService;
         _logger = logger;
     }
 
@@ -45,8 +48,28 @@ public class NotificationService : INotificationService
         string message,
         CancellationToken cancellationToken = default)
     {
-        var hasSignalR = !string.IsNullOrWhiteSpace(_pushOptions.SignalRWebhookUrl);
-        var hasFirebase = !string.IsNullOrWhiteSpace(_pushOptions.FirebaseServerKey);
+        var signalRWebhookUrl = await _systemSettingsService.GetAsync(
+            "Notifications:Push:SignalRWebhookUrl",
+            _pushOptions.SignalRWebhookUrl ?? string.Empty,
+            cancellationToken);
+
+        var firebaseServerKey = await _systemSettingsService.GetAsync(
+            "Notifications:Firebase:ServerKey",
+            _pushOptions.FirebaseServerKey ?? string.Empty,
+            cancellationToken);
+
+        var firebaseEndpoint = await _systemSettingsService.GetAsync(
+            "Notifications:Firebase:Endpoint",
+            _pushOptions.FirebaseEndpoint ?? "https://fcm.googleapis.com/fcm/send",
+            cancellationToken);
+
+        var topicPrefix = await _systemSettingsService.GetAsync(
+            "Notifications:Firebase:TopicPrefix",
+            _pushOptions.TopicPrefix,
+            cancellationToken);
+
+        var hasSignalR = !string.IsNullOrWhiteSpace(signalRWebhookUrl);
+        var hasFirebase = !string.IsNullOrWhiteSpace(firebaseServerKey);
 
         if (!hasSignalR && !hasFirebase)
         {
@@ -56,12 +79,12 @@ public class NotificationService : INotificationService
 
         if (hasSignalR)
         {
-            await SendSignalRNotificationAsync(userId, title, message, cancellationToken);
+            await SendSignalRNotificationAsync(userId, title, message, signalRWebhookUrl, cancellationToken);
         }
 
         if (hasFirebase)
         {
-            await SendFirebaseNotificationAsync(userId, title, message, cancellationToken);
+            await SendFirebaseNotificationAsync(userId, title, message, firebaseServerKey, firebaseEndpoint, topicPrefix, cancellationToken);
         }
     }
 
@@ -70,21 +93,36 @@ public class NotificationService : INotificationService
         string message,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(_twilioOptions.AccountSid) ||
-            string.IsNullOrWhiteSpace(_twilioOptions.AuthToken) ||
-            string.IsNullOrWhiteSpace(_twilioOptions.FromPhoneNumber))
+        var accountSid = await _systemSettingsService.GetAsync(
+            "Notifications:Twilio:AccountSid",
+            _twilioOptions.AccountSid ?? string.Empty,
+            cancellationToken);
+
+        var authToken = await _systemSettingsService.GetAsync(
+            "Notifications:Twilio:AuthToken",
+            _twilioOptions.AuthToken ?? string.Empty,
+            cancellationToken);
+
+        var fromNumber = await _systemSettingsService.GetAsync(
+            "Notifications:Twilio:FromNumber",
+            _twilioOptions.FromPhoneNumber ?? string.Empty,
+            cancellationToken);
+
+        if (string.IsNullOrWhiteSpace(accountSid) ||
+            string.IsNullOrWhiteSpace(authToken) ||
+            string.IsNullOrWhiteSpace(fromNumber))
         {
             _logger.LogWarning("SMS skipped for {PhoneNumber}. Twilio is not configured.", phoneNumber);
             return;
         }
 
         var endpointBase = _twilioOptions.EndpointBaseUrl?.TrimEnd('/') ?? "https://api.twilio.com";
-        var url = $"{endpointBase}/2010-04-01/Accounts/{_twilioOptions.AccountSid}/Messages.json";
+        var url = $"{endpointBase}/2010-04-01/Accounts/{accountSid}/Messages.json";
 
         var content = new FormUrlEncodedContent(new Dictionary<string, string>
         {
             ["To"] = phoneNumber,
-            ["From"] = _twilioOptions.FromPhoneNumber,
+            ["From"] = fromNumber,
             ["Body"] = message
         });
 
@@ -93,7 +131,7 @@ public class NotificationService : INotificationService
             Content = content
         };
 
-        var authBytes = Encoding.ASCII.GetBytes($"{_twilioOptions.AccountSid}:{_twilioOptions.AuthToken}");
+        var authBytes = Encoding.ASCII.GetBytes($"{accountSid}:{authToken}");
         request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authBytes));
 
         var client = _httpClientFactory.CreateClient(nameof(NotificationService));
@@ -112,6 +150,7 @@ public class NotificationService : INotificationService
         Guid userId,
         string title,
         string message,
+        string signalRWebhookUrl,
         CancellationToken cancellationToken)
     {
         var payload = new
@@ -122,7 +161,7 @@ public class NotificationService : INotificationService
             sentAtUtc = DateTime.UtcNow
         };
 
-        var request = new HttpRequestMessage(HttpMethod.Post, _pushOptions.SignalRWebhookUrl)
+        var request = new HttpRequestMessage(HttpMethod.Post, signalRWebhookUrl)
         {
             Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
         };
@@ -143,10 +182,16 @@ public class NotificationService : INotificationService
         Guid userId,
         string title,
         string message,
+        string firebaseServerKey,
+        string firebaseEndpoint,
+        string topicPrefix,
         CancellationToken cancellationToken)
     {
-        var endpoint = _pushOptions.FirebaseEndpoint ?? "https://fcm.googleapis.com/fcm/send";
-        var topicPrefix = string.IsNullOrWhiteSpace(_pushOptions.TopicPrefix) ? "user" : _pushOptions.TopicPrefix;
+        var endpoint = string.IsNullOrWhiteSpace(firebaseEndpoint)
+            ? "https://fcm.googleapis.com/fcm/send"
+            : firebaseEndpoint;
+
+        topicPrefix = string.IsNullOrWhiteSpace(topicPrefix) ? "user" : topicPrefix;
         var topic = $"/topics/{topicPrefix}-{userId:N}";
 
         var payload = new
@@ -171,7 +216,7 @@ public class NotificationService : INotificationService
             Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
         };
 
-        request.Headers.TryAddWithoutValidation("Authorization", $"key={_pushOptions.FirebaseServerKey}");
+        request.Headers.TryAddWithoutValidation("Authorization", $"key={firebaseServerKey}");
 
         var client = _httpClientFactory.CreateClient(nameof(NotificationService));
         var response = await client.SendAsync(request, cancellationToken);

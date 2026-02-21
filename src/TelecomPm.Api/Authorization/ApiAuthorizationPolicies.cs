@@ -1,7 +1,7 @@
 namespace TelecomPM.Api.Authorization;
 
 using Microsoft.AspNetCore.Authorization;
-using TelecomPM.Domain.Enums;
+using TelecomPM.Application.Security;
 
 public static class ApiAuthorizationPolicies
 {
@@ -19,95 +19,71 @@ public static class ApiAuthorizationPolicies
     public const string CanViewReports = "CanViewReports";
     public const string CanViewMaterials = "CanViewMaterials";
     public const string CanManageMaterials = "CanManageMaterials";
+    public const string CanManageSettings = "CanManageSettings";
 
     public static void Configure(AuthorizationOptions options)
     {
         options.AddPolicy(CanManageWorkOrders, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString(),
-                UserRole.Supervisor.ToString()));
+            RequireAnyPermission(policy,
+                PermissionConstants.WorkOrdersCreate,
+                PermissionConstants.WorkOrdersAssign,
+                PermissionConstants.WorkOrdersComplete,
+                PermissionConstants.WorkOrdersClose));
 
         options.AddPolicy(CanViewWorkOrders, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString(),
-                UserRole.Supervisor.ToString(),
-                UserRole.PMEngineer.ToString()));
+            RequireAnyPermission(policy, PermissionConstants.WorkOrdersView));
 
         options.AddPolicy(CanReviewVisits, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString(),
-                UserRole.Supervisor.ToString()));
+            RequireAnyPermission(policy,
+                PermissionConstants.VisitsReview,
+                PermissionConstants.VisitsApprove));
 
         options.AddPolicy(CanManageEscalations, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString(),
-                UserRole.Supervisor.ToString()));
+            RequireAnyPermission(policy, PermissionConstants.EscalationsApprove));
 
         options.AddPolicy(CanViewEscalations, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString(),
-                UserRole.Supervisor.ToString(),
-                UserRole.PMEngineer.ToString()));
+            RequireAnyPermission(policy, PermissionConstants.EscalationsView));
 
         options.AddPolicy(CanViewKpis, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString(),
-                UserRole.Supervisor.ToString()));
+            RequireAnyPermission(policy, PermissionConstants.KpiView));
 
         options.AddPolicy(CanManageUsers, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString()));
+            RequireAnyPermission(policy,
+                PermissionConstants.UsersCreate,
+                PermissionConstants.UsersEdit,
+                PermissionConstants.UsersDelete,
+                PermissionConstants.UsersChangeRole));
 
         options.AddPolicy(CanManageOffices, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString()));
+            RequireAnyPermission(policy, PermissionConstants.SettingsEdit));
 
         options.AddPolicy(CanManageSites, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString(),
-                UserRole.Supervisor.ToString()));
+            RequireAnyPermission(policy, PermissionConstants.SitesEdit));
 
         options.AddPolicy(CanViewAnalytics, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString(),
-                UserRole.Supervisor.ToString(),
-                UserRole.PMEngineer.ToString()));
+            RequireAnyPermission(policy, PermissionConstants.KpiAnalytics));
 
         options.AddPolicy(CanViewSites, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString(),
-                UserRole.Supervisor.ToString(),
-                UserRole.PMEngineer.ToString()));
+            RequireAnyPermission(policy, PermissionConstants.SitesView));
 
         options.AddPolicy(CanViewReports, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString(),
-                UserRole.Supervisor.ToString(),
-                UserRole.PMEngineer.ToString()));
+            RequireAnyPermission(policy, PermissionConstants.ReportsView));
 
         options.AddPolicy(CanViewMaterials, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString(),
-                UserRole.Supervisor.ToString(),
-                UserRole.PMEngineer.ToString()));
+            RequireAnyPermission(policy, PermissionConstants.MaterialsView));
 
         options.AddPolicy(CanManageMaterials, policy =>
-            policy.RequireRole(
-                UserRole.Admin.ToString(),
-                UserRole.Manager.ToString(),
-                UserRole.Supervisor.ToString()));
+            RequireAnyPermission(policy, PermissionConstants.MaterialsManage));
+
+        options.AddPolicy(CanManageSettings, policy =>
+            RequireAnyPermission(policy, PermissionConstants.SettingsEdit));
+    }
+
+    private static void RequireAnyPermission(AuthorizationPolicyBuilder policy, params string[] requiredPermissions)
+    {
+        policy.RequireAssertion(context =>
+            context.User.Claims.Any(c =>
+                c.Type == PermissionConstants.ClaimType &&
+                requiredPermissions.Any(p => string.Equals(p, c.Value, StringComparison.OrdinalIgnoreCase))));
     }
 }

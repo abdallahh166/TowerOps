@@ -1,4 +1,7 @@
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Memory;
+using Moq;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Domain.Entities.WorkOrders;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Infrastructure.Services;
@@ -8,7 +11,26 @@ namespace TelecomPM.Infrastructure.Tests.Services;
 
 public class SlaClockServiceTests
 {
-    private readonly SlaClockService _service = new();
+    private readonly Mock<ISystemSettingsService> _settingsServiceMock;
+    private readonly SlaClockService _service;
+
+    public SlaClockServiceTests()
+    {
+        _settingsServiceMock = new Mock<ISystemSettingsService>();
+        _settingsServiceMock
+            .Setup(s => s.GetAsync("SLA:P1:ResponseMinutes", 60, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(60);
+        _settingsServiceMock
+            .Setup(s => s.GetAsync("SLA:P2:ResponseMinutes", 240, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(240);
+        _settingsServiceMock
+            .Setup(s => s.GetAsync("SLA:P3:ResponseMinutes", 1440, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1440);
+
+        _service = new SlaClockService(
+            _settingsServiceMock.Object,
+            new MemoryCache(new MemoryCacheOptions()));
+    }
 
     [Theory]
     [InlineData(SlaClass.P1, 59, false)]
@@ -67,6 +89,20 @@ public class SlaClockServiceTests
         var status = _service.EvaluateStatus(workOrder);
 
         status.Should().Be(SlaStatus.OnTime);
+    }
+
+    [Fact]
+    public void CalculateDeadline_ShouldUseSettingsValue_NotHardcoded()
+    {
+        _settingsServiceMock
+            .Setup(s => s.GetAsync("SLA:P1:ResponseMinutes", 60, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(90);
+
+        var createdAt = new DateTime(2026, 2, 21, 0, 0, 0, DateTimeKind.Utc);
+
+        var deadline = _service.CalculateDeadline(createdAt, SlaClass.P1);
+
+        deadline.Should().Be(createdAt.AddMinutes(90));
     }
 
     private static void SetCreatedAt(WorkOrder workOrder, DateTime createdAtUtc)

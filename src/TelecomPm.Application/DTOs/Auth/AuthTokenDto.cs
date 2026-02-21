@@ -8,4 +8,5 @@ public sealed class AuthTokenDto
     public string Email { get; init; } = string.Empty;
     public string Role { get; init; } = string.Empty;
     public Guid OfficeId { get; init; }
+    public bool RequiresPasswordChange { get; init; }
 }

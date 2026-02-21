@@ -6,15 +6,21 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using TelecomPM.Application.Common.Interfaces;
+using TelecomPM.Application.Security;
 using TelecomPM.Domain.Entities.Users;
+using TelecomPM.Domain.Interfaces.Repositories;
 
 public sealed class JwtTokenService : IJwtTokenService
 {
     private readonly IConfiguration _configuration;
+    private readonly IApplicationRoleRepository _applicationRoleRepository;
 
-    public JwtTokenService(IConfiguration configuration)
+    public JwtTokenService(
+        IConfiguration configuration,
+        IApplicationRoleRepository applicationRoleRepository)
     {
         _configuration = configuration;
+        _applicationRoleRepository = applicationRoleRepository;
     }
 
     public (string token, DateTime expiresAtUtc) GenerateToken(User user)
@@ -40,6 +46,11 @@ public sealed class JwtTokenService : IJwtTokenService
             new("OfficeId", user.OfficeId.ToString())
         };
 
+        foreach (var permission in ResolvePermissions(user.Role.ToString()))
+        {
+            claims.Add(new Claim(PermissionConstants.ClaimType, permission));
+        }
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -52,5 +63,20 @@ public sealed class JwtTokenService : IJwtTokenService
 
         var token = new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
         return (token, expiresAtUtc);
+    }
+
+    private IReadOnlyList<string> ResolvePermissions(string roleName)
+    {
+        var role = _applicationRoleRepository
+            .GetByNameAsync(roleName)
+            .GetAwaiter()
+            .GetResult();
+
+        if (role is not null && role.Permissions.Count > 0)
+        {
+            return role.Permissions.ToList();
+        }
+
+        return RolePermissionDefaults.GetDefaultPermissions(roleName);
     }
 }
