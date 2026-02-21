@@ -56,6 +56,7 @@ public static class DependencyInjection
         services.AddScoped<IBatteryDischargeTestRepository, BatteryDischargeTestRepository>();
         services.AddScoped<ISystemSettingsRepository, SystemSettingsRepository>();
         services.AddScoped<IApplicationRoleRepository, ApplicationRoleRepository>();
+        services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 
         // Domain event dispatcher
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
@@ -90,6 +91,7 @@ public static class DependencyInjection
         services.AddScoped<IReportGenerationService, ReportGenerationService>();
         services.AddScoped<ISettingsEncryptionService, SettingsEncryptionService>();
         services.AddScoped<ISystemSettingsService, SystemSettingsService>();
+        services.AddScoped<IOtpService, OtpService>();
 
         // Domain Services with Infrastructure dependencies (Repository-dependent)
         services.AddScoped<IVisitNumberGeneratorService, VisitNumberGeneratorService>();

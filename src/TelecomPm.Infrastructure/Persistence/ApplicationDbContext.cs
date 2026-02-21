@@ -11,6 +11,7 @@ using TelecomPM.Domain.Entities.BatteryDischargeTests;
 using TelecomPM.Domain.Entities.ChecklistTemplates;
 using TelecomPM.Domain.Entities.Materials;
 using TelecomPM.Domain.Entities.Offices;
+using TelecomPM.Domain.Entities.PasswordResetTokens;
 using TelecomPM.Domain.Entities.Sites;
 using TelecomPM.Domain.Entities.SystemSettings;
 using TelecomPM.Domain.Entities.Users;
@@ -53,6 +54,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Office> Offices => Set<Office>();
     public DbSet<ApplicationRole> ApplicationRoles => Set<ApplicationRole>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
     // Material
     public DbSet<Material> Materials => Set<Material>();
