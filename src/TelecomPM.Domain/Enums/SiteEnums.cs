@@ -11,11 +11,9 @@ public enum SiteType
     Indoor = 6,
     Repeater = 7,
     MicroNano = 8,
-    BTS = 10,
-    BSCExtended = 11,
-    GreenField = 12,
-    RoofTop = 13,
-    IndoorExtended = 14
+    GreenField = 20,
+    RoofTop = 21,
+    BTS = 22
 }
 
 public enum SiteComplexity
