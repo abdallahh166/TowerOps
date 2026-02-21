@@ -21,6 +21,10 @@ public sealed class SitePowerSystem : Entity<Guid>
     public int BatteriesPerString { get; private set; }
     public int BatteryAmpereHour { get; private set; }
     public int BatteryVoltage { get; private set; }
+    public string? BatteryBrand { get; private set; }
+    public string? BatteryHealthStatus { get; private set; }
+    public bool? IsCabinetized { get; private set; }
+    public string? CabinetVendor { get; private set; }
     
     // Solar (if applicable)
     public bool HasSolarPanel { get; private set; }
@@ -38,6 +42,8 @@ public sealed class SitePowerSystem : Entity<Guid>
     public bool HasPowerMeter { get; private set; }
     public int? PowerMeterRate { get; private set; }
     public string? ElectricityPhaseType { get; private set; }
+    public int? RouterCount { get; private set; }
+    public int? ModemCount { get; private set; }
 
     private SitePowerSystem() : base() { }
 
@@ -82,6 +88,18 @@ public sealed class SitePowerSystem : Entity<Guid>
         BatteryVoltage = voltage;
     }
 
+    public void SetBatteryMetadata(string? batteryBrand, string? batteryHealthStatus)
+    {
+        BatteryBrand = batteryBrand;
+        BatteryHealthStatus = batteryHealthStatus;
+    }
+
+    public void SetCabinetInfo(bool? isCabinetized, string? cabinetVendor)
+    {
+        IsCabinetized = isCabinetized;
+        CabinetVendor = cabinetVendor;
+    }
+
     public void SetSolarPanel(int panelWatt, int panelsCount)
     {
         HasSolarPanel = true;
@@ -103,5 +121,11 @@ public sealed class SitePowerSystem : Entity<Guid>
         HasPowerMeter = true;
         PowerMeterRate = rate;
         ElectricityPhaseType = phaseType;
+    }
+
+    public void SetNetworkEquipmentCounts(int? routerCount, int? modemCount)
+    {
+        RouterCount = routerCount;
+        ModemCount = modemCount;
     }
 }

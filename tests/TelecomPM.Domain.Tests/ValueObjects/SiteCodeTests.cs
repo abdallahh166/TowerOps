@@ -25,6 +25,15 @@ public class SiteCodeTests
         var act = () => SiteCode.Create(code);
         act.Should().Throw<DomainException>();
     }
+
+    [Fact]
+    public void FromShortCode_WithValidValue_ShouldCreateSiteCode()
+    {
+        var siteCode = SiteCode.FromShortCode("3564DE");
+
+        siteCode.Value.Should().Be("3564DE");
+        siteCode.OfficeCode.Should().Be("DE");
+        siteCode.SequenceNumber.Should().Be(3564);
+        siteCode.ShortCode.Should().Be("3564DE");
+    }
 }
-
-

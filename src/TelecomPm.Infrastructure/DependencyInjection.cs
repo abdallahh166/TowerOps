@@ -52,6 +52,8 @@ public static class DependencyInjection
         services.AddScoped<IEscalationRepository, EscalationRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IApprovalRecordRepository, ApprovalRecordRepository>();
+        services.AddScoped<IChecklistTemplateRepository, ChecklistTemplateRepository>();
+        services.AddScoped<IBatteryDischargeTestRepository, BatteryDischargeTestRepository>();
 
         // Domain event dispatcher
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();

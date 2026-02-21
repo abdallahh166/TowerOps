@@ -34,6 +34,8 @@ public sealed class Site : AggregateRoot<Guid>
     // Contractor
     public string Subcontractor { get; private set; } = string.Empty;
     public string MaintenanceArea { get; private set; } = string.Empty;
+    public string? ZTEMonitoringStatus { get; private set; }
+    public string? GeneralNotes { get; private set; }
     
     // Components (Navigation Properties)
     public SiteTowerInfo TowerInfo { get; private set; } = null!;
@@ -43,6 +45,7 @@ public sealed class Site : AggregateRoot<Guid>
     public SiteCoolingSystem CoolingSystem { get; private set; } = null!;
     public SiteFireSafety FireSafety { get; private set; } = null!;
     public SiteSharing? SharingInfo { get; private set; }
+    public SiteRFStatus? RFStatus { get; private set; }
     
     // Calculated Fields
     public int EstimatedVisitDurationMinutes { get; private set; }
@@ -125,6 +128,12 @@ public sealed class Site : AggregateRoot<Guid>
         MaintenanceArea = maintenanceArea;
     }
 
+    public void SetMonitoringInfo(string? zteMonitoringStatus, string? generalNotes)
+    {
+        ZTEMonitoringStatus = zteMonitoringStatus;
+        GeneralNotes = generalNotes;
+    }
+
     public void SetTowerInfo(SiteTowerInfo towerInfo)
     {
         TowerInfo = towerInfo;
@@ -165,6 +174,11 @@ public sealed class Site : AggregateRoot<Guid>
     {
         SharingInfo = sharingInfo;
         RecalculateComplexity();
+    }
+
+    public void SetRFStatus(SiteRFStatus rfStatus)
+    {
+        RFStatus = rfStatus;
     }
 
     public void UpdateStatus(SiteStatus status)

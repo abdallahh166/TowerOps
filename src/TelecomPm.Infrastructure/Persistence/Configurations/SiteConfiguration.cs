@@ -27,6 +27,11 @@ public class SiteConfiguration : IEntityTypeConfiguration<Site>
             code.Property(c => c.SequenceNumber)
                 .HasColumnName("SiteSequenceNumber");
 
+            code.Property(c => c.ShortCode)
+                .HasColumnName("SiteShortCode")
+                .HasMaxLength(20)
+                .IsRequired(false);
+
             code.HasIndex(c => c.Value)
                 .IsUnique();
         });
@@ -92,6 +97,39 @@ public class SiteConfiguration : IEntityTypeConfiguration<Site>
 
         builder.Property(s => s.MaintenanceArea)
             .HasMaxLength(100);
+
+        builder.Property(s => s.ZTEMonitoringStatus)
+            .HasMaxLength(200);
+
+        builder.Property(s => s.GeneralNotes)
+            .HasMaxLength(2000);
+
+        builder.OwnsOne(s => s.RFStatus, rf =>
+        {
+            rf.Property(r => r.TotalRFCount)
+                .HasColumnName("TotalRFCount");
+
+            rf.Property(r => r.RFOnTowerCount)
+                .HasColumnName("RFOnTowerCount");
+
+            rf.Property(r => r.RFOnGroundCount)
+                .HasColumnName("RFOnGroundCount");
+
+            rf.Property(r => r.RFSectorCarryCount)
+                .HasColumnName("RFSectorCarryCount");
+
+            rf.Property(r => r.BandForRFOnTower)
+                .HasColumnName("BandForRFOnTower")
+                .HasMaxLength(200);
+
+            rf.Property(r => r.BandForRFOnGround)
+                .HasColumnName("BandForRFOnGround")
+                .HasMaxLength(200);
+
+            rf.Property(r => r.Notes)
+                .HasColumnName("RFStatusNotes")
+                .HasMaxLength(2000);
+        });
 
         // Relationships - One-to-One with components
         builder.HasOne(s => s.TowerInfo)

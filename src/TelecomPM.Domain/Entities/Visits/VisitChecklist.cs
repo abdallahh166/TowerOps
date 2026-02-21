@@ -10,6 +10,7 @@ public sealed class VisitChecklist : Entity<Guid>
     public string Category { get; private set; } = string.Empty; // Electrical, Power, Cooling
     public string ItemName { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
+    public Guid? TemplateItemId { get; private set; }
     public CheckStatus Status { get; private set; }
     public bool IsMandatory { get; private set; }
     public string? Notes { get; private set; }
@@ -23,13 +24,15 @@ public sealed class VisitChecklist : Entity<Guid>
         string category,
         string itemName,
         string description,
-        bool isMandatory) : base(Guid.NewGuid())
+        bool isMandatory,
+        Guid? templateItemId) : base(Guid.NewGuid())
     {
         VisitId = visitId;
         Category = category;
         ItemName = itemName;
         Description = description;
         IsMandatory = isMandatory;
+        TemplateItemId = templateItemId;
         Status = CheckStatus.NA;
     }
 
@@ -38,9 +41,10 @@ public sealed class VisitChecklist : Entity<Guid>
         string category,
         string itemName,
         string description,
-        bool isMandatory = false)
+        bool isMandatory = false,
+        Guid? templateItemId = null)
     {
-        return new VisitChecklist(visitId, category, itemName, description, isMandatory);
+        return new VisitChecklist(visitId, category, itemName, description, isMandatory, templateItemId);
     }
 
     public void UpdateStatus(CheckStatus status, string? notes = null)

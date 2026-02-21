@@ -13,6 +13,10 @@ public sealed class SectorInfo
     public string AntennaType { get; private set; } = string.Empty;
     public int? ElectricalTilt { get; private set; }
     public int? MechanicalTilt { get; private set; }
+    public string? SectorTechnology { get; private set; }
+    public string? RruSolution { get; private set; }
+    public string? FeederSize { get; private set; }
+    public decimal? FeederLengthM { get; private set; }
 
     private SectorInfo() { }
 
@@ -40,5 +44,23 @@ public sealed class SectorInfo
     {
         ElectricalTilt = electrical;
         MechanicalTilt = mechanical;
+    }
+
+    public void SetDeploymentDetails(
+        string? sectorTechnology,
+        string? rruSolution,
+        string? feederSize,
+        decimal? feederLengthM,
+        string? antennaType = null)
+    {
+        SectorTechnology = sectorTechnology;
+        RruSolution = rruSolution;
+        FeederSize = feederSize;
+        FeederLengthM = feederLengthM;
+
+        if (!string.IsNullOrWhiteSpace(antennaType))
+        {
+            AntennaType = antennaType;
+        }
     }
 }

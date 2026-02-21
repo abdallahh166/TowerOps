@@ -42,6 +42,8 @@ public class VisitIssueConfiguration : IEntityTypeConfiguration<VisitIssue>
         builder.Property(i => i.Resolution)
             .HasMaxLength(2000);
 
+        builder.Property(i => i.TargetDateUtc);
+
         var guidListComparer = ValueComparerFactory.CreateGuidListComparer();
 
         builder.Property(i => i.PhotoIds)
@@ -56,5 +58,6 @@ public class VisitIssueConfiguration : IEntityTypeConfiguration<VisitIssue>
         builder.HasIndex(i => i.VisitId);
         builder.HasIndex(i => i.Severity);
         builder.HasIndex(i => i.Status);
+        builder.HasIndex(i => i.TargetDateUtc);
     }
 }

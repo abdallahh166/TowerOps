@@ -50,5 +50,6 @@ public class VisitChecklistConfiguration : IEntityTypeConfiguration<VisitCheckli
         builder.HasIndex(c => c.VisitId);
         builder.HasIndex(c => c.Category);
         builder.HasIndex(c => c.Status);
+        builder.HasIndex(c => c.TemplateItemId);
     }
 }

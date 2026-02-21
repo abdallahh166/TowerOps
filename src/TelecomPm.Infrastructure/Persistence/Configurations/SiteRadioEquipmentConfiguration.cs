@@ -31,6 +31,14 @@ namespace TelecomPm.Infrastructure.Persistence.Configurations
                     .HasMaxLength(100);
                 sector.Property(s => s.HeightAboveBase)
                     .HasPrecision(18, 2);
+                sector.Property(s => s.SectorTechnology)
+                    .HasMaxLength(100);
+                sector.Property(s => s.RruSolution)
+                    .HasMaxLength(100);
+                sector.Property(s => s.FeederSize)
+                    .HasMaxLength(100);
+                sector.Property(s => s.FeederLengthM)
+                    .HasPrecision(18, 2);
             });
 
             builder.HasIndex(r => r.SiteId);

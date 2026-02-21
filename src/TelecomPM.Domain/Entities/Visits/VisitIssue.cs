@@ -16,6 +16,7 @@ public sealed class VisitIssue : Entity<Guid>
     public DateTime ReportedAt { get; private set; }
     public DateTime? ResolvedAt { get; private set; }
     public string? Resolution { get; private set; }
+    public DateTime? TargetDateUtc { get; private set; }
     public List<Guid> PhotoIds { get; private set; } = new();
     public bool RequiresFollowUp { get; private set; }
 
@@ -75,6 +76,22 @@ public sealed class VisitIssue : Entity<Guid>
     public void Escalate()
     {
         Status = IssueStatus.Escalated;
+    }
+
+    public void SetTargetDate(DateTime? targetDateUtc)
+    {
+        if (!targetDateUtc.HasValue)
+        {
+            TargetDateUtc = null;
+            return;
+        }
+
+        TargetDateUtc = targetDateUtc.Value.Kind switch
+        {
+            DateTimeKind.Utc => targetDateUtc.Value,
+            DateTimeKind.Local => targetDateUtc.Value.ToUniversalTime(),
+            _ => DateTime.SpecifyKind(targetDateUtc.Value, DateTimeKind.Utc)
+        };
     }
 
     public void Close()

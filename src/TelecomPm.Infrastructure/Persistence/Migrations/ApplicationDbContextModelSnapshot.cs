@@ -165,6 +165,192 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.ToTable("AuditLogs", (string)null);
                 });
 
+            modelBuilder.Entity("TelecomPM.Domain.Entities.BatteryDischargeTests.BatteryDischargeTest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CapRequestNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("DischargeTimeMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("EndAmperage")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("EndVoltage")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("EngineerName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Network")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("NodalDegree")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<decimal?>("PlvdLlvdValue")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PowerSource")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ReasonForRepeatedBDT")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ReasonForStop")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("RelatedVisitType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("SiteCategory")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SiteCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("SiteId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("StartAmperage")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("StartVoltage")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("SubcontractorOffice")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("TestDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Week")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SiteId");
+
+                    b.HasIndex("TestDateUtc");
+
+                    b.ToTable("BatteryDischargeTests", (string)null);
+                });
+
+            modelBuilder.Entity("TelecomPM.Domain.Entities.ChecklistTemplates.ChecklistTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ApprovedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ChangeNotes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EffectiveFromUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EffectiveToUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("VisitType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VisitType", "EffectiveFromUtc");
+
+                    b.HasIndex("VisitType", "IsActive");
+
+                    b.ToTable("ChecklistTemplates", (string)null);
+                });
+
             modelBuilder.Entity("TelecomPM.Domain.Entities.Escalations.Escalation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -531,6 +717,10 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.Property<int>("EstimatedVisitDurationMinutes")
                         .HasColumnType("int");
 
+                    b.Property<string>("GeneralNotes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -584,6 +774,10 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ZTEMonitoringStatus")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -715,6 +909,14 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.Property<int>("BatteryAmpereHour")
                         .HasColumnType("int");
 
+                    b.Property<string>("BatteryBrand")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("BatteryHealthStatus")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<int>("BatteryStrings")
                         .HasColumnType("int");
 
@@ -723,6 +925,10 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
 
                     b.Property<int>("BatteryVoltage")
                         .HasColumnType("int");
+
+                    b.Property<string>("CabinetVendor")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Configuration")
                         .HasColumnType("int");
@@ -767,8 +973,14 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.Property<bool>("HasSolarPanel")
                         .HasColumnType("bit");
 
+                    b.Property<bool?>("IsCabinetized")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("ModemCount")
+                        .HasColumnType("int");
 
                     b.Property<int?>("PowerMeterRate")
                         .HasColumnType("int");
@@ -781,6 +993,9 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("RectifierModulesCount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RouterCount")
                         .HasColumnType("int");
 
                     b.Property<Guid>("SiteId")
@@ -1184,6 +1399,13 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("CheckInTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("ChecklistTemplateId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ChecklistTemplateVersion")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
                     b.Property<int>("CompletionPercentage")
                         .HasColumnType("int");
 
@@ -1282,6 +1504,8 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ChecklistTemplateId");
 
                     b.HasIndex("EngineerId");
 
@@ -1422,6 +1646,9 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<Guid?>("TemplateItemId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1436,6 +1663,8 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.HasIndex("Category");
 
                     b.HasIndex("Status");
+
+                    b.HasIndex("TemplateItemId");
 
                     b.HasIndex("VisitId");
 
@@ -1502,6 +1731,9 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<DateTime?>("TargetDateUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -1521,6 +1753,8 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.HasIndex("Severity");
 
                     b.HasIndex("Status");
+
+                    b.HasIndex("TargetDateUtc");
 
                     b.HasIndex("VisitId");
 
@@ -1860,6 +2094,59 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("WorkOrders", (string)null);
+                });
+
+            modelBuilder.Entity("TelecomPM.Domain.Entities.ChecklistTemplates.ChecklistTemplate", b =>
+                {
+                    b.OwnsMany("TelecomPM.Domain.Entities.ChecklistTemplates.ChecklistTemplateItem", "Items", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("ApplicableSiteTypes")
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)");
+
+                            b1.Property<string>("ApplicableVisitTypes")
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)");
+
+                            b1.Property<string>("Category")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b1.Property<Guid>("ChecklistTemplateId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Description")
+                                .HasMaxLength(2000)
+                                .HasColumnType("nvarchar(2000)");
+
+                            b1.Property<bool>("IsMandatory")
+                                .HasColumnType("bit");
+
+                            b1.Property<string>("ItemName")
+                                .IsRequired()
+                                .HasMaxLength(300)
+                                .HasColumnType("nvarchar(300)");
+
+                            b1.Property<int>("OrderIndex")
+                                .HasColumnType("int");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("ChecklistTemplateId");
+
+                            b1.HasIndex("OrderIndex");
+
+                            b1.ToTable("ChecklistTemplateItems", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("ChecklistTemplateId");
+                        });
+
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("TelecomPM.Domain.Entities.Materials.Material", b =>
@@ -2257,6 +2544,50 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                                 .HasForeignKey("SiteId");
                         });
 
+                    b.OwnsOne("TelecomPM.Domain.Entities.Sites.SiteRFStatus", "RFStatus", b1 =>
+                        {
+                            b1.Property<Guid>("SiteId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("BandForRFOnGround")
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("BandForRFOnGround");
+
+                            b1.Property<string>("BandForRFOnTower")
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("BandForRFOnTower");
+
+                            b1.Property<string>("Notes")
+                                .HasMaxLength(2000)
+                                .HasColumnType("nvarchar(2000)")
+                                .HasColumnName("RFStatusNotes");
+
+                            b1.Property<int>("RFOnGroundCount")
+                                .HasColumnType("int")
+                                .HasColumnName("RFOnGroundCount");
+
+                            b1.Property<int>("RFOnTowerCount")
+                                .HasColumnType("int")
+                                .HasColumnName("RFOnTowerCount");
+
+                            b1.Property<int>("RFSectorCarryCount")
+                                .HasColumnType("int")
+                                .HasColumnName("RFSectorCarryCount");
+
+                            b1.Property<int>("TotalRFCount")
+                                .HasColumnType("int")
+                                .HasColumnName("TotalRFCount");
+
+                            b1.HasKey("SiteId");
+
+                            b1.ToTable("Sites");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SiteId");
+                        });
+
                     b.OwnsOne("TelecomPM.Domain.ValueObjects.SiteCode", "SiteCode", b1 =>
                         {
                             b1.Property<Guid>("SiteId")
@@ -2271,6 +2602,11 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                             b1.Property<int>("SequenceNumber")
                                 .HasColumnType("int")
                                 .HasColumnName("SiteSequenceNumber");
+
+                            b1.Property<string>("ShortCode")
+                                .HasMaxLength(20)
+                                .HasColumnType("nvarchar(20)")
+                                .HasColumnName("SiteShortCode");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
@@ -2296,6 +2632,8 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Coordinates")
                         .IsRequired();
+
+                    b.Navigation("RFStatus");
 
                     b.Navigation("SiteCode")
                         .IsRequired();
@@ -2441,6 +2779,14 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                             b1.Property<int?>("ElectricalTilt")
                                 .HasColumnType("int");
 
+                            b1.Property<decimal?>("FeederLengthM")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)");
+
+                            b1.Property<string>("FeederSize")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
                             b1.Property<decimal>("HeightAboveBase")
                                 .HasPrecision(18, 2)
                                 .HasColumnType("decimal(18,2)");
@@ -2448,8 +2794,16 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                             b1.Property<int?>("MechanicalTilt")
                                 .HasColumnType("int");
 
+                            b1.Property<string>("RruSolution")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
                             b1.Property<int>("SectorNumber")
                                 .HasColumnType("int");
+
+                            b1.Property<string>("SectorTechnology")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
 
                             b1.Property<int>("Technology")
                                 .HasColumnType("int");
@@ -2502,6 +2856,18 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
 
+                            b1.Property<string>("AntennaReference")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b1.Property<decimal?>("CapacityMbps")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)");
+
+                            b1.Property<string>("Configuration")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
                             b1.Property<int>("DishSizeCM")
                                 .HasColumnType("int");
 
@@ -2515,8 +2881,24 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                                 .HasMaxLength(100)
                                 .HasColumnType("nvarchar(100)");
 
+                            b1.Property<string>("ManagementIpAddress")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b1.Property<string>("Modulation")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
                             b1.Property<string>("ODUType")
                                 .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b1.Property<string>("OduSerialNumber")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b1.Property<string>("OppositeOduSerialNumber")
                                 .HasMaxLength(100)
                                 .HasColumnType("nvarchar(100)");
 
@@ -2524,6 +2906,34 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                                 .IsRequired()
                                 .HasMaxLength(100)
                                 .HasColumnType("nvarchar(100)");
+
+                            b1.Property<string>("Polarization")
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b1.Property<decimal?>("RxFrequencyKHz")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)");
+
+                            b1.Property<decimal?>("RxPowerDbm")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)");
+
+                            b1.Property<decimal?>("TxAzimuth")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)");
+
+                            b1.Property<decimal?>("TxFrequencyKHz")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)");
+
+                            b1.Property<decimal?>("TxHbaMeters")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)");
+
+                            b1.Property<decimal?>("TxPowerDbm")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)");
 
                             b1.HasKey("SiteTransmissionId", "Id");
 

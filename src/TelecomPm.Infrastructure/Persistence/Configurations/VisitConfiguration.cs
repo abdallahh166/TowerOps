@@ -65,6 +65,9 @@ public class VisitConfiguration : IEntityTypeConfiguration<Visit>
         builder.Property(v => v.ReviewerNotes)
             .HasMaxLength(1000);
 
+        builder.Property(v => v.ChecklistTemplateVersion)
+            .HasMaxLength(32);
+
         // Owned Type: TimeRange
         builder.OwnsOne(v => v.ActualDuration, duration =>
         {
@@ -123,6 +126,7 @@ public class VisitConfiguration : IEntityTypeConfiguration<Visit>
         builder.HasIndex(v => v.EngineerId);
         builder.HasIndex(v => v.Status);
         builder.HasIndex(v => v.ScheduledDate);
+        builder.HasIndex(v => v.ChecklistTemplateId);
 
         // Ignore domain events
         builder.Ignore(v => v.DomainEvents);

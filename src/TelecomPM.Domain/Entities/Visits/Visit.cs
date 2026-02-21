@@ -30,6 +30,8 @@ public sealed class Visit : AggregateRoot<Guid>
     // Status
     public VisitStatus Status { get; private set; }
     public VisitType Type { get; private set; }
+    public Guid? ChecklistTemplateId { get; private set; }
+    public string? ChecklistTemplateVersion { get; private set; }
     
     // Location Verification
     public Coordinates? CheckInLocation { get; private set; }
@@ -325,6 +327,12 @@ public sealed class Visit : AggregateRoot<Guid>
     {
         Checklists.Add(item);
         CalculateCompletionPercentage();
+    }
+
+    public void ApplyChecklistTemplate(Guid checklistTemplateId, string checklistTemplateVersion)
+    {
+        ChecklistTemplateId = checklistTemplateId;
+        ChecklistTemplateVersion = checklistTemplateVersion;
     }
 
     public void UpdateChecklistItem(Guid itemId, CheckStatus status, string? notes = null)

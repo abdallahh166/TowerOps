@@ -33,6 +33,34 @@ namespace TelecomPm.Infrastructure.Persistence.Configurations
                     .HasMaxLength(50);
                 link.Property(l => l.ODUType)
                     .HasMaxLength(100);
+                link.Property(l => l.ManagementIpAddress)
+                    .HasMaxLength(100);
+                link.Property(l => l.Modulation)
+                    .HasMaxLength(100);
+                link.Property(l => l.Configuration)
+                    .HasMaxLength(100);
+                link.Property(l => l.Polarization)
+                    .HasMaxLength(50);
+                link.Property(l => l.OduSerialNumber)
+                    .HasMaxLength(100);
+                link.Property(l => l.OppositeOduSerialNumber)
+                    .HasMaxLength(100);
+                link.Property(l => l.AntennaReference)
+                    .HasMaxLength(100);
+                link.Property(l => l.TxFrequencyKHz)
+                    .HasPrecision(18, 2);
+                link.Property(l => l.RxFrequencyKHz)
+                    .HasPrecision(18, 2);
+                link.Property(l => l.TxPowerDbm)
+                    .HasPrecision(18, 2);
+                link.Property(l => l.RxPowerDbm)
+                    .HasPrecision(18, 2);
+                link.Property(l => l.CapacityMbps)
+                    .HasPrecision(18, 2);
+                link.Property(l => l.TxAzimuth)
+                    .HasPrecision(18, 2);
+                link.Property(l => l.TxHbaMeters)
+                    .HasPrecision(18, 2);
             });
 
             builder.HasIndex(t => t.SiteId);

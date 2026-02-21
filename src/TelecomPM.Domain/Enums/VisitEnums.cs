@@ -22,7 +22,10 @@ public enum VisitType
     Installation = 4,
     Upgrade = 5,
     Inspection = 6,
-    Commissioning = 7
+    Commissioning = 7,
+    BM = 10,
+    CM = 11,
+    Audit = 12
 }
 
 public enum CheckStatus

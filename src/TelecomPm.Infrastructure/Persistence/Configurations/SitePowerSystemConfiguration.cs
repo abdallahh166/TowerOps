@@ -29,6 +29,15 @@ namespace TelecomPm.Infrastructure.Persistence.Configurations
             builder.Property(p => p.ElectricityPhaseType)
                 .HasMaxLength(50);
 
+            builder.Property(p => p.BatteryBrand)
+                .HasMaxLength(100);
+
+            builder.Property(p => p.BatteryHealthStatus)
+                .HasMaxLength(100);
+
+            builder.Property(p => p.CabinetVendor)
+                .HasMaxLength(100);
+
             builder.HasIndex(p => p.SiteId);
         }
     }

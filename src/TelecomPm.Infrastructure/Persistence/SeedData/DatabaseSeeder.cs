@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using TelecomPM.Domain.Entities.Materials;
+using TelecomPM.Domain.Entities.ChecklistTemplates;
 using TelecomPM.Domain.Entities.Offices;
 using TelecomPM.Domain.Entities.Sites;
 using TelecomPM.Domain.Entities.Users;
@@ -50,6 +51,12 @@ public class DatabaseSeeder
             if (!await _context.Materials.AnyAsync())
             {
                 await SeedMaterialsAsync();
+                await _context.SaveChangesAsync();
+            }
+
+            if (!await _context.ChecklistTemplates.AnyAsync())
+            {
+                await SeedChecklistTemplatesAsync();
                 await _context.SaveChangesAsync();
             }
 
@@ -262,5 +269,115 @@ public class DatabaseSeeder
 
         await _context.Materials.AddRangeAsync(materials);
         _logger.LogInformation("Seeded {Count} materials", materials.Count);
+    }
+
+    private async Task SeedChecklistTemplatesAsync()
+    {
+        var createdBy = "SystemSeeder";
+        var effectiveFrom = DateTime.UtcNow;
+
+        var bm = ChecklistTemplate.Create(
+            VisitType.BM,
+            "v1.0",
+            effectiveFrom,
+            createdBy,
+            "Initial BM checklist template");
+
+        AddBmItems(bm);
+        bm.Activate(createdBy);
+
+        var cm = ChecklistTemplate.Create(
+            VisitType.CM,
+            "v1.0",
+            effectiveFrom,
+            createdBy,
+            "Initial CM checklist template");
+
+        AddCmItems(cm);
+        cm.Activate(createdBy);
+
+        var audit = ChecklistTemplate.Create(
+            VisitType.Audit,
+            "v1.0",
+            effectiveFrom,
+            createdBy,
+            "Initial Audit checklist template");
+
+        AddAuditItems(audit);
+        audit.Activate(createdBy);
+
+        await _context.ChecklistTemplates.AddRangeAsync(bm, cm, audit);
+        _logger.LogInformation("Seeded default checklist templates");
+    }
+
+    private static void AddBmItems(ChecklistTemplate template)
+    {
+        var i = 1;
+        template.AddItem("Power", "Rectifier Visual Check", null, true, i++);
+        template.AddItem("Power", "Battery Visual Check", null, true, i++);
+        template.AddItem("Power", "GEDP Check", null, true, i++);
+        template.AddItem("Power", "Generator Check", null, true, i++, "[\"GF\"]");
+        template.AddItem("Power", "Solar Panel Check", null, true, i++, "[\"GF\"]");
+        template.AddItem("Power", "Power Meter Reading", null, true, i++);
+        template.AddItem("Power", "CB Status Check", null, true, i++);
+
+        template.AddItem("Cooling", "A/C Unit 1 Check", null, true, i++);
+        template.AddItem("Cooling", "A/C Unit 2 Check", null, true, i++, "[\"GF\",\"RT\"]");
+        template.AddItem("Cooling", "Ventilation Check", null, false, i++);
+
+        template.AddItem("Radio", "BTS/NodeB Visual Check", null, true, i++);
+        template.AddItem("Radio", "Antenna Visual Check", null, true, i++);
+        template.AddItem("Radio", "DDF Check", null, true, i++);
+        template.AddItem("Radio", "Alarm Status Check", null, true, i++);
+
+        template.AddItem("TX", "MW Link Visual Check", null, true, i++);
+        template.AddItem("TX", "ODU Check", null, true, i++);
+        template.AddItem("TX", "IP Connectivity Check", null, true, i++);
+
+        template.AddItem("Fire Safety", "Fire Panel Check", null, true, i++);
+        template.AddItem("Fire Safety", "Fire Extinguisher Check", null, true, i++);
+        template.AddItem("Fire Safety", "Heat Sensor Check", null, true, i++);
+
+        template.AddItem("Structure", "Tower Visual Check", null, true, i++, "[\"GF\"]");
+        template.AddItem("Structure", "Fence Check", null, true, i++);
+        template.AddItem("Structure", "Earth Bar Check", null, true, i++);
+        template.AddItem("Structure", "Shelter Condition Check", null, true, i++);
+
+        template.AddItem("General", "PM Logbook Update", null, true, i++);
+        template.AddItem("General", "Site Cleanliness Check", null, true, i++);
+        template.AddItem("General", "Pending Issues Review", null, true, i++);
+    }
+
+    private static void AddCmItems(ChecklistTemplate template)
+    {
+        var i = 1;
+        template.AddItem("Power", "Fault Identification", null, true, i++);
+        template.AddItem("Power", "Rectifier Check", null, true, i++);
+        template.AddItem("Power", "Battery Check", null, true, i++);
+        template.AddItem("Power", "CB Reset/Replace", null, true, i++);
+
+        template.AddItem("Radio", "BTS Alarm Check", null, true, i++);
+        template.AddItem("Radio", "Reset/Restore Procedure", null, true, i++);
+        template.AddItem("Radio", "Signal Quality Check", null, true, i++);
+
+        template.AddItem("TX", "MW Link Status Check", null, true, i++);
+        template.AddItem("TX", "ODU Status Check", null, true, i++);
+
+        template.AddItem("General", "Root Cause Documentation", null, true, i++);
+        template.AddItem("General", "Resolution Steps Documented", null, true, i++);
+        template.AddItem("General", "Customer Notification", null, true, i++);
+    }
+
+    private static void AddAuditItems(ChecklistTemplate template)
+    {
+        var i = 1;
+        template.AddItem("SQI", "Network Audit Checklist", null, true, i++);
+        template.AddItem("SQI", "RF Status Verification", null, true, i++);
+        template.AddItem("SQI", "Documentation Completeness", null, true, i++);
+        template.AddItem("SQI", "Compliance Check", null, true, i++);
+
+        template.AddItem("All", "Evidence Package Complete", null, true, i++);
+        template.AddItem("All", "Photos Adequate", null, true, i++);
+        template.AddItem("All", "Readings Verified", null, true, i++);
     }
 }

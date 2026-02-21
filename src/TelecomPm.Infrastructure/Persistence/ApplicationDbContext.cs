@@ -6,6 +6,8 @@ using System.Reflection;
 using TelecomPM.Domain.Common;
 using TelecomPM.Domain.Entities.ApprovalRecords;
 using TelecomPM.Domain.Entities.AuditLogs;
+using TelecomPM.Domain.Entities.BatteryDischargeTests;
+using TelecomPM.Domain.Entities.ChecklistTemplates;
 using TelecomPM.Domain.Entities.Materials;
 using TelecomPM.Domain.Entities.Offices;
 using TelecomPM.Domain.Entities.Sites;
@@ -62,6 +64,8 @@ public class ApplicationDbContext : DbContext
     // Audit & Approvals
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<ApprovalRecord> ApprovalRecords => Set<ApprovalRecord>();
+    public DbSet<ChecklistTemplate> ChecklistTemplates => Set<ChecklistTemplate>();
+    public DbSet<BatteryDischargeTest> BatteryDischargeTests => Set<BatteryDischargeTest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
