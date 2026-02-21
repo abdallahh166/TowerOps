@@ -107,8 +107,16 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `GET /` (**CanViewMaterials**)
 - `GET /low-stock/{officeId}`
 
+### `ChecklistTemplatesController` (`/api/checklisttemplates`)
+- `GET /?visitType={visitType}`
+- `GET /{id}`
+- `GET /history?visitType={visitType}`
+- `POST /` (**CanManageWorkOrders**)
+- `POST /{id}/activate` (**CanManageWorkOrders**)
+
 ### `ReportsController` (`/api/reports`)
 - `GET /visits/{visitId}`
+- `GET /scorecard?officeCode={officeCode}&month={month}&year={year}`
 
 ### `UsersController` (`/api/users`)
 - `POST /` (**CanManageUsers**)
