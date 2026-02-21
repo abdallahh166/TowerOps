@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using TelecomPM.Api.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TelecomPM.Domain.Enums;
 using TelecomPm.Api.Mappings;
 
 [ApiController]
@@ -28,7 +29,7 @@ public sealed class ReportsController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(
-            ReportsContractMapper.ToGenerateContractorScorecardCommand(officeCode, month, year),
+            ReportsContractMapper.ToExportScorecardCommand(officeCode, month, year),
             cancellationToken);
 
         if (result.IsFailure || result.Value is null)
@@ -39,5 +40,61 @@ public sealed class ReportsController : ApiControllerBase
             result.Value,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             fileName);
+    }
+
+    [HttpGet("checklist")]
+    public async Task<IActionResult> ExportChecklist(
+        [FromQuery] Guid? visitId,
+        [FromQuery] VisitType? visitType,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(
+            ReportsContractMapper.ToExportChecklistCommand(visitId, visitType),
+            cancellationToken);
+
+        if (result.IsFailure || result.Value is null)
+            return HandleResult(result);
+
+        return File(
+            result.Value,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "GH-DE Checklist.xlsx");
+    }
+
+    [HttpGet("bdt")]
+    public async Task<IActionResult> ExportBdt(
+        [FromQuery] DateTime? fromDateUtc,
+        [FromQuery] DateTime? toDateUtc,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(
+            ReportsContractMapper.ToExportBdtCommand(fromDateUtc, toDateUtc),
+            cancellationToken);
+
+        if (result.IsFailure || result.Value is null)
+            return HandleResult(result);
+
+        return File(
+            result.Value,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "GH-BDT_BDT.xlsx");
+    }
+
+    [HttpGet("data-collection")]
+    public async Task<IActionResult> ExportDataCollection(
+        [FromQuery] string? officeCode,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(
+            ReportsContractMapper.ToExportDataCollectionCommand(officeCode),
+            cancellationToken);
+
+        if (result.IsFailure || result.Value is null)
+            return HandleResult(result);
+
+        return File(
+            result.Value,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "GH-DE Data Collection.xlsx");
     }
 }

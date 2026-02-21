@@ -89,14 +89,107 @@ public sealed class SitesController : ApiControllerBase
     [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
     public async Task<IActionResult> Import([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
     {
-        if (request.File is null || request.File.Length == 0)
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
             return BadRequest("Excel file is required.");
 
-        await using var stream = request.File.OpenReadStream();
-        using var ms = new MemoryStream();
-        await stream.CopyToAsync(ms, cancellationToken);
+        var result = await Mediator.Send(fileBytes.ToCommand(), cancellationToken);
+        return HandleResult(result);
+    }
 
-        var result = await Mediator.Send(ms.ToArray().ToCommand(), cancellationToken);
+    [HttpPost("import/site-assets")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportSiteAssets([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToSiteAssetsImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/power-data")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportPowerData([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToPowerDataImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/radio-data")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportSiteRadioData([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToSiteRadioDataImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/tx-data")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportSiteTxData([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToSiteTxDataImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/sharing-data")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportSiteSharingData([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToSiteSharingDataImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/rf-status")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportRfStatus([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToRfStatusImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/battery-discharge-tests")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportBatteryDischargeTests([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToBatteryDischargeTestImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/delta-sites")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportDeltaSites([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToDeltaSitesImportCommand(), cancellationToken);
         return HandleResult(result);
     }
 
@@ -124,5 +217,16 @@ public sealed class SitesController : ApiControllerBase
     {
         var result = await Mediator.Send(parameters.ToMaintenanceQuery(), cancellationToken);
         return HandleResult(result);
+    }
+
+    private static async Task<byte[]?> ReadExcelBytesOrNullAsync(ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        if (request.File is null || request.File.Length == 0)
+            return null;
+
+        await using var stream = request.File.OpenReadStream();
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms, cancellationToken);
+        return ms.ToArray();
     }
 }

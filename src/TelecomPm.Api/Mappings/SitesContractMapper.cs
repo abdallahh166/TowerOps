@@ -2,6 +2,14 @@ namespace TelecomPm.Api.Mappings;
 
 using TelecomPm.Api.Contracts.Sites;
 using TelecomPM.Application.Commands.Sites.AssignEngineerToSite;
+using TelecomPM.Application.Commands.Imports.ImportBatteryDischargeTest;
+using TelecomPM.Application.Commands.Imports.ImportDeltaSites;
+using TelecomPM.Application.Commands.Imports.ImportPowerData;
+using TelecomPM.Application.Commands.Imports.ImportRFStatus;
+using TelecomPM.Application.Commands.Imports.ImportSiteAssets;
+using TelecomPM.Application.Commands.Imports.ImportSiteRadioData;
+using TelecomPM.Application.Commands.Imports.ImportSiteSharingData;
+using TelecomPM.Application.Commands.Imports.ImportSiteTxData;
 using TelecomPM.Application.Commands.Sites.CreateSite;
 using TelecomPM.Application.Commands.Sites.ImportSiteData;
 using TelecomPM.Application.Commands.Sites.UnassignEngineerFromSite;
@@ -92,4 +100,28 @@ public static class SitesContractMapper
         {
             FileContent = fileContent
         };
+
+    public static ImportSiteAssetsCommand ToSiteAssetsImportCommand(this byte[] fileContent)
+        => new() { FileContent = fileContent };
+
+    public static ImportPowerDataCommand ToPowerDataImportCommand(this byte[] fileContent)
+        => new() { FileContent = fileContent };
+
+    public static ImportSiteRadioDataCommand ToSiteRadioDataImportCommand(this byte[] fileContent)
+        => new() { FileContent = fileContent };
+
+    public static ImportSiteTxDataCommand ToSiteTxDataImportCommand(this byte[] fileContent)
+        => new() { FileContent = fileContent };
+
+    public static ImportSiteSharingDataCommand ToSiteSharingDataImportCommand(this byte[] fileContent)
+        => new() { FileContent = fileContent };
+
+    public static ImportRFStatusCommand ToRfStatusImportCommand(this byte[] fileContent)
+        => new() { FileContent = fileContent };
+
+    public static ImportBatteryDischargeTestCommand ToBatteryDischargeTestImportCommand(this byte[] fileContent)
+        => new() { FileContent = fileContent };
+
+    public static ImportDeltaSitesCommand ToDeltaSitesImportCommand(this byte[] fileContent)
+        => new() { FileContent = fileContent };
 }

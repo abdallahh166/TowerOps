@@ -92,6 +92,15 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `PATCH /{siteId}/status` (**CanManageSites**)
 - `POST /{siteId}/assign` (**CanManageSites**)
 - `POST /{siteId}/unassign` (**CanManageSites**)
+- `POST /import` (**CanManageSites**) - GH-DE Data Collection import
+- `POST /import/site-assets` (**CanManageSites**)
+- `POST /import/power-data` (**CanManageSites**)
+- `POST /import/radio-data` (**CanManageSites**)
+- `POST /import/tx-data` (**CanManageSites**)
+- `POST /import/sharing-data` (**CanManageSites**)
+- `POST /import/rf-status` (**CanManageSites**)
+- `POST /import/battery-discharge-tests` (**CanManageSites**)
+- `POST /import/delta-sites` (**CanManageSites**)
 - `GET /{siteId}` (**CanViewSites**)
 - `GET /office/{officeId}` (**CanViewSites**)
 - `GET /maintenance` (**CanViewSites**)
@@ -117,6 +126,9 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 ### `ReportsController` (`/api/reports`)
 - `GET /visits/{visitId}`
 - `GET /scorecard?officeCode={officeCode}&month={month}&year={year}`
+- `GET /checklist?visitId={visitId?}&visitType={visitType?}`
+- `GET /bdt?fromDateUtc={from?}&toDateUtc={to?}`
+- `GET /data-collection?officeCode={officeCode?}`
 
 ### `UsersController` (`/api/users`)
 - `POST /` (**CanManageUsers**)

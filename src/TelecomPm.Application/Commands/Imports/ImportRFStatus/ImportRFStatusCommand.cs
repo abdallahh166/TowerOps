@@ -1,0 +1,108 @@
+using ClosedXML.Excel;
+using FluentValidation;
+using MediatR;
+using TelecomPM.Application.Commands.Imports;
+using TelecomPM.Application.Common;
+using TelecomPM.Application.DTOs.Sites;
+using TelecomPM.Domain.Entities.Sites;
+using TelecomPM.Domain.Interfaces.Repositories;
+
+namespace TelecomPM.Application.Commands.Imports.ImportRFStatus;
+
+public record ImportRFStatusCommand : ICommand<ImportSiteDataResult>
+{
+    public byte[] FileContent { get; init; } = Array.Empty<byte>();
+}
+
+public class ImportRFStatusCommandValidator : AbstractValidator<ImportRFStatusCommand>
+{
+    public ImportRFStatusCommandValidator()
+    {
+        RuleFor(x => x.FileContent)
+            .NotNull()
+            .Must(x => x.Length > 0)
+            .WithMessage("Excel file content is required.");
+    }
+}
+
+public sealed class ImportRFStatusCommandHandler : IRequestHandler<ImportRFStatusCommand, Result<ImportSiteDataResult>>
+{
+    private readonly ISiteRepository _siteRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ImportRFStatusCommandHandler(ISiteRepository siteRepository, IUnitOfWork unitOfWork)
+    {
+        _siteRepository = siteRepository;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<Result<ImportSiteDataResult>> Handle(ImportRFStatusCommand request, CancellationToken cancellationToken)
+    {
+        var result = new ImportSiteDataResult();
+
+        using var stream = new MemoryStream(request.FileContent);
+        using var workbook = new XLWorkbook(stream);
+
+        var worksheet = ImportExcelSupport.FindWorksheet(workbook, "RF Status");
+        if (worksheet is null)
+            return Result.Failure<ImportSiteDataResult>("Sheet 'RF Status' was not found.");
+
+        var siteLookup = ImportExcelSupport.BuildSiteIdLookup(await _siteRepository.GetAllAsNoTrackingAsync(cancellationToken));
+        var trackedSites = new Dictionary<Guid, Site>();
+
+        var columnMap = ImportExcelSupport.BuildColumnMap(worksheet.Row(1));
+        var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? 1;
+
+        for (var rowNumber = 2; rowNumber <= lastRow; rowNumber++)
+        {
+            var row = worksheet.Row(rowNumber);
+            if (row.IsEmpty())
+                continue;
+
+            var siteCode = ImportExcelSupport.GetCellText(row, columnMap, "Site code", "Site Code", "Short Code");
+            var key = ImportExcelSupport.NormalizeSiteKey(siteCode);
+            if (string.IsNullOrWhiteSpace(key) || !siteLookup.TryGetValue(key, out var siteId))
+            {
+                result.SkippedCount++;
+                result.Errors.Add($"Row {rowNumber}: site '{key}' not found.");
+                continue;
+            }
+
+            var site = await GetTrackedSiteAsync(siteId, trackedSites, cancellationToken);
+            if (site is null)
+            {
+                result.SkippedCount++;
+                result.Errors.Add($"Row {rowNumber}: site '{key}' could not be loaded for update.");
+                continue;
+            }
+
+            var total = ImportExcelSupport.ParseInt(ImportExcelSupport.GetCellText(row, columnMap, "Total RF Count", "Total RF", "Total")) ?? 0;
+            var onTower = ImportExcelSupport.ParseInt(ImportExcelSupport.GetCellText(row, columnMap, "RF On Tower Count", "RF on tower", "RFOnTower")) ?? 0;
+            var onGround = ImportExcelSupport.ParseInt(ImportExcelSupport.GetCellText(row, columnMap, "RF On Ground Count", "RF on ground", "RFOnGround")) ?? 0;
+            var sectorCarry = ImportExcelSupport.ParseInt(ImportExcelSupport.GetCellText(row, columnMap, "RF Sector Carry Count", "RFSectorCarry")) ?? 0;
+            var bandTower = ImportExcelSupport.GetCellText(row, columnMap, "Band For RF On Tower", "Band Tower");
+            var bandGround = ImportExcelSupport.GetCellText(row, columnMap, "Band For RF On Ground", "Band Ground");
+            var notes = ImportExcelSupport.GetCellText(row, columnMap, "comment", "Notes");
+
+            site.SetRFStatus(SiteRFStatus.Create(total, onTower, onGround, sectorCarry, bandTower, bandGround, notes));
+            result.ImportedCount++;
+        }
+
+        if (result.ImportedCount > 0)
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result);
+    }
+
+    private async Task<Site?> GetTrackedSiteAsync(Guid siteId, Dictionary<Guid, Site> trackedSites, CancellationToken cancellationToken)
+    {
+        if (trackedSites.TryGetValue(siteId, out var site))
+            return site;
+
+        site = await _siteRepository.GetByIdAsync(siteId, cancellationToken);
+        if (site is not null)
+            trackedSites[siteId] = site;
+
+        return site;
+    }
+}
