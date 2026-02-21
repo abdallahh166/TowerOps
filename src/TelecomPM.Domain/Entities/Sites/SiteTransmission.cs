@@ -15,6 +15,8 @@ public sealed class SiteTransmission : Entity<Guid>
     public bool HasSDH { get; private set; }
     public bool HasEBand { get; private set; }
     public bool HasALURouter { get; private set; }
+    public string? NodalDegreeRaw { get; private set; }
+    public int? MWLinkCount { get; private set; }
     public List<MWLink> MWLinks { get; private set; } = new();
 
     private SiteTransmission() : base() { }
@@ -47,5 +49,36 @@ public sealed class SiteTransmission : Entity<Guid>
     {
         MWLinks.Add(link);
         LinksCount = MWLinks.Count;
+    }
+
+    public void SetNodalDegree(string? nodalDegreeRaw)
+    {
+        var normalized = string.IsNullOrWhiteSpace(nodalDegreeRaw)
+            ? null
+            : nodalDegreeRaw.Trim();
+
+        NodalDegreeRaw = normalized;
+        MWLinkCount = ParseMWLinkCount(normalized);
+    }
+
+    private static int? ParseMWLinkCount(string? nodalDegreeRaw)
+    {
+        if (string.IsNullOrWhiteSpace(nodalDegreeRaw))
+            return null;
+
+        var normalized = nodalDegreeRaw.Replace(" ", string.Empty, StringComparison.Ordinal);
+
+        var plusIndex = normalized.IndexOf('+');
+        if (plusIndex > 0)
+        {
+            var firstPart = normalized[..plusIndex];
+            if (int.TryParse(firstPart, out var parsedWithProtection))
+                return parsedWithProtection;
+        }
+
+        if (int.TryParse(normalized, out var parsedDirect))
+            return parsedDirect;
+
+        return null;
     }
 }

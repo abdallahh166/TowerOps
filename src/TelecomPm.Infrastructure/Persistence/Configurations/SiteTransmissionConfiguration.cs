@@ -21,6 +21,9 @@ namespace TelecomPm.Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasMaxLength(100);
 
+            builder.Property(t => t.NodalDegreeRaw)
+                .HasMaxLength(50);
+
             // MWLinks as JSON
             builder.OwnsMany(t => t.MWLinks, link =>
             {
