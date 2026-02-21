@@ -26,6 +26,7 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `CanViewReports`: Admin, Manager, Supervisor, PMEngineer
 - `CanViewMaterials`: Admin, Manager, Supervisor, PMEngineer
 - `CanManageMaterials`: Admin, Manager, Supervisor
+- `CanManageSettings`: Admin (via `settings.edit` permission)
 
 ## Access Model
 - All business controllers are protected with `[Authorize]` and selected actions enforce role policies.
@@ -144,6 +145,20 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `GET /office/{officeId}`
 - `GET /role/{role}`
 - `GET /{userId}/performance`
+
+### `RolesController` (`/api/roles`)
+- `GET /`
+- `GET /permissions`
+- `GET /{id}`
+- `POST /` (**CanManageSettings**)
+- `PUT /{id}` (**CanManageSettings**)
+- `DELETE /{id}` (**CanManageSettings**)
+
+### `SettingsController` (`/api/settings`)
+- `GET /` (**CanManageSettings**)
+- `GET /{group}` (**CanManageSettings**)
+- `PUT /` (**CanManageSettings**)
+- `POST /test/{service}` (**CanManageSettings**)
 
 ### `OfficesController` (`/api/offices`)
 - `POST /` (**CanManageOffices**)
