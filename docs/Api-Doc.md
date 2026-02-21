@@ -58,6 +58,8 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `POST /{visitId}/readings`
 - `PATCH /{visitId}/readings/{readingId}`
 - `POST /{visitId}/photos`
+- `POST /{visitId}/import/panorama`
+- `POST /{visitId}/import/alarms`
 - `DELETE /{visitId}/photos/{photoId}`
 - `POST /{visitId}/cancel`
 - `POST /{visitId}/reschedule`
@@ -120,6 +122,7 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `GET /?visitType={visitType}`
 - `GET /{id}`
 - `GET /history?visitType={visitType}`
+- `POST /import` (**CanManageWorkOrders**)
 - `POST /` (**CanManageWorkOrders**)
 - `POST /{id}/activate` (**CanManageWorkOrders**)
 

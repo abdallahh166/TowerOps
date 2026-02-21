@@ -1,6 +1,7 @@
 using TelecomPm.Api.Contracts.ChecklistTemplates;
 using TelecomPM.Application.Commands.ChecklistTemplates.ActivateChecklistTemplate;
 using TelecomPM.Application.Commands.ChecklistTemplates.CreateChecklistTemplate;
+using TelecomPM.Application.Commands.Imports.ImportChecklistTemplate;
 using TelecomPM.Application.Queries.ChecklistTemplates.GetActiveChecklistTemplate;
 using TelecomPM.Application.Queries.ChecklistTemplates.GetChecklistTemplateById;
 using TelecomPM.Application.Queries.ChecklistTemplates.GetChecklistTemplateHistory;
@@ -44,5 +45,16 @@ public static class ChecklistTemplatesContractMapper
         {
             TemplateId = templateId,
             ApprovedBy = request.ApprovedBy
+        };
+
+    public static ImportChecklistTemplateCommand ToImportCommand(this ImportChecklistTemplateRequest request, byte[] fileContent)
+        => new()
+        {
+            FileContent = fileContent,
+            VisitType = request.VisitType,
+            Version = request.Version,
+            EffectiveFromUtc = request.EffectiveFromUtc,
+            CreatedBy = request.CreatedBy,
+            ChangeNotes = request.ChangeNotes
         };
 }

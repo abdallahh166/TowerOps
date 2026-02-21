@@ -14,11 +14,13 @@ Each sprint deliverable must satisfy all checks before closure:
 - [x] Application service/handler tests updated.
 - [x] Infrastructure service tests cover external provider calls and fallback behavior.
 - [x] No active `NotImplementedException` on production execution path.
+- [x] Real Excel integration tests exist for sprint import/export handlers using files from `docs/excell`.
 
 ## 3) Documentation
 - [x] `docs/Api-Doc.md` updated with endpoint and policy changes.
 - [x] Sprint delivery contract updated with status + references + payload samples.
 - [x] Business/operating docs updated for capability changes.
+- [x] Dry-run reconciliation report captured (imported/skipped/errors/entity diff) for Sprint 12.
 
 ## 4) Telemetry & Operations
 - [x] Key actions are logged with correlation context.
@@ -36,3 +38,4 @@ Each sprint deliverable must satisfy all checks before closure:
 - Shared editable visit mutation workflow: `src/TelecomPm.Application/Services/EditableVisitMutationService.cs`.
 - Test coverage additions: mapper tests, auth/policy tests, infrastructure notification/report tests.
 - Release notes: `docs/phase-2/08-release-readiness-report.md`.
+- Sprint 12 reconciliation: `docs/phase-2/10-sprint-12-dry-run-reconciliation.md`.

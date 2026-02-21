@@ -219,6 +219,34 @@ public sealed class VisitsController : ApiControllerBase
         return HandleResult(result);
     }
 
+    [HttpPost("{visitId:guid}/import/panorama")]
+    public async Task<IActionResult> ImportPanoramaEvidence(
+        Guid visitId,
+        [FromForm] ImportVisitEvidenceRequest request,
+        CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request.File, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(visitId.ToImportPanoramaEvidenceCommand(fileBytes), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("{visitId:guid}/import/alarms")]
+    public async Task<IActionResult> ImportAlarmCaptureEvidence(
+        Guid visitId,
+        [FromForm] ImportVisitEvidenceRequest request,
+        CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request.File, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(visitId.ToImportAlarmCaptureCommand(fileBytes), cancellationToken);
+        return HandleResult(result);
+    }
+
     [HttpPost("{visitId:guid}/cancel")]
     public async Task<IActionResult> Cancel(
         Guid visitId,
@@ -258,5 +286,16 @@ public sealed class VisitsController : ApiControllerBase
     {
         var result = await Mediator.Send(request.ToCommand(visitId, readingId), cancellationToken);
         return HandleResult(result);
+    }
+
+    private static async Task<byte[]?> ReadExcelBytesOrNullAsync(IFormFile? file, CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0)
+            return null;
+
+        await using var stream = file.OpenReadStream();
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms, cancellationToken);
+        return ms.ToArray();
     }
 }

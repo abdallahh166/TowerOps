@@ -12,6 +12,8 @@ using TelecomPM.Application.Commands.Visits.ApproveVisit;
 using TelecomPM.Application.Commands.Visits.CancelVisit;
 using TelecomPM.Application.Commands.Visits.CompleteVisit;
 using TelecomPM.Application.Commands.Visits.CreateVisit;
+using TelecomPM.Application.Commands.Imports.ImportAlarmCapture;
+using TelecomPM.Application.Commands.Imports.ImportPanoramaEvidence;
 using TelecomPM.Application.Commands.Visits.RejectVisit;
 using TelecomPM.Application.Commands.Visits.RemovePhoto;
 using TelecomPM.Application.Commands.Visits.RequestCorrection;
@@ -204,5 +206,19 @@ public static class VisitsContractMapper
             VisitId = visitId,
             ReadingId = readingId,
             Value = request.Value
+        };
+
+    public static ImportPanoramaEvidenceCommand ToImportPanoramaEvidenceCommand(this Guid visitId, byte[] fileContent)
+        => new()
+        {
+            VisitId = visitId,
+            FileContent = fileContent
+        };
+
+    public static ImportAlarmCaptureCommand ToImportAlarmCaptureCommand(this Guid visitId, byte[] fileContent)
+        => new()
+        {
+            VisitId = visitId,
+            FileContent = fileContent
         };
 }

@@ -33,3 +33,11 @@
 ## Verification Notes
 - Add integration tests for auth policy allow/deny flows per role.
 - Validate UTC timestamp persistence with work order domain tests and persistence integration tests.
+
+## Sprint 12 Addendum
+- Sprint 10/11 import-export baseline was frozen with a dedicated commit marker.
+- Sprint 12 added hardening on top of that baseline:
+  - Real-workbook integration tests for import/export handlers.
+  - Additional import commands for checklist template and evidence sheets.
+  - API exposure for checklist/evidence imports.
+  - Reconciliation report generation for dry-run import outcomes.
