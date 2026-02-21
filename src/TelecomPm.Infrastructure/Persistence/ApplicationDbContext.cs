@@ -11,6 +11,7 @@ using TelecomPM.Domain.Entities.ChecklistTemplates;
 using TelecomPM.Domain.Entities.Materials;
 using TelecomPM.Domain.Entities.Offices;
 using TelecomPM.Domain.Entities.Sites;
+using TelecomPM.Domain.Entities.SystemSettings;
 using TelecomPM.Domain.Entities.Users;
 using TelecomPM.Domain.Entities.Escalations;
 using TelecomPM.Domain.Entities.Visits;
@@ -66,6 +67,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ApprovalRecord> ApprovalRecords => Set<ApprovalRecord>();
     public DbSet<ChecklistTemplate> ChecklistTemplates => Set<ChecklistTemplate>();
     public DbSet<BatteryDischargeTest> BatteryDischargeTests => Set<BatteryDischargeTest>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

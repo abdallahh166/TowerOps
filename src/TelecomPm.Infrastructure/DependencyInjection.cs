@@ -54,6 +54,7 @@ public static class DependencyInjection
         services.AddScoped<IApprovalRecordRepository, ApprovalRecordRepository>();
         services.AddScoped<IChecklistTemplateRepository, ChecklistTemplateRepository>();
         services.AddScoped<IBatteryDischargeTestRepository, BatteryDischargeTestRepository>();
+        services.AddScoped<ISystemSettingsRepository, SystemSettingsRepository>();
 
         // Domain event dispatcher
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
@@ -86,6 +87,8 @@ public static class DependencyInjection
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IExcelExportService, ExcelExportService>();
         services.AddScoped<IReportGenerationService, ReportGenerationService>();
+        services.AddScoped<ISettingsEncryptionService, SettingsEncryptionService>();
+        services.AddScoped<ISystemSettingsService, SystemSettingsService>();
 
         // Domain Services with Infrastructure dependencies (Repository-dependent)
         services.AddScoped<IVisitNumberGeneratorService, VisitNumberGeneratorService>();
@@ -94,6 +97,7 @@ public static class DependencyInjection
 
         // HttpContextAccessor for CurrentUserService
         services.AddHttpContextAccessor();
+        services.AddMemoryCache();
 
         return services;
     }

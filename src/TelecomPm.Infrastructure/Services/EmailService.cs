@@ -10,11 +10,16 @@ using TelecomPM.Application.Common.Interfaces;
 public class EmailService : IEmailService
 {
     private readonly IConfiguration _configuration;
+    private readonly ISystemSettingsService _systemSettingsService;
     private readonly ILogger<EmailService> _logger;
 
-    public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
+    public EmailService(
+        IConfiguration configuration,
+        ISystemSettingsService systemSettingsService,
+        ILogger<EmailService> logger)
     {
         _configuration = configuration;
+        _systemSettingsService = systemSettingsService;
         _logger = logger;
     }
 
@@ -24,13 +29,8 @@ public class EmailService : IEmailService
         string body,
         CancellationToken cancellationToken = default)
     {
-        var emailSettings = _configuration.GetSection("EmailSettings");
-        var smtpServer = emailSettings["SmtpServer"];
-        var smtpPort = int.Parse(emailSettings["SmtpPort"] ?? "587");
-        var senderEmail = emailSettings["SenderEmail"];
-        var senderName = emailSettings["SenderName"];
-        var username = emailSettings["Username"];
-        var password = emailSettings["Password"];
+        var (smtpServer, smtpPort, senderEmail, senderName, username, password) =
+            await ResolveSmtpSettingsAsync(cancellationToken);
 
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(senderName, senderEmail));
@@ -77,13 +77,8 @@ public class EmailService : IEmailService
         string attachmentFileName,
         CancellationToken cancellationToken = default)
     {
-        var emailSettings = _configuration.GetSection("EmailSettings");
-        var smtpServer = emailSettings["SmtpServer"];
-        var smtpPort = int.Parse(emailSettings["SmtpPort"] ?? "587");
-        var senderEmail = emailSettings["SenderEmail"];
-        var senderName = emailSettings["SenderName"];
-        var username = emailSettings["Username"];
-        var password = emailSettings["Password"];
+        var (smtpServer, smtpPort, senderEmail, senderName, username, password) =
+            await ResolveSmtpSettingsAsync(cancellationToken);
 
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(senderName, senderEmail));
@@ -115,5 +110,42 @@ public class EmailService : IEmailService
             _logger.LogError(ex, "Failed to send email with attachment to {To}", to);
             throw;
         }
+    }
+
+    private async Task<(string smtpServer, int smtpPort, string senderEmail, string senderName, string username, string password)> ResolveSmtpSettingsAsync(CancellationToken cancellationToken)
+    {
+        var fallbackSection = _configuration.GetSection("EmailSettings");
+
+        var smtpServer = await _systemSettingsService.GetAsync(
+            "Notifications:Email:SmtpHost",
+            fallbackSection["SmtpServer"] ?? string.Empty,
+            cancellationToken);
+
+        var smtpPort = await _systemSettingsService.GetAsync(
+            "Notifications:Email:SmtpPort",
+            int.TryParse(fallbackSection["SmtpPort"], out var configuredPort) ? configuredPort : 587,
+            cancellationToken);
+
+        var senderEmail = await _systemSettingsService.GetAsync(
+            "Notifications:Email:FromAddress",
+            fallbackSection["SenderEmail"] ?? string.Empty,
+            cancellationToken);
+
+        var senderName = await _systemSettingsService.GetAsync(
+            "Company:Name",
+            fallbackSection["SenderName"] ?? "TelecomPM System",
+            cancellationToken);
+
+        var username = await _systemSettingsService.GetAsync(
+            "Notifications:Email:Username",
+            fallbackSection["Username"] ?? string.Empty,
+            cancellationToken);
+
+        var password = await _systemSettingsService.GetAsync(
+            "Notifications:Email:Password",
+            fallbackSection["Password"] ?? string.Empty,
+            cancellationToken);
+
+        return (smtpServer, smtpPort, senderEmail, senderName, username, password);
     }
 }

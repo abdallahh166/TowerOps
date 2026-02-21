@@ -1,11 +1,13 @@
 using System.Reflection;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TelecomPm.Api.Controllers;
 using TelecomPM.Api.Authorization;
+using TelecomPM.Domain.Enums;
 using Xunit;
 
 namespace TelecomPM.Application.Tests.Services;
@@ -33,6 +35,22 @@ public class ApiAuthorizationPoliciesTests
         options.GetPolicy(ApiAuthorizationPolicies.CanViewReports).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewMaterials).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanManageMaterials).Should().NotBeNull();
+        options.GetPolicy(ApiAuthorizationPolicies.CanManageSettings).Should().NotBeNull();
+    }
+
+    [Fact]
+    public void CanManageSettingsPolicy_ShouldRequireAdminRoleOnly()
+    {
+        var services = new ServiceCollection();
+        services.AddAuthorization(ApiAuthorizationPolicies.Configure);
+        var provider = services.BuildServiceProvider();
+
+        var options = provider.GetRequiredService<IOptions<AuthorizationOptions>>().Value;
+        var policy = options.GetPolicy(ApiAuthorizationPolicies.CanManageSettings);
+
+        policy.Should().NotBeNull();
+        var roleRequirement = policy!.Requirements.OfType<RolesAuthorizationRequirement>().Single();
+        roleRequirement.AllowedRoles.Should().BeEquivalentTo(new[] { UserRole.Admin.ToString() });
     }
 
     [Theory]
@@ -47,6 +65,7 @@ public class ApiAuthorizationPoliciesTests
     [InlineData(typeof(ReportsController), ApiAuthorizationPolicies.CanViewReports)]
     [InlineData(typeof(MaterialsController), ApiAuthorizationPolicies.CanViewMaterials)]
     [InlineData(typeof(MaterialsController), ApiAuthorizationPolicies.CanManageMaterials)]
+    [InlineData(typeof(SettingsController), ApiAuthorizationPolicies.CanManageSettings)]
     public void Controllers_ShouldReferenceExpectedPolicies(Type controllerType, string policy)
     {
         var methods = controllerType

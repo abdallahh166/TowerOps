@@ -1,4 +1,6 @@
 using FluentAssertions;
+using Moq;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.Services;
 using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Enums;
@@ -9,7 +11,17 @@ namespace TelecomPM.Application.Tests.Services;
 
 public class EvidencePolicyServiceTests
 {
-    private readonly EvidencePolicyService _service = new();
+    private readonly Mock<ISystemSettingsService> _settingsServiceMock;
+    private readonly EvidencePolicyService _service;
+
+    public EvidencePolicyServiceTests()
+    {
+        _settingsServiceMock = new Mock<ISystemSettingsService>();
+        _settingsServiceMock
+            .Setup(s => s.GetAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((string _, int fallback, CancellationToken _) => fallback);
+        _service = new EvidencePolicyService(_settingsServiceMock.Object);
+    }
 
     [Fact]
     public void Validate_ShouldFail_WhenPhotosAreInsufficient()
@@ -55,6 +67,27 @@ public class EvidencePolicyServiceTests
             readingsRequired: true,
             checklistRequired: true,
             minChecklistCompletionPercent: 80);
+
+        var result = _service.Validate(visit, policy);
+
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Validate_ShouldReadThresholdsFromSettings()
+    {
+        var visit = CreateVisit(VisitType.BM);
+        visit.AddPhoto(CreatePhoto(visit.Id, "only-one.jpg"));
+
+        _settingsServiceMock
+            .Setup(s => s.GetAsync("Evidence:BM:MinPhotos", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+
+        _settingsServiceMock
+            .Setup(s => s.GetAsync("Evidence:BM:ChecklistCompletionPercent", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(0);
+
+        var policy = EvidencePolicy.Create(VisitType.BM, 3, false, false, 80);
 
         var result = _service.Validate(visit, policy);
 

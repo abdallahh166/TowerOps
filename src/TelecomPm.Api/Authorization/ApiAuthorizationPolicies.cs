@@ -19,6 +19,7 @@ public static class ApiAuthorizationPolicies
     public const string CanViewReports = "CanViewReports";
     public const string CanViewMaterials = "CanViewMaterials";
     public const string CanManageMaterials = "CanManageMaterials";
+    public const string CanManageSettings = "CanManageSettings";
 
     public static void Configure(AuthorizationOptions options)
     {
@@ -109,5 +110,8 @@ public static class ApiAuthorizationPolicies
                 UserRole.Admin.ToString(),
                 UserRole.Manager.ToString(),
                 UserRole.Supervisor.ToString()));
+
+        options.AddPolicy(CanManageSettings, policy =>
+            policy.RequireRole(UserRole.Admin.ToString()));
     }
 }

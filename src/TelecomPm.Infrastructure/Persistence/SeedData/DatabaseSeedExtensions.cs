@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Infrastructure.Persistence;
 
 public static class DatabaseSeedExtensions
@@ -18,12 +19,13 @@ public static class DatabaseSeedExtensions
         {
             var context = services.GetRequiredService<ApplicationDbContext>();
             var logger = services.GetRequiredService<ILogger<DatabaseSeeder>>();
+            var settingsEncryptionService = services.GetRequiredService<ISettingsEncryptionService>();
             
             // Apply migrations
             await context.Database.MigrateAsync();
 
             // Seed data
-            var seeder = new DatabaseSeeder(context, logger);
+            var seeder = new DatabaseSeeder(context, logger, settingsEncryptionService);
             await seeder.SeedAsync();
         }
         catch (PlatformNotSupportedException ex)

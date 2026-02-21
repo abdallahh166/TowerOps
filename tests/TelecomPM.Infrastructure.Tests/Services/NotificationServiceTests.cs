@@ -23,6 +23,7 @@ public class NotificationServiceTests
         });
 
         var factory = BuildFactory(handler);
+        var settings = BuildSettingsService();
         var service = new NotificationService(
             Mock.Of<IEmailService>(),
             factory,
@@ -32,6 +33,7 @@ public class NotificationServiceTests
                 FirebaseServerKey = "firebase-key"
             }),
             Options.Create(new TwilioOptions()),
+            settings,
             Mock.Of<ILogger<NotificationService>>());
 
         await service.SendPushNotificationAsync(Guid.NewGuid(), "Title", "Message");
@@ -46,6 +48,7 @@ public class NotificationServiceTests
     {
         var handler = new QueueHttpMessageHandler(new[] { new HttpResponseMessage(HttpStatusCode.Created) });
         var factory = BuildFactory(handler);
+        var settings = BuildSettingsService();
         var service = new NotificationService(
             Mock.Of<IEmailService>(),
             factory,
@@ -56,6 +59,7 @@ public class NotificationServiceTests
                 AuthToken = "token",
                 FromPhoneNumber = "+201000000000"
             }),
+            settings,
             Mock.Of<ILogger<NotificationService>>());
 
         await service.SendSmsAsync("+201111111111", "Hello");
@@ -74,6 +78,16 @@ public class NotificationServiceTests
         var factory = new Mock<IHttpClientFactory>();
         factory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(client);
         return factory.Object;
+    }
+
+    private static ISystemSettingsService BuildSettingsService()
+    {
+        var settings = new Mock<ISystemSettingsService>();
+        settings
+            .Setup(s => s.GetAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((string _, string fallback, CancellationToken _) => fallback);
+
+        return settings.Object;
     }
 
     private sealed class QueueHttpMessageHandler : HttpMessageHandler
