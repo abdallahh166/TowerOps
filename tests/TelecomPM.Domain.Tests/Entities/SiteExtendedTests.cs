@@ -91,6 +91,38 @@ public class SiteExtendedTests
         site.RequiredPhotosCount.Should().BeGreaterThan(initialPhotos);
         site.EstimatedVisitDurationMinutes.Should().BeGreaterThan(initialDuration);
     }
+
+    [Fact]
+    public void SetOwnership_IndependentTower_ShouldForceEquipmentOnlyScope()
+    {
+        var site = CreateBasicSite(Guid.NewGuid());
+
+        site.SetOwnership(
+            TowerOwnershipType.IndependentTower,
+            "IHS Towers",
+            "AGR-IND-1",
+            "Host Contact",
+            "+201111111111");
+
+        site.TowerOwnershipType.Should().Be(TowerOwnershipType.IndependentTower);
+        site.ResponsibilityScope.Should().Be(ResponsibilityScope.EquipmentOnly);
+    }
+
+    [Fact]
+    public void SetOwnership_Host_ShouldForceFullScope()
+    {
+        var site = CreateBasicSite(Guid.NewGuid());
+
+        site.SetOwnership(
+            TowerOwnershipType.Host,
+            "Orange Egypt",
+            "AGR-HOST-1",
+            "Host Contact",
+            "+201111111111");
+
+        site.TowerOwnershipType.Should().Be(TowerOwnershipType.Host);
+        site.ResponsibilityScope.Should().Be(ResponsibilityScope.Full);
+    }
 }
 
 

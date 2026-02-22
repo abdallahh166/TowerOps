@@ -3,6 +3,9 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TelecomPM.Application.Common;
@@ -15,8 +18,17 @@ using TelecomPM.Domain.ValueObjects;
 
 public class StartVisitCommandHandler : IRequestHandler<StartVisitCommand, Result<VisitDto>>
 {
+    private static readonly HashSet<string> EquipmentOnlyExcludedCategories = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ChecklistItemCategory.Tower.ToString(),
+        ChecklistItemCategory.Generator.ToString(),
+        ChecklistItemCategory.Fence.ToString(),
+        ChecklistItemCategory.EarthBar.ToString()
+    };
+
     private readonly IVisitRepository _visitRepository;
     private readonly IChecklistTemplateRepository _checklistTemplateRepository;
+    private readonly ISiteRepository _siteRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ILogger<StartVisitCommandHandler> _logger;
@@ -24,12 +36,14 @@ public class StartVisitCommandHandler : IRequestHandler<StartVisitCommand, Resul
     public StartVisitCommandHandler(
         IVisitRepository visitRepository,
         IChecklistTemplateRepository checklistTemplateRepository,
+        ISiteRepository siteRepository,
         IUnitOfWork unitOfWork,
         IMapper mapper,
         ILogger<StartVisitCommandHandler> logger)
     {
         _visitRepository = visitRepository;
         _checklistTemplateRepository = checklistTemplateRepository;
+        _siteRepository = siteRepository;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
@@ -48,10 +62,19 @@ public class StartVisitCommandHandler : IRequestHandler<StartVisitCommand, Resul
 
             var templateVisitType = ResolveChecklistTemplateVisitType(visit.Type);
             var activeTemplate = await _checklistTemplateRepository.GetActiveByVisitTypeAsync(templateVisitType, cancellationToken);
+            var site = await _siteRepository.GetByIdAsync(visit.SiteId, cancellationToken);
+            var isEquipmentOnly = site?.ResponsibilityScope == ResponsibilityScope.EquipmentOnly;
+
             if (activeTemplate is not null)
             {
                 foreach (var templateItem in activeTemplate.Items.OrderBy(i => i.OrderIndex))
                 {
+                    if (isEquipmentOnly &&
+                        ShouldExcludeForEquipmentOnly(templateItem.Category, templateItem.ItemName))
+                    {
+                        continue;
+                    }
+
                     visit.AddChecklistItem(
                         VisitChecklist.Create(
                             visit.Id,
@@ -63,6 +86,17 @@ public class StartVisitCommandHandler : IRequestHandler<StartVisitCommand, Resul
                 }
 
                 visit.ApplyChecklistTemplate(activeTemplate.Id, activeTemplate.Version);
+
+                if (isEquipmentOnly)
+                {
+                    visit.AddChecklistItem(
+                        VisitChecklist.Create(
+                            visit.Id,
+                            ChecklistItemCategory.General.ToString(),
+                            "Report any tower/shared equipment issues to host operator",
+                            "Escalate tower/shared infrastructure findings to the host operator.",
+                            true));
+                }
             }
             else
             {
@@ -92,5 +126,29 @@ public class StartVisitCommandHandler : IRequestHandler<StartVisitCommand, Resul
             VisitType.PreventiveMaintenance => VisitType.BM,
             _ => visitType
         };
+    }
+
+    private static bool ShouldExcludeForEquipmentOnly(string category, string itemName)
+    {
+        var normalizedCategory = category?.Trim() ?? string.Empty;
+        var normalizedItem = itemName?.Trim() ?? string.Empty;
+
+        if (EquipmentOnlyExcludedCategories.Contains(normalizedCategory))
+            return true;
+
+        if (normalizedItem.Contains("tower", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (normalizedItem.Contains("generator", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (normalizedItem.Contains("fence", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (normalizedItem.Contains("earth bar", StringComparison.OrdinalIgnoreCase) ||
+            normalizedItem.Contains("earthbar", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
     }
 }

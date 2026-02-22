@@ -20,6 +20,8 @@ public sealed class User : AggregateRoot<Guid>
     public bool IsActive { get; private set; }
     public bool MustChangePassword { get; private set; }
     public DateTime? LastLoginAt { get; private set; }
+    public string? ClientCode { get; private set; }
+    public bool IsClientPortalUser { get; private set; }
     
     // For PM Engineers
     public int? MaxAssignedSites { get; private set; }
@@ -180,6 +182,23 @@ public sealed class User : AggregateRoot<Guid>
     public void RecordLogin()
     {
         LastLoginAt = DateTime.UtcNow;
+    }
+
+    public void EnableClientPortalAccess(string clientCode)
+    {
+        if (string.IsNullOrWhiteSpace(clientCode))
+            throw new DomainException("Client code is required for portal access.");
+
+        ClientCode = clientCode.Trim().ToUpperInvariant();
+        IsClientPortalUser = true;
+        MarkAsUpdated(Email);
+    }
+
+    public void DisableClientPortalAccess()
+    {
+        IsClientPortalUser = false;
+        ClientCode = null;
+        MarkAsUpdated(Email);
     }
 
     public void RequirePasswordChange()

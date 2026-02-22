@@ -6,13 +6,17 @@ using System.Reflection;
 using TelecomPM.Domain.Common;
 using TelecomPM.Domain.Entities.ApplicationRoles;
 using TelecomPM.Domain.Entities.ApprovalRecords;
+using TelecomPM.Domain.Entities.Assets;
 using TelecomPM.Domain.Entities.AuditLogs;
 using TelecomPM.Domain.Entities.BatteryDischargeTests;
 using TelecomPM.Domain.Entities.ChecklistTemplates;
+using TelecomPM.Domain.Entities.Clients;
+using TelecomPM.Domain.Entities.DailyPlans;
 using TelecomPM.Domain.Entities.Materials;
 using TelecomPM.Domain.Entities.Offices;
 using TelecomPM.Domain.Entities.PasswordResetTokens;
 using TelecomPM.Domain.Entities.Sites;
+using TelecomPM.Domain.Entities.Sync;
 using TelecomPM.Domain.Entities.SystemSettings;
 using TelecomPM.Domain.Entities.Users;
 using TelecomPM.Domain.Entities.Escalations;
@@ -72,6 +76,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<ChecklistTemplate> ChecklistTemplates => Set<ChecklistTemplate>();
     public DbSet<BatteryDischargeTest> BatteryDischargeTests => Set<BatteryDischargeTest>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
+    public DbSet<Client> Clients => Set<Client>();
+    public DbSet<DailyPlan> DailyPlans => Set<DailyPlan>();
+    public DbSet<SyncQueue> SyncQueues => Set<SyncQueue>();
+    public DbSet<SyncConflict> SyncConflicts => Set<SyncConflict>();
+    public DbSet<Asset> Assets => Set<Asset>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

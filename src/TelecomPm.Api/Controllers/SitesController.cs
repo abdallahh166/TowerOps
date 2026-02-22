@@ -85,6 +85,17 @@ public sealed class SitesController : ApiControllerBase
         return HandleResult(result);
     }
 
+    [HttpPut("{siteCode}/ownership")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> UpdateOwnership(
+        string siteCode,
+        [FromBody] UpdateSiteOwnershipRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(siteCode), cancellationToken);
+        return HandleResult(result);
+    }
+
     [HttpPost("import")]
     [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
     public async Task<IActionResult> Import([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
@@ -197,6 +208,13 @@ public sealed class SitesController : ApiControllerBase
     public async Task<IActionResult> GetById(Guid siteId, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(siteId.ToSiteByIdQuery(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpGet("{siteCode}/location")]
+    public async Task<IActionResult> GetLocation(string siteCode, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(siteCode.ToSiteLocationQuery(), cancellationToken);
         return HandleResult(result);
     }
 

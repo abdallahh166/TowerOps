@@ -35,6 +35,20 @@ public enum CheckStatus
     NA = 3
 }
 
+public enum ChecklistItemCategory
+{
+    General = 1,
+    Power = 2,
+    Radio = 3,
+    TX = 4,
+    Tower = 5,
+    Generator = 6,
+    Fence = 7,
+    EarthBar = 8,
+    FireSafety = 9,
+    Cooling = 10
+}
+
 public enum PhotoType
 {
     Before = 1,

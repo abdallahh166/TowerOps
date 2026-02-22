@@ -14,15 +14,20 @@ using TelecomPM.Application.Commands.Sites.CreateSite;
 using TelecomPM.Application.Commands.Sites.ImportSiteData;
 using TelecomPM.Application.Commands.Sites.UnassignEngineerFromSite;
 using TelecomPM.Application.Commands.Sites.UpdateSite;
+using TelecomPM.Application.Commands.Sites.UpdateSiteOwnership;
 using TelecomPM.Application.Commands.Sites.UpdateSiteStatus;
 using TelecomPM.Application.Queries.Sites.GetOfficeSites;
 using TelecomPM.Application.Queries.Sites.GetSiteById;
+using TelecomPM.Application.Queries.Sites.GetSiteLocation;
 using TelecomPM.Application.Queries.Sites.GetSitesNeedingMaintenance;
 
 public static class SitesContractMapper
 {
     public static GetSiteByIdQuery ToSiteByIdQuery(this Guid siteId)
         => new() { SiteId = siteId };
+
+    public static GetSiteLocationQuery ToSiteLocationQuery(this string siteCode)
+        => new() { SiteCode = siteCode };
 
     public static GetOfficeSitesQuery ToOfficeSitesQuery(this OfficeSitesQueryParameters parameters, Guid officeId)
         => new()
@@ -79,6 +84,17 @@ public static class SitesContractMapper
         {
             SiteId = siteId,
             Status = request.Status
+        };
+
+    public static UpdateSiteOwnershipCommand ToCommand(this UpdateSiteOwnershipRequest request, string siteCode)
+        => new()
+        {
+            SiteCode = siteCode,
+            TowerOwnershipType = request.TowerOwnershipType,
+            TowerOwnerName = request.TowerOwnerName,
+            SharingAgreementRef = request.SharingAgreementRef,
+            HostContactName = request.HostContactName,
+            HostContactPhone = request.HostContactPhone
         };
 
     public static AssignEngineerToSiteCommand ToCommand(this AssignEngineerRequest request, Guid siteId, Guid assignedBy)

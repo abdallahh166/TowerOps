@@ -71,6 +71,12 @@ public class VisitConfiguration : IEntityTypeConfiguration<Visit>
         builder.Property(v => v.ChecklistTemplateVersion)
             .HasMaxLength(32);
 
+        builder.Property(v => v.DistanceFromSiteMeters)
+            .HasPrecision(10, 2);
+
+        builder.Property(v => v.CheckInTimeUtc);
+        builder.Property(v => v.CheckOutTimeUtc);
+
         // Owned Type: TimeRange
         builder.OwnsOne(v => v.ActualDuration, duration =>
         {
@@ -91,6 +97,61 @@ public class VisitConfiguration : IEntityTypeConfiguration<Visit>
             coords.Property(c => c.Longitude)
                 .HasColumnName("CheckInLongitude")
                 .HasPrecision(11, 8);
+        });
+
+        builder.OwnsOne(v => v.CheckInGeoLocation, coords =>
+        {
+            coords.Property(c => c.Latitude)
+                .HasColumnName("CheckInGeoLatitude")
+                .HasPrecision(10, 8);
+
+            coords.Property(c => c.Longitude)
+                .HasColumnName("CheckInGeoLongitude")
+                .HasPrecision(11, 8);
+        });
+
+        builder.OwnsOne(v => v.CheckOutLocation, coords =>
+        {
+            coords.Property(c => c.Latitude)
+                .HasColumnName("CheckOutLatitude")
+                .HasPrecision(10, 8);
+
+            coords.Property(c => c.Longitude)
+                .HasColumnName("CheckOutLongitude")
+                .HasPrecision(11, 8);
+        });
+
+        builder.OwnsOne(v => v.SiteContactSignature, sig =>
+        {
+            sig.Property(s => s.SignerName)
+                .HasColumnName("SiteContactSignerName")
+                .HasMaxLength(200);
+
+            sig.Property(s => s.SignerRole)
+                .HasColumnName("SiteContactSignerRole")
+                .HasMaxLength(100);
+
+            sig.Property(s => s.SignatureDataBase64)
+                .HasColumnName("SiteContactSignatureBase64")
+                .HasMaxLength(250000);
+
+            sig.Property(s => s.SignedAtUtc)
+                .HasColumnName("SiteContactSignedAtUtc");
+
+            sig.Property(s => s.SignerPhone)
+                .HasColumnName("SiteContactSignerPhone")
+                .HasMaxLength(50);
+
+            sig.OwnsOne(s => s.SignedAtLocation, loc =>
+            {
+                loc.Property(x => x.Latitude)
+                    .HasColumnName("SiteContactSignedLatitude")
+                    .HasPrecision(10, 8);
+
+                loc.Property(x => x.Longitude)
+                    .HasColumnName("SiteContactSignedLongitude")
+                    .HasPrecision(11, 8);
+            });
         });
 
         // Relationships

@@ -31,6 +31,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(50);
 
+        builder.Property(u => u.ClientCode)
+            .HasMaxLength(32);
+
         builder.Property(u => u.PasswordHash)
             .IsRequired()
             .HasMaxLength(500);
@@ -69,6 +72,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.OfficeId);
         builder.HasIndex(u => u.Role);
         builder.HasIndex(u => u.IsActive);
+        builder.HasIndex(u => u.ClientCode);
 
         // Ignore domain events
         builder.Ignore(u => u.DomainEvents);

@@ -24,6 +24,7 @@ public sealed class Visit : AggregateRoot<Guid>
     
     // Schedule
     public DateTime ScheduledDate { get; private set; }
+    public int? PlannedOrder { get; private set; }
     public DateTime? ActualStartTime { get; private set; }
     public DateTime? ActualEndTime { get; private set; }
     public TimeRange? ActualDuration { get; private set; }
@@ -37,6 +38,14 @@ public sealed class Visit : AggregateRoot<Guid>
     // Location Verification
     public Coordinates? CheckInLocation { get; private set; }
     public DateTime? CheckInTime { get; private set; }
+    public GeoLocation? CheckInGeoLocation { get; private set; }
+    public DateTime? CheckInTimeUtc { get; private set; }
+    public decimal? DistanceFromSiteMeters { get; private set; }
+    public bool IsWithinSiteRadius { get; private set; }
+    public GeoLocation? CheckOutLocation { get; private set; }
+    public DateTime? CheckOutTimeUtc { get; private set; }
+    public Signature? SiteContactSignature { get; private set; }
+    public bool IsSiteContactSigned => SiteContactSignature is not null;
     
     // Collections
     public List<VisitPhoto> Photos { get; private set; } = new();
@@ -128,6 +137,14 @@ public sealed class Visit : AggregateRoot<Guid>
             : contactPersonName.Trim();
     }
 
+    public void SetPlannedOrder(int? plannedOrder)
+    {
+        if (plannedOrder.HasValue && plannedOrder <= 0)
+            throw new DomainException("Planned order must be greater than zero.");
+
+        PlannedOrder = plannedOrder;
+    }
+
     public void StartVisit(Coordinates location)
     {
         if (Status != VisitStatus.Scheduled)
@@ -135,10 +152,53 @@ public sealed class Visit : AggregateRoot<Guid>
 
         CheckInLocation = location;
         CheckInTime = DateTime.UtcNow;
+        CheckInTimeUtc = CheckInTime;
+        CheckInGeoLocation = GeoLocation.Create((decimal)location.Latitude, (decimal)location.Longitude);
         ActualStartTime = DateTime.UtcNow;
         Status = VisitStatus.InProgress;
 
         AddDomainEvent(new VisitStartedEvent(Id, SiteId, EngineerId));
+    }
+
+    public void RecordCheckIn(GeoLocation location, decimal distanceFromSiteMeters, bool isWithinSiteRadius)
+    {
+        if (Status == VisitStatus.Approved || Status == VisitStatus.Rejected || Status == VisitStatus.Cancelled)
+            throw new DomainException("Cannot check in for this visit status");
+
+        CheckInGeoLocation = location;
+        CheckInTimeUtc = DateTime.UtcNow;
+        DistanceFromSiteMeters = distanceFromSiteMeters;
+        IsWithinSiteRadius = isWithinSiteRadius;
+
+        // Backward compatibility for existing check-in coordinates/time fields.
+        CheckInLocation ??= Coordinates.Create((double)location.Latitude, (double)location.Longitude);
+        CheckInTime ??= CheckInTimeUtc;
+
+        AddDomainEvent(new VisitCheckedInEvent(Id, SiteId, EngineerId, distanceFromSiteMeters, isWithinSiteRadius));
+
+        if (!isWithinSiteRadius)
+        {
+            AddDomainEvent(new SuspiciousCheckInEvent(Id, SiteId, EngineerId, distanceFromSiteMeters));
+        }
+    }
+
+    public void RecordCheckOut(GeoLocation location)
+    {
+        if (!CheckInTimeUtc.HasValue && !CheckInTime.HasValue)
+            throw new DomainException("Visit must be checked in before checkout");
+
+        CheckOutLocation = location;
+        CheckOutTimeUtc = DateTime.UtcNow;
+
+        AddDomainEvent(new VisitCheckedOutEvent(Id, SiteId, EngineerId));
+    }
+
+    public void CaptureSiteContactSignature(Signature signature)
+    {
+        if (SiteContactSignature is not null)
+            throw new DomainException("Site contact signature already captured.");
+
+        SiteContactSignature = signature;
     }
 
     public void CompleteVisit()

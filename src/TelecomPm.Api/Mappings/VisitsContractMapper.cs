@@ -10,6 +10,9 @@ using TelecomPM.Application.Commands.Visits.AddPhoto;
 using TelecomPM.Application.Commands.Visits.AddReading;
 using TelecomPM.Application.Commands.Visits.ApproveVisit;
 using TelecomPM.Application.Commands.Visits.CancelVisit;
+using TelecomPM.Application.Commands.Signatures.CaptureVisitSignature;
+using TelecomPM.Application.Commands.Visits.CheckInVisit;
+using TelecomPM.Application.Commands.Visits.CheckOutVisit;
 using TelecomPM.Application.Commands.Visits.CompleteVisit;
 using TelecomPM.Application.Commands.Visits.CreateVisit;
 using TelecomPM.Application.Commands.Imports.ImportAlarmCapture;
@@ -28,6 +31,7 @@ using TelecomPM.Application.Queries.Visits.GetPendingReviews;
 using TelecomPM.Application.Queries.Visits.GetScheduledVisits;
 using TelecomPM.Application.Queries.Visits.GetVisitById;
 using TelecomPM.Application.Queries.Visits.GetVisitEvidenceStatus;
+using TelecomPM.Application.Queries.Signatures.GetVisitSignature;
 
 public static class VisitsContractMapper
 {
@@ -73,6 +77,24 @@ public static class VisitsContractMapper
         => new()
         {
             VisitId = visitId,
+            Latitude = request.Latitude,
+            Longitude = request.Longitude
+        };
+
+    public static CheckInVisitCommand ToCommand(this CheckInVisitRequest request, Guid visitId)
+        => new()
+        {
+            VisitId = visitId,
+            EngineerId = request.EngineerId,
+            Latitude = request.Latitude,
+            Longitude = request.Longitude
+        };
+
+    public static CheckOutVisitCommand ToCommand(this CheckOutVisitRequest request, Guid visitId)
+        => new()
+        {
+            VisitId = visitId,
+            EngineerId = request.EngineerId,
             Latitude = request.Latitude,
             Longitude = request.Longitude
         };
@@ -207,6 +229,21 @@ public static class VisitsContractMapper
             ReadingId = readingId,
             Value = request.Value
         };
+
+    public static CaptureVisitSignatureCommand ToCommand(this CaptureVisitSignatureRequest request, Guid visitId)
+        => new()
+        {
+            VisitId = visitId,
+            SignerName = request.SignerName,
+            SignerRole = request.SignerRole,
+            SignatureDataBase64 = request.SignatureDataBase64,
+            SignerPhone = request.SignerPhone,
+            Latitude = request.Latitude,
+            Longitude = request.Longitude
+        };
+
+    public static GetVisitSignatureQuery ToVisitSignatureQuery(this Guid visitId)
+        => new() { VisitId = visitId };
 
     public static ImportPanoramaEvidenceCommand ToImportPanoramaEvidenceCommand(this Guid visitId, byte[] fileContent)
         => new()

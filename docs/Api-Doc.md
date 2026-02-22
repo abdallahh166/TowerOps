@@ -95,6 +95,7 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `PATCH /{siteId}/status` (**CanManageSites**)
 - `POST /{siteId}/assign` (**CanManageSites**)
 - `POST /{siteId}/unassign` (**CanManageSites**)
+- `PUT /{siteCode}/ownership` (**CanManageSites**)
 - `POST /import` (**CanManageSites**) - GH-DE Data Collection import
 - `POST /import/site-assets` (**CanManageSites**)
 - `POST /import/power-data` (**CanManageSites**)
@@ -105,6 +106,7 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `POST /import/battery-discharge-tests` (**CanManageSites**)
 - `POST /import/delta-sites` (**CanManageSites**)
 - `GET /{siteId}` (**CanViewSites**)
+- `GET /{siteCode}/location` (**CanViewSites**)
 - `GET /office/{officeId}` (**CanViewSites**)
 - `GET /maintenance` (**CanViewSites**)
 
@@ -126,6 +128,39 @@ The API layer exposes domain/application capabilities over RESTful ASP.NET Core 
 - `POST /import` (**CanManageWorkOrders**)
 - `POST /` (**CanManageWorkOrders**)
 - `POST /{id}/activate` (**CanManageWorkOrders**)
+
+### `AssetsController` (`/api/assets`)
+- `GET /site/{siteCode}` (**CanViewSites**)
+- `GET /{assetCode}` (**CanViewSites**)
+- `GET /{assetCode}/history` (**CanViewSites**)
+- `POST /` (**CanManageSites**)
+- `PUT /{assetCode}/service` (**CanManageSites**)
+- `PUT /{assetCode}/fault` (**CanManageSites**)
+- `PUT /{assetCode}/replace` (**CanManageSites**)
+- `GET /expiring-warranties?days={days}` (**CanViewSites**)
+- `GET /faulty` (**CanViewSites**)
+
+### `ClientPortalController` (`/api/portal`)
+- `GET /dashboard` (**CanViewPortal**)
+- `GET /sites` (**CanViewPortal**)
+- `GET /sites/{siteCode}` (**CanViewPortal**)
+- `GET /workorders` (**CanViewPortal**)
+- `GET /sla-report` (**CanViewPortal**)
+- `GET /visits/{siteCode}` (**CanViewPortal**)
+
+### `DailyPlansController` (`/api/daily-plans`)
+- `POST /` (**CanManageSites**)
+- `GET /{officeId}/{date}` (**CanManageSites**)
+- `POST /{planId}/assign` (**CanManageSites**)
+- `DELETE /{planId}/assign` (**CanManageSites**)
+- `GET /{planId}/suggest/{engineerId}` (**CanManageSites**)
+- `GET /{officeId}/{date}/unassigned` (**CanManageSites**)
+- `POST /{planId}/publish` (**CanManageSites**)
+
+### `SyncController` (`/api/sync`)
+- `POST /`
+- `GET /status/{deviceId}`
+- `GET /conflicts/{engineerId}`
 
 ### `ReportsController` (`/api/reports`)
 - `GET /visits/{visitId}`

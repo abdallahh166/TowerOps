@@ -95,4 +95,20 @@ public sealed class WorkOrdersController : ApiControllerBase
         var result = await Mediator.Send(request.ToRejectByCustomerCommand(id), cancellationToken);
         return HandleResult(result);
     }
+
+    [HttpPost("{id:guid}/signature")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageWorkOrders)]
+    public async Task<IActionResult> CaptureSignature(Guid id, [FromBody] CaptureWorkOrderSignatureRequest request, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(id), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpGet("{id:guid}/signature")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanViewWorkOrders)]
+    public async Task<IActionResult> GetSignatures(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(id.ToWorkOrderSignaturesQuery(), cancellationToken);
+        return HandleResult(result);
+    }
 }

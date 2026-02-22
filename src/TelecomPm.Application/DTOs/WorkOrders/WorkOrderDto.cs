@@ -10,6 +10,7 @@ public class WorkOrderDto
     public string SiteCode { get; set; } = string.Empty;
     public string OfficeCode { get; set; } = string.Empty;
     public SlaClass SlaClass { get; set; }
+    public WorkOrderScope Scope { get; set; }
     public WorkOrderStatus Status { get; set; }
     public string IssueDescription { get; set; } = string.Empty;
     public Guid? AssignedEngineerId { get; set; }

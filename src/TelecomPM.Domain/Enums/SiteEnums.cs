@@ -71,3 +71,16 @@ public enum PowerConfiguration
     Generator = 5,
     SolarHybrid = 6
 }
+
+public enum TowerOwnershipType
+{
+    Host = 1,
+    Guest = 2,
+    IndependentTower = 3
+}
+
+public enum ResponsibilityScope
+{
+    Full = 1,
+    EquipmentOnly = 2
+}

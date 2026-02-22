@@ -7,6 +7,7 @@ using TelecomPM.Application.Common;
 using TelecomPM.Application.Commands.AuditLogs.LogAuditEntry;
 using TelecomPM.Application.DTOs.WorkOrders;
 using TelecomPM.Domain.Entities.WorkOrders;
+using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Interfaces.Repositories;
 
 namespace TelecomPM.Application.Commands.WorkOrders.CreateWorkOrder;
@@ -14,17 +15,20 @@ namespace TelecomPM.Application.Commands.WorkOrders.CreateWorkOrder;
 public class CreateWorkOrderCommandHandler : IRequestHandler<CreateWorkOrderCommand, Result<WorkOrderDto>>
 {
     private readonly IWorkOrderRepository _workOrderRepository;
+    private readonly ISiteRepository _siteRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ISender _sender;
 
     public CreateWorkOrderCommandHandler(
         IWorkOrderRepository workOrderRepository,
+        ISiteRepository siteRepository,
         IUnitOfWork unitOfWork,
         IMapper mapper,
         ISender sender)
     {
         _workOrderRepository = workOrderRepository;
+        _siteRepository = siteRepository;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _sender = sender;
@@ -36,12 +40,23 @@ public class CreateWorkOrderCommandHandler : IRequestHandler<CreateWorkOrderComm
         if (existing != null)
             return Result.Failure<WorkOrderDto>($"Work order with number {request.WoNumber} already exists");
 
+        var site = await _siteRepository.GetBySiteCodeAsNoTrackingAsync(request.SiteCode, cancellationToken);
+        if (site is null)
+            return Result.Failure<WorkOrderDto>("Site not found.");
+
+        if (site.ResponsibilityScope == ResponsibilityScope.EquipmentOnly &&
+            request.Scope == WorkOrderScope.TowerInfrastructure)
+        {
+            return Result.Failure<WorkOrderDto>("TowerInfrastructure scope is not allowed for equipment-only sites.");
+        }
+
         var workOrder = WorkOrder.Create(
             request.WoNumber,
             request.SiteCode,
             request.OfficeCode,
             request.SlaClass,
-            request.IssueDescription);
+            request.IssueDescription,
+            request.Scope);
 
         await _workOrderRepository.AddAsync(workOrder, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

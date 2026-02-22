@@ -44,6 +44,19 @@ public class SiteConfiguration : IEntityTypeConfiguration<Site>
             .IsRequired()
             .HasMaxLength(200);
 
+        builder.Property(s => s.ClientCode)
+            .HasMaxLength(32);
+
+        builder.Property(s => s.TowerOwnershipType)
+            .HasConversion<string>()
+            .HasMaxLength(32)
+            .HasDefaultValue(TelecomPM.Domain.Enums.TowerOwnershipType.Host);
+
+        builder.Property(s => s.ResponsibilityScope)
+            .HasConversion<string>()
+            .HasMaxLength(32)
+            .HasDefaultValue(TelecomPM.Domain.Enums.ResponsibilityScope.Full);
+
         builder.Property(s => s.Region)
             .IsRequired()
             .HasMaxLength(100);
@@ -112,6 +125,21 @@ public class SiteConfiguration : IEntityTypeConfiguration<Site>
 
         builder.Property(s => s.EnclosureTypeRaw)
             .HasMaxLength(100);
+
+        builder.Property(s => s.TowerOwnerName)
+            .HasMaxLength(200);
+
+        builder.Property(s => s.SharingAgreementRef)
+            .HasMaxLength(100);
+
+        builder.Property(s => s.HostContactName)
+            .HasMaxLength(200);
+
+        builder.Property(s => s.HostContactPhone)
+            .HasMaxLength(50);
+
+        builder.Property(s => s.AllowedCheckInRadiusMeters)
+            .HasPrecision(10, 2);
 
         builder.OwnsOne(s => s.RFStatus, rf =>
         {
@@ -186,6 +214,7 @@ public class SiteConfiguration : IEntityTypeConfiguration<Site>
         // Indexes
         builder.HasIndex(s => s.OfficeId);
         builder.HasIndex(s => s.Region);
+        builder.HasIndex(s => s.ClientCode);
         builder.HasIndex(s => s.Status);
         builder.HasIndex(s => s.Complexity);
         builder.HasIndex(s => s.AssignedEngineerId);

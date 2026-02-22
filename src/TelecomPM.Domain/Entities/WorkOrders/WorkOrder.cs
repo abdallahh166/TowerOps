@@ -2,6 +2,7 @@ using TelecomPM.Domain.Common;
 using TelecomPM.Domain.Events.WorkOrderEvents;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Exceptions;
+using TelecomPM.Domain.ValueObjects;
 
 namespace TelecomPM.Domain.Entities.WorkOrders;
 
@@ -13,6 +14,7 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public string SiteCode { get; private set; } = string.Empty;
     public string OfficeCode { get; private set; } = string.Empty;
     public SlaClass SlaClass { get; private set; }
+    public WorkOrderScope Scope { get; private set; }
     public WorkOrderStatus Status { get; private set; }
     public string IssueDescription { get; private set; } = string.Empty;
 
@@ -23,6 +25,10 @@ public sealed class WorkOrder : AggregateRoot<Guid>
 
     public DateTime ResponseDeadlineUtc { get; private set; }
     public DateTime ResolutionDeadlineUtc { get; private set; }
+    public Signature? ClientSignature { get; private set; }
+    public Signature? EngineerSignature { get; private set; }
+    public bool IsClientSigned => ClientSignature is not null;
+    public bool IsEngineerSigned => EngineerSignature is not null;
 
     private WorkOrder() : base() { }
 
@@ -31,12 +37,14 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         string siteCode,
         string officeCode,
         SlaClass slaClass,
+        WorkOrderScope scope,
         string issueDescription) : base(Guid.NewGuid())
     {
         WoNumber = woNumber;
         SiteCode = siteCode;
         OfficeCode = officeCode;
         SlaClass = slaClass;
+        Scope = scope;
         IssueDescription = issueDescription;
         Status = WorkOrderStatus.Created;
 
@@ -50,7 +58,8 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         string siteCode,
         string officeCode,
         SlaClass slaClass,
-        string issueDescription)
+        string issueDescription,
+        WorkOrderScope scope = WorkOrderScope.ClientEquipment)
     {
         if (string.IsNullOrWhiteSpace(woNumber))
             throw new DomainException("WO number is required");
@@ -64,7 +73,7 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         if (string.IsNullOrWhiteSpace(issueDescription))
             throw new DomainException("Issue description is required");
 
-        return new WorkOrder(woNumber, siteCode, officeCode, slaClass, issueDescription);
+        return new WorkOrder(woNumber, siteCode, officeCode, slaClass, scope, issueDescription);
     }
 
     public void Assign(Guid engineerId, string engineerName, string assignedBy)
@@ -166,6 +175,23 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         }
 
         _wasBreached = false;
+    }
+
+    public void CaptureClientSignature(Signature signature)
+    {
+        if (ClientSignature is not null)
+            throw new DomainException("Client signature already captured.");
+
+        ClientSignature = signature;
+        AddDomainEvent(new WorkOrderClientSignedEvent(Id, WoNumber, signature.SignerName, signature.SignedAtUtc));
+    }
+
+    public void CaptureEngineerSignature(Signature signature)
+    {
+        if (EngineerSignature is not null)
+            throw new DomainException("Engineer signature already captured.");
+
+        EngineerSignature = signature;
     }
 
     private static TimeSpan GetResponseSla(SlaClass slaClass)

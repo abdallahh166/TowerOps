@@ -36,6 +36,7 @@ public class ApiAuthorizationPoliciesTests
         options.GetPolicy(ApiAuthorizationPolicies.CanViewMaterials).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanManageMaterials).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanManageSettings).Should().NotBeNull();
+        options.GetPolicy(ApiAuthorizationPolicies.CanViewPortal).Should().NotBeNull();
     }
 
     [Fact]
@@ -70,6 +71,60 @@ public class ApiAuthorizationPoliciesTests
         denied.Succeeded.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task CanViewPortalPolicy_ShouldDenyEngineerAndAllowPortalUser()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddAuthorization(ApiAuthorizationPolicies.Configure);
+        var provider = services.BuildServiceProvider();
+
+        var options = provider.GetRequiredService<IOptions<AuthorizationOptions>>().Value;
+        var policy = options.GetPolicy(ApiAuthorizationPolicies.CanViewPortal);
+        policy.Should().NotBeNull();
+
+        var authService = provider.GetRequiredService<IAuthorizationService>();
+
+        var engineerPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(PermissionConstants.ClaimType, PermissionConstants.VisitsStart)
+        }, "test"));
+
+        var portalPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(PermissionConstants.ClaimType, PermissionConstants.PortalViewSites)
+        }, "test"));
+
+        var denied = await authService.AuthorizeAsync(engineerPrincipal, policy!);
+        var allowed = await authService.AuthorizeAsync(portalPrincipal, policy!);
+
+        denied.Succeeded.Should().BeFalse();
+        allowed.Succeeded.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task CanViewSitesPolicy_ShouldDenyPortalOnlyUser()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddAuthorization(ApiAuthorizationPolicies.Configure);
+        var provider = services.BuildServiceProvider();
+
+        var options = provider.GetRequiredService<IOptions<AuthorizationOptions>>().Value;
+        var policy = options.GetPolicy(ApiAuthorizationPolicies.CanViewSites);
+        policy.Should().NotBeNull();
+
+        var authService = provider.GetRequiredService<IAuthorizationService>();
+
+        var portalPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(PermissionConstants.ClaimType, PermissionConstants.PortalViewSites)
+        }, "test"));
+
+        var result = await authService.AuthorizeAsync(portalPrincipal, policy!);
+        result.Succeeded.Should().BeFalse();
+    }
+
     [Theory]
     [InlineData(typeof(VisitsController), ApiAuthorizationPolicies.CanReviewVisits)]
     [InlineData(typeof(EscalationsController), ApiAuthorizationPolicies.CanManageEscalations)]
@@ -77,13 +132,17 @@ public class ApiAuthorizationPoliciesTests
     [InlineData(typeof(UsersController), ApiAuthorizationPolicies.CanManageUsers)]
     [InlineData(typeof(OfficesController), ApiAuthorizationPolicies.CanManageOffices)]
     [InlineData(typeof(SitesController), ApiAuthorizationPolicies.CanManageSites)]
+    [InlineData(typeof(DailyPlansController), ApiAuthorizationPolicies.CanManageSites)]
+    [InlineData(typeof(AssetsController), ApiAuthorizationPolicies.CanManageSites)]
     [InlineData(typeof(AnalyticsController), ApiAuthorizationPolicies.CanViewAnalytics)]
     [InlineData(typeof(SitesController), ApiAuthorizationPolicies.CanViewSites)]
+    [InlineData(typeof(AssetsController), ApiAuthorizationPolicies.CanViewSites)]
     [InlineData(typeof(ReportsController), ApiAuthorizationPolicies.CanViewReports)]
     [InlineData(typeof(MaterialsController), ApiAuthorizationPolicies.CanViewMaterials)]
     [InlineData(typeof(MaterialsController), ApiAuthorizationPolicies.CanManageMaterials)]
     [InlineData(typeof(SettingsController), ApiAuthorizationPolicies.CanManageSettings)]
     [InlineData(typeof(RolesController), ApiAuthorizationPolicies.CanManageSettings)]
+    [InlineData(typeof(ClientPortalController), ApiAuthorizationPolicies.CanViewPortal)]
     public void Controllers_ShouldReferenceExpectedPolicies(Type controllerType, string policy)
     {
         var methods = controllerType
