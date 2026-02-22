@@ -12,7 +12,7 @@ public class VisitApprovalPolicyServiceTests
     [Fact]
     public void CanReviewVisit_ShouldDenyTechnicianForBmVisit()
     {
-        var result = _service.CanReviewVisit(UserRole.Technician, VisitType.PreventiveMaintenance, ApprovalAction.Approved);
+        var result = _service.CanReviewVisit(UserRole.Technician, VisitType.BM, ApprovalAction.Approved);
 
         result.IsAllowed.Should().BeFalse();
     }
@@ -20,8 +20,16 @@ public class VisitApprovalPolicyServiceTests
     [Fact]
     public void CanReviewVisit_ShouldAllowSupervisorForCmVisit()
     {
-        var result = _service.CanReviewVisit(UserRole.Supervisor, VisitType.CorrectiveMaintenance, ApprovalAction.Rejected);
+        var result = _service.CanReviewVisit(UserRole.Supervisor, VisitType.CM, ApprovalAction.Rejected);
 
         result.IsAllowed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CanReviewVisit_ShouldTreatPreventiveAliasAsBm()
+    {
+        var result = _service.CanReviewVisit(UserRole.Supervisor, VisitType.PreventiveMaintenance, ApprovalAction.Approved);
+
+        result.IsAllowed.Should().BeFalse();
     }
 }

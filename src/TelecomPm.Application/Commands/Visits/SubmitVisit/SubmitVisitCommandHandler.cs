@@ -52,6 +52,7 @@ public class SubmitVisitCommandHandler : IRequestHandler<SubmitVisitCommand, Res
         }
 
         var evidencePolicy = EvidencePolicy.DefaultFor(visit.Type);
+        var effectivePolicy = _evidencePolicyService.GetEffectivePolicy(visit.Type, evidencePolicy);
         var evidenceResult = _evidencePolicyService.Validate(visit, evidencePolicy);
         if (!evidenceResult.IsValid)
         {
@@ -61,6 +62,7 @@ public class SubmitVisitCommandHandler : IRequestHandler<SubmitVisitCommand, Res
 
         try
         {
+            visit.ApplyEvidencePolicy(effectivePolicy);
             visit.Submit();
 
             await _visitRepository.UpdateAsync(visit, cancellationToken);

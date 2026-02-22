@@ -48,6 +48,9 @@ public static class PermissionConstants
     public const string UsersDelete = "users.delete";
     public const string UsersChangeRole = "users.change_role";
 
+    // Offices
+    public const string OfficesManage = "offices.manage";
+
     // Settings
     public const string SettingsView = "settings.view";
     public const string SettingsEdit = "settings.edit";
@@ -77,6 +80,7 @@ public static class PermissionConstants
         ReportsView, ReportsExport, ReportsScorecard,
         KpiView, KpiAnalytics,
         UsersView, UsersCreate, UsersEdit, UsersDelete, UsersChangeRole,
+        OfficesManage,
         SettingsView, SettingsEdit,
         MaterialsView, MaterialsManage,
         EscalationsView, EscalationsCreate, EscalationsApprove,

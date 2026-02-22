@@ -18,9 +18,12 @@ public sealed class ClientPortalController : ApiControllerBase
     }
 
     [HttpGet("sites")]
-    public async Task<IActionResult> GetSites(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetSites(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
     {
-        var result = await Mediator.Send(PortalContractMapper.ToPortalSitesQuery(), cancellationToken);
+        var result = await Mediator.Send(PortalContractMapper.ToPortalSitesQuery(pageNumber, pageSize), cancellationToken);
         return HandleResult(result);
     }
 
@@ -32,9 +35,12 @@ public sealed class ClientPortalController : ApiControllerBase
     }
 
     [HttpGet("workorders")]
-    public async Task<IActionResult> GetWorkOrders(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetWorkOrders(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
     {
-        var result = await Mediator.Send(new object().ToPortalWorkOrdersQuery(), cancellationToken);
+        var result = await Mediator.Send(new object().ToPortalWorkOrdersQuery(pageNumber, pageSize), cancellationToken);
         return HandleResult(result);
     }
 

@@ -16,6 +16,7 @@ public enum VisitStatus
 
 public enum VisitType
 {
+    // Deprecated aliases kept for backward compatibility with legacy persisted/imported values.
     PreventiveMaintenance = 1,
     CorrectiveMaintenance = 2,
     Emergency = 3,
@@ -23,6 +24,7 @@ public enum VisitType
     Upgrade = 5,
     Inspection = 6,
     Commissioning = 7,
+    // Canonical values for BM/CM flows.
     BM = 10,
     CM = 11,
     Audit = 12

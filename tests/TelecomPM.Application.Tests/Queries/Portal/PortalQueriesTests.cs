@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Moq;
 using TelecomPM.Application.Common.Interfaces;
+using TelecomPM.Application.DTOs.Portal;
 using TelecomPM.Application.Queries.Portal.GetPortalSites;
 using TelecomPM.Application.Queries.Portal.GetPortalVisits;
 using TelecomPM.Domain.Entities.Sites;
@@ -22,7 +23,6 @@ public class PortalQueriesTests
         portalUser.EnableClientPortalAccess("ORANGE");
 
         var orangeSite = CreateSite("CAI001", "ORANGE");
-        var vodafoneSite = CreateSite("ALX001", "VODAFONE");
 
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(x => x.UserId).Returns(portalUser.Id);
@@ -30,30 +30,28 @@ public class PortalQueriesTests
         var users = new Mock<IUserRepository>();
         users.Setup(r => r.GetByIdAsNoTrackingAsync(portalUser.Id, It.IsAny<CancellationToken>())).ReturnsAsync(portalUser);
 
-        var sites = new Mock<ISiteRepository>();
-        sites.Setup(r => r.GetAllAsNoTrackingAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Site> { orangeSite, vodafoneSite });
-
-        var visits = new Mock<IVisitRepository>();
-        visits.Setup(r => r.GetAllAsNoTrackingAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Array.Empty<Visit>());
-
-        var workOrders = new Mock<IWorkOrderRepository>();
-        workOrders.Setup(r => r.GetAllAsNoTrackingAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Array.Empty<Domain.Entities.WorkOrders.WorkOrder>());
+        var portalReadRepository = new Mock<IPortalReadRepository>();
+        portalReadRepository
+            .Setup(r => r.GetSitesAsync("ORANGE", null, 1, 50, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<PortalSiteDto>
+            {
+                new() { SiteCode = orangeSite.SiteCode.Value, Name = orangeSite.Name }
+            });
 
         var sut = new GetPortalSitesQueryHandler(
             currentUser.Object,
             users.Object,
-            sites.Object,
-            visits.Object,
-            workOrders.Object);
+            portalReadRepository.Object);
 
         var result = await sut.Handle(new GetPortalSitesQuery(), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().HaveCount(1);
         result.Value![0].SiteCode.Should().Be("CAI001");
+
+        portalReadRepository.Verify(
+            r => r.GetSitesAsync("ORANGE", null, 1, 50, It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
@@ -71,7 +69,7 @@ public class PortalQueriesTests
             Guid.NewGuid(),
             "Ahmed Engineer",
             DateTime.UtcNow,
-            VisitType.PreventiveMaintenance);
+            VisitType.BM);
 
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(x => x.UserId).Returns(portalUser.Id);
@@ -103,6 +101,36 @@ public class PortalQueriesTests
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().HaveCount(1);
         result.Value![0].EngineerDisplayName.Should().Be("Field Engineer");
+    }
+
+    [Fact]
+    public async Task GetPortalSites_ShouldClampInvalidPaginationValues()
+    {
+        var portalUser = User.Create("Portal User", "portal@client.com", "010", UserRole.Manager, Guid.NewGuid());
+        portalUser.EnableClientPortalAccess("ORANGE");
+
+        var currentUser = new Mock<ICurrentUserService>();
+        currentUser.SetupGet(x => x.UserId).Returns(portalUser.Id);
+
+        var users = new Mock<IUserRepository>();
+        users.Setup(r => r.GetByIdAsNoTrackingAsync(portalUser.Id, It.IsAny<CancellationToken>())).ReturnsAsync(portalUser);
+
+        var portalReadRepository = new Mock<IPortalReadRepository>();
+        portalReadRepository
+            .Setup(r => r.GetSitesAsync("ORANGE", null, 1, 200, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<PortalSiteDto>());
+
+        var sut = new GetPortalSitesQueryHandler(
+            currentUser.Object,
+            users.Object,
+            portalReadRepository.Object);
+
+        var result = await sut.Handle(new GetPortalSitesQuery { PageNumber = 0, PageSize = 500 }, CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        portalReadRepository.Verify(
+            r => r.GetSitesAsync("ORANGE", null, 1, 200, It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     private static Site CreateSite(string siteCode, string clientCode)

@@ -6,7 +6,7 @@ public sealed class VisitApprovalPolicyService : IVisitApprovalPolicyService
 {
     public (bool IsAllowed, string? DenialReason) CanReviewVisit(UserRole reviewerRole, VisitType visitType, ApprovalAction action)
     {
-        var isBmVisit = visitType == VisitType.PreventiveMaintenance || visitType == VisitType.Inspection;
+        var isBmVisit = visitType.IsBm();
 
         if (isBmVisit)
         {

@@ -120,12 +120,7 @@ public class StartVisitCommandHandler : IRequestHandler<StartVisitCommand, Resul
 
     private static VisitType ResolveChecklistTemplateVisitType(VisitType visitType)
     {
-        return visitType switch
-        {
-            VisitType.CorrectiveMaintenance => VisitType.CM,
-            VisitType.PreventiveMaintenance => VisitType.BM,
-            _ => visitType
-        };
+        return visitType.ToCanonical();
     }
 
     private static bool ShouldExcludeForEquipmentOnly(string category, string itemName)

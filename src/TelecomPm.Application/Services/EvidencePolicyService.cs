@@ -17,7 +17,7 @@ public sealed class EvidencePolicyService : IEvidencePolicyService
 
     public ValidationResult Validate(Visit visit, EvidencePolicy policy)
     {
-        var effectivePolicy = ResolveEffectivePolicy(visit.Type, policy);
+        var effectivePolicy = GetEffectivePolicy(visit.Type, policy);
         var result = new ValidationResult();
 
         if (visit.Photos.Count < effectivePolicy.MinPhotosRequired)
@@ -46,6 +46,11 @@ public sealed class EvidencePolicyService : IEvidencePolicyService
         return result;
     }
 
+    public EvidencePolicy GetEffectivePolicy(VisitType visitType, EvidencePolicy fallback)
+    {
+        return ResolveEffectivePolicy(visitType, fallback);
+    }
+
     private static int CalculateChecklistCompletionPercent(Visit visit)
     {
         if (visit.Checklists.Count == 0)
@@ -57,12 +62,8 @@ public sealed class EvidencePolicyService : IEvidencePolicyService
 
     private EvidencePolicy ResolveEffectivePolicy(VisitType visitType, EvidencePolicy fallback)
     {
-        var keyPrefix = visitType switch
-        {
-            VisitType.BM or VisitType.PreventiveMaintenance => "BM",
-            VisitType.CM or VisitType.CorrectiveMaintenance => "CM",
-            _ => "BM"
-        };
+        var canonicalVisitType = visitType.ToCanonical();
+        var keyPrefix = canonicalVisitType.IsCm() ? "CM" : "BM";
 
         var minPhotos = _settingsService
             .GetAsync($"Evidence:{keyPrefix}:MinPhotos", fallback.MinPhotosRequired)
@@ -75,7 +76,7 @@ public sealed class EvidencePolicyService : IEvidencePolicyService
             .GetResult();
 
         return EvidencePolicy.Create(
-            visitType,
+            canonicalVisitType,
             minPhotos,
             fallback.ReadingsRequired,
             fallback.ChecklistRequired,

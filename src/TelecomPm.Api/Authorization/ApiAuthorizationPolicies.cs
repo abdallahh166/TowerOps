@@ -56,7 +56,7 @@ public static class ApiAuthorizationPolicies
                 PermissionConstants.UsersChangeRole));
 
         options.AddPolicy(CanManageOffices, policy =>
-            RequireAnyPermission(policy, PermissionConstants.SettingsEdit));
+            RequireAnyPermission(policy, PermissionConstants.OfficesManage));
 
         options.AddPolicy(CanManageSites, policy =>
             RequireAnyPermission(policy, PermissionConstants.SitesEdit));
