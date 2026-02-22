@@ -72,6 +72,37 @@ public class ApiAuthorizationPoliciesTests
     }
 
     [Fact]
+    public async Task CanManageOfficesPolicy_ShouldRequireOfficesManagePermission()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddAuthorization(ApiAuthorizationPolicies.Configure);
+        var provider = services.BuildServiceProvider();
+
+        var options = provider.GetRequiredService<IOptions<AuthorizationOptions>>().Value;
+        var policy = options.GetPolicy(ApiAuthorizationPolicies.CanManageOffices);
+        policy.Should().NotBeNull();
+
+        var authService = provider.GetRequiredService<IAuthorizationService>();
+
+        var allowedPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(PermissionConstants.ClaimType, PermissionConstants.OfficesManage)
+        }, "test"));
+
+        var deniedPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(PermissionConstants.ClaimType, PermissionConstants.SettingsEdit)
+        }, "test"));
+
+        var allowed = await authService.AuthorizeAsync(allowedPrincipal, policy!);
+        var denied = await authService.AuthorizeAsync(deniedPrincipal, policy!);
+
+        allowed.Succeeded.Should().BeTrue();
+        denied.Succeeded.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task CanViewPortalPolicy_ShouldDenyEngineerAndAllowPortalUser()
     {
         var services = new ServiceCollection();

@@ -11,14 +11,14 @@ public static class PortalContractMapper
     public static GetPortalDashboardQuery ToPortalDashboardQuery(this object _)
         => new();
 
-    public static GetPortalSitesQuery ToPortalSitesQuery()
-        => new();
+    public static GetPortalSitesQuery ToPortalSitesQuery(int pageNumber, int pageSize)
+        => new() { PageNumber = pageNumber, PageSize = pageSize };
 
     public static GetPortalSitesQuery ToPortalSiteByCodeQuery(this string siteCode)
-        => new() { SiteCode = siteCode };
+        => new() { SiteCode = siteCode, PageNumber = 1, PageSize = 1 };
 
-    public static GetPortalWorkOrdersQuery ToPortalWorkOrdersQuery(this object _)
-        => new();
+    public static GetPortalWorkOrdersQuery ToPortalWorkOrdersQuery(this object _, int pageNumber, int pageSize)
+        => new() { PageNumber = pageNumber, PageSize = pageSize };
 
     public static GetPortalSlaReportQuery ToPortalSlaReportQuery(this object _)
         => new();

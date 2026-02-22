@@ -28,6 +28,7 @@ public static class RolePermissionDefaults
                 PermissionConstants.KpiView,
                 PermissionConstants.KpiAnalytics,
                 PermissionConstants.UsersView,
+                PermissionConstants.OfficesManage,
                 PermissionConstants.EscalationsView,
                 PermissionConstants.EscalationsApprove,
                 PermissionConstants.MaterialsView,
@@ -47,6 +48,7 @@ public static class RolePermissionDefaults
                 PermissionConstants.WorkOrdersView,
                 PermissionConstants.ReportsView,
                 PermissionConstants.KpiView,
+                PermissionConstants.OfficesManage,
                 PermissionConstants.EscalationsView,
                 PermissionConstants.MaterialsView
             };

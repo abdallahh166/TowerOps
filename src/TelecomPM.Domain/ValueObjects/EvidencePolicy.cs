@@ -49,11 +49,13 @@ public sealed class EvidencePolicy : ValueObject
 
     public static EvidencePolicy DefaultFor(VisitType visitType)
     {
-        return visitType switch
+        var canonicalVisitType = visitType.ToCanonical();
+
+        return canonicalVisitType switch
         {
-            VisitType.PreventiveMaintenance => Create(visitType, 3, true, true, 80),
-            VisitType.CorrectiveMaintenance => Create(visitType, 2, true, true, 100),
-            _ => Create(visitType, 3, true, true, 80)
+            VisitType.BM => Create(canonicalVisitType, 3, true, true, 80),
+            VisitType.CM => Create(canonicalVisitType, 2, true, true, 100),
+            _ => Create(canonicalVisitType, 3, true, true, 80)
         };
     }
 

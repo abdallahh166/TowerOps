@@ -97,7 +97,7 @@ public sealed class Visit : AggregateRoot<Guid>
         Guid engineerId,
         string engineerName,
         DateTime scheduledDate,
-        VisitType type = VisitType.PreventiveMaintenance)
+        VisitType type = VisitType.BM)
     {
         var visit = new Visit(
             visitNumber,
@@ -490,6 +490,32 @@ public sealed class Visit : AggregateRoot<Guid>
         CalculateCompletionPercentage();
     }
 
+    public void ApplyEvidencePolicy(EvidencePolicy policy)
+    {
+        if (policy is null)
+            throw new DomainException("Evidence policy is required.");
+
+        IsPhotosComplete = Photos.Count >= policy.MinPhotosRequired;
+        IsReadingsComplete = !policy.ReadingsRequired || Readings.Any();
+
+        if (!policy.ChecklistRequired)
+        {
+            IsChecklistComplete = true;
+        }
+        else
+        {
+            var totalChecklistItems = Checklists.Count;
+            var completedItems = Checklists.Count(c => c.Status != CheckStatus.NA);
+            var completionPercent = totalChecklistItems == 0
+                ? 0
+                : completedItems * 100 / totalChecklistItems;
+
+            IsChecklistComplete = completionPercent >= policy.MinChecklistCompletionPercent;
+        }
+
+        CalculateCompletionPercentageForPolicy(policy);
+    }
+
     private void CalculateCompletionPercentage()
     {
         var achievedWeight = 0;
@@ -520,9 +546,45 @@ public sealed class Visit : AggregateRoot<Guid>
         CompletionPercentage = achievedWeight;
     }
 
+    private void CalculateCompletionPercentageForPolicy(EvidencePolicy policy)
+    {
+        var achievedWeight = 0;
+
+        var photosWeight = 40;
+        var photosScore = policy.MinPhotosRequired <= 0
+            ? 100
+            : Math.Min(100, Photos.Count * 100 / policy.MinPhotosRequired);
+        achievedWeight += (int)(photosWeight * photosScore / 100);
+
+        var readingsWeight = 30;
+        var readingsScore = !policy.ReadingsRequired
+            ? 100
+            : (Readings.Any() ? 100 : 0);
+        achievedWeight += (int)(readingsWeight * readingsScore / 100);
+
+        var checklistWeight = 30;
+        if (!policy.ChecklistRequired)
+        {
+            achievedWeight += checklistWeight;
+        }
+        else
+        {
+            var checklistScore = 0;
+            if (Checklists.Count > 0)
+            {
+                var completedChecklist = Checklists.Count(c => c.Status != CheckStatus.NA);
+                checklistScore = completedChecklist * 100 / Checklists.Count;
+            }
+
+            achievedWeight += (int)(checklistWeight * checklistScore / 100);
+        }
+
+        CompletionPercentage = achievedWeight;
+    }
+
     public bool CanBeSubmitted()
     {
-        return Status == VisitStatus.Completed && 
+        return (Status == VisitStatus.Completed || Status == VisitStatus.NeedsCorrection) && 
                IsReadingsComplete && 
                IsPhotosComplete && 
                IsChecklistComplete;

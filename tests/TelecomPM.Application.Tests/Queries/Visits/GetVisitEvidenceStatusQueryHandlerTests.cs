@@ -4,6 +4,8 @@ using TelecomPM.Application.Queries.Visits.GetVisitEvidenceStatus;
 using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Interfaces.Repositories;
+using TelecomPM.Domain.Services;
+using TelecomPM.Domain.ValueObjects;
 using Xunit;
 
 
@@ -45,8 +47,12 @@ public class GetVisitEvidenceStatusQueryHandlerTests
 
         var repo = new Mock<IVisitRepository>();
         repo.Setup(r => r.GetByIdAsync(visit.Id, It.IsAny<CancellationToken>())).ReturnsAsync(visit);
+        var evidencePolicyService = new Mock<IEvidencePolicyService>();
+        evidencePolicyService
+            .Setup(s => s.GetEffectivePolicy(visit.Type, It.IsAny<EvidencePolicy>()))
+            .Returns(EvidencePolicy.Create(VisitType.BM, 30, true, true, 100));
 
-        var handler = new GetVisitEvidenceStatusQueryHandler(repo.Object);
+        var handler = new GetVisitEvidenceStatusQueryHandler(repo.Object, evidencePolicyService.Object);
         var result = await handler.Handle(new GetVisitEvidenceStatusQuery { VisitId = visit.Id }, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
@@ -64,8 +70,9 @@ public class GetVisitEvidenceStatusQueryHandlerTests
     {
         var repo = new Mock<IVisitRepository>();
         repo.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync((Visit?)null);
+        var evidencePolicyService = new Mock<IEvidencePolicyService>();
 
-        var handler = new GetVisitEvidenceStatusQueryHandler(repo.Object);
+        var handler = new GetVisitEvidenceStatusQueryHandler(repo.Object, evidencePolicyService.Object);
         var result = await handler.Handle(new GetVisitEvidenceStatusQuery { VisitId = Guid.NewGuid() }, CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();

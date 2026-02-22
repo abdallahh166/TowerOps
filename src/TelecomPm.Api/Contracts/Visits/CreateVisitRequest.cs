@@ -16,7 +16,7 @@ public record CreateVisitRequest
     [Required]
     public DateTime ScheduledDate { get; init; }
 
-    public VisitType Type { get; init; } = VisitType.PreventiveMaintenance;
+    public VisitType Type { get; init; } = VisitType.BM;
 
     public Guid? SupervisorId { get; init; }
 

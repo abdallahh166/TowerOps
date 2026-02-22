@@ -50,7 +50,7 @@ public class SlaClockService : ISlaClockService
         }
 
         var nowUtc = DateTime.UtcNow;
-        var deadlineUtc = CalculateDeadline(workOrder.CreatedAt, workOrder.SlaClass);
+        var deadlineUtc = workOrder.ResponseDeadlineUtc;
 
         var status = nowUtc > deadlineUtc
             ? SlaStatus.Breached

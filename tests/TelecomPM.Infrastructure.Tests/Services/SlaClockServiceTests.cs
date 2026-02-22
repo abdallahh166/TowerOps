@@ -52,7 +52,7 @@ public class SlaClockServiceTests
     public void EvaluateStatus_ShouldReturnOnTime_WhenFarFromDeadline()
     {
         var workOrder = WorkOrder.Create("WO-SLA-1", "S-1", "CAI", SlaClass.P1, "Issue");
-        SetCreatedAt(workOrder, DateTime.UtcNow.AddMinutes(-10));
+        SetResponseDeadline(workOrder, DateTime.UtcNow.AddMinutes(50));
 
         var status = _service.EvaluateStatus(workOrder);
 
@@ -63,7 +63,7 @@ public class SlaClockServiceTests
     public void EvaluateStatus_ShouldReturnAtRisk_WhenWithinThirtyMinutesToDeadline()
     {
         var workOrder = WorkOrder.Create("WO-SLA-2", "S-2", "CAI", SlaClass.P1, "Issue");
-        SetCreatedAt(workOrder, DateTime.UtcNow.AddMinutes(-45));
+        SetResponseDeadline(workOrder, DateTime.UtcNow.AddMinutes(15));
 
         var status = _service.EvaluateStatus(workOrder);
 
@@ -74,7 +74,7 @@ public class SlaClockServiceTests
     public void EvaluateStatus_ShouldReturnBreached_WhenPastDeadline()
     {
         var workOrder = WorkOrder.Create("WO-SLA-3", "S-3", "CAI", SlaClass.P1, "Issue");
-        SetCreatedAt(workOrder, DateTime.UtcNow.AddHours(-2));
+        SetResponseDeadline(workOrder, DateTime.UtcNow.AddMinutes(-1));
 
         var status = _service.EvaluateStatus(workOrder);
 
@@ -105,10 +105,10 @@ public class SlaClockServiceTests
         deadline.Should().Be(createdAt.AddMinutes(90));
     }
 
-    private static void SetCreatedAt(WorkOrder workOrder, DateTime createdAtUtc)
+    private static void SetResponseDeadline(WorkOrder workOrder, DateTime responseDeadlineUtc)
     {
         typeof(WorkOrder)
-            .GetProperty("CreatedAt")!
-            .SetValue(workOrder, createdAtUtc);
+            .GetProperty("ResponseDeadlineUtc")!
+            .SetValue(workOrder, responseDeadlineUtc);
     }
 }

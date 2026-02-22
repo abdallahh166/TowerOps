@@ -38,7 +38,9 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         string officeCode,
         SlaClass slaClass,
         WorkOrderScope scope,
-        string issueDescription) : base(Guid.NewGuid())
+        string issueDescription,
+        int? responseMinutes = null,
+        int? resolutionMinutes = null) : base(Guid.NewGuid())
     {
         WoNumber = woNumber;
         SiteCode = siteCode;
@@ -49,8 +51,11 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         Status = WorkOrderStatus.Created;
 
         var now = DateTime.UtcNow;
-        ResponseDeadlineUtc = now.Add(GetResponseSla(slaClass));
-        ResolutionDeadlineUtc = now.Add(GetResolutionSla(slaClass));
+        var effectiveResponseMinutes = responseMinutes ?? GetDefaultResponseMinutes(slaClass);
+        var effectiveResolutionMinutes = resolutionMinutes ?? GetDefaultResolutionMinutes(slaClass);
+
+        ResponseDeadlineUtc = now.AddMinutes(effectiveResponseMinutes);
+        ResolutionDeadlineUtc = now.AddMinutes(effectiveResolutionMinutes);
     }
 
     public static WorkOrder Create(
@@ -59,7 +64,9 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         string officeCode,
         SlaClass slaClass,
         string issueDescription,
-        WorkOrderScope scope = WorkOrderScope.ClientEquipment)
+        WorkOrderScope scope = WorkOrderScope.ClientEquipment,
+        int? responseMinutes = null,
+        int? resolutionMinutes = null)
     {
         if (string.IsNullOrWhiteSpace(woNumber))
             throw new DomainException("WO number is required");
@@ -73,7 +80,15 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         if (string.IsNullOrWhiteSpace(issueDescription))
             throw new DomainException("Issue description is required");
 
-        return new WorkOrder(woNumber, siteCode, officeCode, slaClass, scope, issueDescription);
+        return new WorkOrder(
+            woNumber,
+            siteCode,
+            officeCode,
+            slaClass,
+            scope,
+            issueDescription,
+            responseMinutes,
+            resolutionMinutes);
     }
 
     public void Assign(Guid engineerId, string engineerName, string assignedBy)
@@ -194,25 +209,25 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         EngineerSignature = signature;
     }
 
-    private static TimeSpan GetResponseSla(SlaClass slaClass)
+    private static int GetDefaultResponseMinutes(SlaClass slaClass)
     {
         return slaClass switch
         {
-            SlaClass.P1 => TimeSpan.FromHours(1),
-            SlaClass.P2 => TimeSpan.FromHours(4),
-            SlaClass.P3 => TimeSpan.FromHours(24),
-            _ => TimeSpan.FromHours(48)
+            SlaClass.P1 => 60,
+            SlaClass.P2 => 240,
+            SlaClass.P3 => 1440,
+            _ => 2880
         };
     }
 
-    private static TimeSpan GetResolutionSla(SlaClass slaClass)
+    private static int GetDefaultResolutionMinutes(SlaClass slaClass)
     {
         return slaClass switch
         {
-            SlaClass.P1 => TimeSpan.FromHours(4),
-            SlaClass.P2 => TimeSpan.FromHours(8),
-            SlaClass.P3 => TimeSpan.FromHours(24),
-            _ => TimeSpan.FromHours(48)
+            SlaClass.P1 => 240,
+            SlaClass.P2 => 480,
+            SlaClass.P3 => 1440,
+            _ => 2880
         };
     }
 }

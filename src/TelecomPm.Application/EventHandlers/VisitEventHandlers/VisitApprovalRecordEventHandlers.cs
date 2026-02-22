@@ -55,7 +55,7 @@ public class VisitApprovedApprovalRecordEventHandler : INotificationHandler<Doma
     }
 
     private static WorkflowType MapWorkflow(VisitType visitType)
-        => visitType == VisitType.CorrectiveMaintenance ? WorkflowType.CM : WorkflowType.BM;
+        => visitType.IsCm() ? WorkflowType.CM : WorkflowType.BM;
 }
 
 public class VisitRejectedApprovalRecordEventHandler : INotificationHandler<DomainEventNotification<VisitRejectedEvent>>
@@ -106,7 +106,7 @@ public class VisitRejectedApprovalRecordEventHandler : INotificationHandler<Doma
     }
 
     private static WorkflowType MapWorkflow(VisitType visitType)
-        => visitType == VisitType.CorrectiveMaintenance ? WorkflowType.CM : WorkflowType.BM;
+        => visitType.IsCm() ? WorkflowType.CM : WorkflowType.BM;
 }
 
 public class VisitCorrectionRequestedApprovalRecordEventHandler : INotificationHandler<DomainEventNotification<VisitCorrectionRequestedEvent>>
@@ -157,5 +157,5 @@ public class VisitCorrectionRequestedApprovalRecordEventHandler : INotificationH
     }
 
     private static WorkflowType MapWorkflow(VisitType visitType)
-        => visitType == VisitType.CorrectiveMaintenance ? WorkflowType.CM : WorkflowType.BM;
+        => visitType.IsCm() ? WorkflowType.CM : WorkflowType.BM;
 }
