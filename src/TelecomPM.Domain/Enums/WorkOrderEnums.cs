@@ -21,6 +21,12 @@ public enum WorkOrderStatus
     Cancelled = 9
 }
 
+public enum WorkOrderScope
+{
+    ClientEquipment = 1,
+    TowerInfrastructure = 2
+}
+
 public enum SlaStatus
 {
     OnTime = 1,

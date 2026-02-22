@@ -44,6 +44,7 @@ public static class DependencyInjection
         services.AddScoped<IVisitApprovalPolicyService, VisitApprovalPolicyService>();
         services.AddScoped<IEscalationRoutingService, EscalationRoutingService>();
         services.AddScoped<IEvidencePolicyService, EvidencePolicyService>();
+        services.AddScoped<ISyncQueueProcessor, SyncQueueProcessor>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
         return services;

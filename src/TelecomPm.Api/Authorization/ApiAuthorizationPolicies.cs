@@ -20,6 +20,7 @@ public static class ApiAuthorizationPolicies
     public const string CanViewMaterials = "CanViewMaterials";
     public const string CanManageMaterials = "CanManageMaterials";
     public const string CanManageSettings = "CanManageSettings";
+    public const string CanViewPortal = "CanViewPortal";
 
     public static void Configure(AuthorizationOptions options)
     {
@@ -77,6 +78,14 @@ public static class ApiAuthorizationPolicies
 
         options.AddPolicy(CanManageSettings, policy =>
             RequireAnyPermission(policy, PermissionConstants.SettingsEdit));
+
+        options.AddPolicy(CanViewPortal, policy =>
+            RequireAnyPermission(policy,
+                PermissionConstants.PortalViewSites,
+                PermissionConstants.PortalViewVisits,
+                PermissionConstants.PortalViewKpis,
+                PermissionConstants.PortalViewWorkOrders,
+                PermissionConstants.PortalViewSla));
     }
 
     private static void RequireAnyPermission(AuthorizationPolicyBuilder policy, params string[] requiredPermissions)

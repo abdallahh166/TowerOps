@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TelecomPM.Domain.Entities.Materials;
 using TelecomPM.Domain.Entities.ChecklistTemplates;
+using TelecomPM.Domain.Entities.Clients;
 using TelecomPM.Domain.Entities.Offices;
 using TelecomPM.Domain.Entities.Sites;
 using TelecomPM.Domain.Entities.ApplicationRoles;
@@ -46,6 +47,13 @@ public class DatabaseSeeder
             if (!await _context.Offices.AnyAsync())
             {
                 await SeedOfficesAsync();
+                await _context.SaveChangesAsync();
+            }
+
+            // Seed users
+            if (!await _context.Clients.AnyAsync())
+            {
+                await SeedClientsAsync();
                 await _context.SaveChangesAsync();
             }
 
@@ -218,6 +226,20 @@ public class DatabaseSeeder
         _logger.LogInformation("Seeded {Count} users", users.Count);
     }
 
+    private async Task SeedClientsAsync()
+    {
+        var clients = new List<Client>
+        {
+            Client.Create("ORANGE", "Orange Egypt"),
+            Client.Create("VODAFONE", "Vodafone Egypt"),
+            Client.Create("WE", "Telecom Egypt WE"),
+            Client.Create("IHS", "IHS Towers")
+        };
+
+        await _context.Clients.AddRangeAsync(clients);
+        _logger.LogInformation("Seeded {Count} clients", clients.Count);
+    }
+
     private async Task SeedMaterialsAsync()
     {
         var cairoOffice = await _context.Offices.FirstOrDefaultAsync(o => o.Code == "CAI");
@@ -334,39 +356,39 @@ public class DatabaseSeeder
     private static void AddBmItems(ChecklistTemplate template)
     {
         var i = 1;
-        template.AddItem("Power", "Rectifier Visual Check", null, true, i++);
-        template.AddItem("Power", "Battery Visual Check", null, true, i++);
-        template.AddItem("Power", "GEDP Check", null, true, i++);
-        template.AddItem("Power", "Generator Check", null, true, i++, "[\"GF\"]");
-        template.AddItem("Power", "Solar Panel Check", null, true, i++, "[\"GF\"]");
-        template.AddItem("Power", "Power Meter Reading", null, true, i++);
-        template.AddItem("Power", "CB Status Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.Power.ToString(), "Rectifier Visual Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.Power.ToString(), "Battery Visual Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.Power.ToString(), "GEDP Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.Generator.ToString(), "Generator Check", null, true, i++, "[\"GF\"]");
+        template.AddItem(ChecklistItemCategory.Power.ToString(), "Solar Panel Check", null, true, i++, "[\"GF\"]");
+        template.AddItem(ChecklistItemCategory.Power.ToString(), "Power Meter Reading", null, true, i++);
+        template.AddItem(ChecklistItemCategory.Power.ToString(), "CB Status Check", null, true, i++);
 
-        template.AddItem("Cooling", "A/C Unit 1 Check", null, true, i++);
-        template.AddItem("Cooling", "A/C Unit 2 Check", null, true, i++, "[\"GF\",\"RT\"]");
-        template.AddItem("Cooling", "Ventilation Check", null, false, i++);
+        template.AddItem(ChecklistItemCategory.Cooling.ToString(), "A/C Unit 1 Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.Cooling.ToString(), "A/C Unit 2 Check", null, true, i++, "[\"GF\",\"RT\"]");
+        template.AddItem(ChecklistItemCategory.Cooling.ToString(), "Ventilation Check", null, false, i++);
 
-        template.AddItem("Radio", "BTS/NodeB Visual Check", null, true, i++);
-        template.AddItem("Radio", "Antenna Visual Check", null, true, i++);
-        template.AddItem("Radio", "DDF Check", null, true, i++);
-        template.AddItem("Radio", "Alarm Status Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.Radio.ToString(), "BTS/NodeB Visual Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.Radio.ToString(), "Antenna Visual Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.Radio.ToString(), "DDF Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.Radio.ToString(), "Alarm Status Check", null, true, i++);
 
-        template.AddItem("TX", "MW Link Visual Check", null, true, i++);
-        template.AddItem("TX", "ODU Check", null, true, i++);
-        template.AddItem("TX", "IP Connectivity Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.TX.ToString(), "MW Link Visual Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.TX.ToString(), "ODU Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.TX.ToString(), "IP Connectivity Check", null, true, i++);
 
-        template.AddItem("Fire Safety", "Fire Panel Check", null, true, i++);
-        template.AddItem("Fire Safety", "Fire Extinguisher Check", null, true, i++);
-        template.AddItem("Fire Safety", "Heat Sensor Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.FireSafety.ToString(), "Fire Panel Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.FireSafety.ToString(), "Fire Extinguisher Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.FireSafety.ToString(), "Heat Sensor Check", null, true, i++);
 
-        template.AddItem("Structure", "Tower Visual Check", null, true, i++, "[\"GF\"]");
-        template.AddItem("Structure", "Fence Check", null, true, i++);
-        template.AddItem("Structure", "Earth Bar Check", null, true, i++);
-        template.AddItem("Structure", "Shelter Condition Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.Tower.ToString(), "Tower Visual Check", null, true, i++, "[\"GF\"]");
+        template.AddItem(ChecklistItemCategory.Fence.ToString(), "Fence Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.EarthBar.ToString(), "Earth Bar Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.General.ToString(), "Shelter Condition Check", null, true, i++);
 
-        template.AddItem("General", "PM Logbook Update", null, true, i++);
-        template.AddItem("General", "Site Cleanliness Check", null, true, i++);
-        template.AddItem("General", "Pending Issues Review", null, true, i++);
+        template.AddItem(ChecklistItemCategory.General.ToString(), "PM Logbook Update", null, true, i++);
+        template.AddItem(ChecklistItemCategory.General.ToString(), "Site Cleanliness Check", null, true, i++);
+        template.AddItem(ChecklistItemCategory.General.ToString(), "Pending Issues Review", null, true, i++);
     }
 
     private static void AddCmItems(ChecklistTemplate template)
@@ -437,6 +459,28 @@ public class DatabaseSeeder
             CreateSetting("Notifications:Email:Password", string.Empty, "Notifications", "secret", "SMTP password", true, seededBy),
             CreateSetting("Notifications:Email:FromAddress", string.Empty, "Notifications", "secret", "SMTP from address", true, seededBy),
 
+            // GPS
+            CreateSetting("GPS:AllowedRadiusMeters", "200", "GPS", "int", "Default allowed check-in radius in meters", false, seededBy),
+            CreateSetting("GPS:BlockCheckInOutsideRadius", "false", "GPS", "bool", "Block check-in when outside allowed radius", false, seededBy),
+
+            // Sync
+            CreateSetting("Sync:MaxBatchSize", "50", "Sync", "int", "Maximum sync items per batch", false, seededBy),
+            CreateSetting("Sync:MaxRetries", "3", "Sync", "int", "Maximum retries before marking sync as failed", false, seededBy),
+            CreateSetting("Sync:ConflictResolutionMode", "ServerWins", "Sync", "string", "Default conflict resolution mode", false, seededBy),
+
+            // Portal
+            CreateSetting("Portal:EnableClientPortal", "true", "Portal", "bool", "Enable read-only client portal", false, seededBy),
+            CreateSetting("Portal:DataRetentionDays", "90", "Portal", "int", "Portal data retention in days", false, seededBy),
+            CreateSetting("Portal:AnonymizeEngineers", "true", "Portal", "bool", "Show anonymized engineer names in portal", false, seededBy),
+
+            // Route
+            CreateSetting("Route:AverageSpeedKmh", "40", "Route", "int", "Average travel speed for route estimation", false, seededBy),
+            CreateSetting("Route:MaxSitesPerEngineerPerDay", "8", "Route", "int", "Maximum planned sites per engineer per day", false, seededBy),
+
+            // Asset
+            CreateSetting("Asset:WarrantyAlertDaysBeforeExpiry", "30", "Asset", "int", "Days before warranty expiry alert", false, seededBy),
+            CreateSetting("Asset:AutoRegisterFromImport", "true", "Asset", "bool", "Auto-register assets during import", false, seededBy),
+
             // Import
             CreateSetting("Import:SkipInvalidRows", "true", "Import", "bool", "Skip invalid rows during imports", false, seededBy),
             CreateSetting("Import:MaxRows", "5000", "Import", "int", "Maximum rows per import file", false, seededBy),
@@ -505,6 +549,21 @@ public class DatabaseSeeder
                     PermissionConstants.ReportsView,
                     PermissionConstants.KpiView,
                     PermissionConstants.MaterialsView
+                }),
+
+            ApplicationRole.Create(
+                "ClientPortal",
+                "Client Portal",
+                "Read-only portal access for tower owner clients.",
+                isSystem: false,
+                isActive: true,
+                new[]
+                {
+                    PermissionConstants.PortalViewSites,
+                    PermissionConstants.PortalViewVisits,
+                    PermissionConstants.PortalViewKpis,
+                    PermissionConstants.PortalViewWorkOrders,
+                    PermissionConstants.PortalViewSla
                 })
         };
 

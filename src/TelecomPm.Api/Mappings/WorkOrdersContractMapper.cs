@@ -8,8 +8,10 @@ using TelecomPM.Application.Commands.WorkOrders.CloseWorkOrder;
 using TelecomPM.Application.Commands.WorkOrders.CompleteWorkOrder;
 using TelecomPM.Application.Commands.WorkOrders.CreateWorkOrder;
 using TelecomPM.Application.Commands.WorkOrders.RejectByCustomer;
+using TelecomPM.Application.Commands.Signatures.CaptureWorkOrderSignature;
 using TelecomPM.Application.Commands.WorkOrders.StartWorkOrder;
 using TelecomPM.Application.Commands.WorkOrders.SubmitForCustomerAcceptance;
+using TelecomPM.Application.Queries.Signatures.GetWorkOrderSignatures;
 using TelecomPM.Application.Queries.WorkOrders.GetWorkOrderById;
 
 public static class WorkOrdersContractMapper
@@ -21,6 +23,7 @@ public static class WorkOrdersContractMapper
             SiteCode = request.SiteCode,
             OfficeCode = request.OfficeCode,
             SlaClass = request.SlaClass,
+            Scope = request.Scope,
             IssueDescription = request.IssueDescription
         };
 
@@ -56,4 +59,20 @@ public static class WorkOrdersContractMapper
 
     public static RejectByCustomerCommand ToRejectByCustomerCommand(this CustomerRejectWorkOrderRequest request, Guid workOrderId)
         => new() { WorkOrderId = workOrderId, Reason = request.Reason };
+
+    public static CaptureWorkOrderSignatureCommand ToCommand(this CaptureWorkOrderSignatureRequest request, Guid workOrderId)
+        => new()
+        {
+            WorkOrderId = workOrderId,
+            SignerName = request.SignerName,
+            SignerRole = request.SignerRole,
+            SignatureDataBase64 = request.SignatureDataBase64,
+            SignerPhone = request.SignerPhone,
+            Latitude = request.Latitude,
+            Longitude = request.Longitude,
+            IsEngineerSignature = request.IsEngineerSignature
+        };
+
+    public static GetWorkOrderSignaturesQuery ToWorkOrderSignaturesQuery(this Guid workOrderId)
+        => new() { WorkOrderId = workOrderId };
 }

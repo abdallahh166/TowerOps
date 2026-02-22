@@ -57,6 +57,11 @@ public static class DependencyInjection
         services.AddScoped<ISystemSettingsRepository, SystemSettingsRepository>();
         services.AddScoped<IApplicationRoleRepository, ApplicationRoleRepository>();
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+        services.AddScoped<IClientRepository, ClientRepository>();
+        services.AddScoped<IDailyPlanRepository, DailyPlanRepository>();
+        services.AddScoped<ISyncQueueRepository, SyncQueueRepository>();
+        services.AddScoped<ISyncConflictRepository, SyncConflictRepository>();
+        services.AddScoped<IAssetRepository, AssetRepository>();
 
         // Domain event dispatcher
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
@@ -97,6 +102,7 @@ public static class DependencyInjection
         services.AddScoped<IVisitNumberGeneratorService, VisitNumberGeneratorService>();
         services.AddScoped<IMaterialStockService, MaterialStockService>();
         services.AddScoped<ISlaClockService, SlaClockService>();
+        services.AddScoped<IGeoCheckInService, GeoCheckInService>();
 
         // HttpContextAccessor for CurrentUserService
         services.AddHttpContextAccessor();

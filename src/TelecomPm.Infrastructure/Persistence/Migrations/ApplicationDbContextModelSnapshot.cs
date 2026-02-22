@@ -152,6 +152,93 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.ToTable("ApprovalRecords", (string)null);
                 });
 
+            modelBuilder.Entity("TelecomPM.Domain.Entities.Assets.Asset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AssetCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Brand")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("InstalledAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastServicedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Model")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("ReplacedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ReplacedByAssetId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SerialNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SiteCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("WarrantyExpiresAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetCode")
+                        .IsUnique();
+
+                    b.HasIndex("SiteCode");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("Assets", (string)null);
+                });
+
             modelBuilder.Entity("TelecomPM.Domain.Entities.AuditLogs.AuditLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -409,6 +496,117 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.HasIndex("VisitType", "IsActive");
 
                     b.ToTable("ChecklistTemplates", (string)null);
+                });
+
+            modelBuilder.Entity("TelecomPM.Domain.Entities.Clients.Client", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ClientCode")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("ClientName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ContactEmail")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ContactPhone")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LogoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientCode")
+                        .IsUnique();
+
+                    b.ToTable("Clients", (string)null);
+                });
+
+            modelBuilder.Entity("TelecomPM.Domain.Entities.DailyPlans.DailyPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("OfficeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OfficeManagerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("PlanDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OfficeId", "PlanDate")
+                        .IsUnique();
+
+                    b.ToTable("DailyPlans", (string)null);
                 });
 
             modelBuilder.Entity("TelecomPM.Domain.Entities.Escalations.Escalation", b =>
@@ -795,6 +993,10 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal?>("AllowedCheckInRadiusMeters")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
                     b.Property<DateTime?>("AnnouncementDate")
                         .HasColumnType("datetime2");
 
@@ -810,6 +1012,10 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ClientCode")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<int>("Complexity")
                         .HasColumnType("int");
@@ -840,6 +1046,14 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.Property<string>("GeneralNotes")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("HostContactName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("HostContactPhone")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -877,6 +1091,17 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.Property<int>("RequiredPhotosCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("ResponsibilityScope")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)")
+                        .HasDefaultValue("Full");
+
+                    b.Property<string>("SharingAgreementRef")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<int>("SiteType")
                         .HasColumnType("int");
 
@@ -897,6 +1122,17 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("TowerOwnerName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TowerOwnershipType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)")
+                        .HasDefaultValue("Host");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -910,6 +1146,8 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AssignedEngineerId");
+
+                    b.HasIndex("ClientCode");
 
                     b.HasIndex("Complexity");
 
@@ -1447,6 +1685,136 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.ToTable("SiteTransmissions", (string)null);
                 });
 
+            modelBuilder.Entity("TelecomPM.Domain.Entities.Sync.SyncConflict", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConflictType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Resolution")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("ResolvedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("SyncQueueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SyncQueueId");
+
+                    b.ToTable("SyncConflicts", (string)null);
+                });
+
+            modelBuilder.Entity("TelecomPM.Domain.Entities.Sync.SyncQueue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConflictReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedOnDeviceUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("EngineerId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OperationType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ReceivedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedOnDeviceUtc");
+
+                    b.HasIndex("DeviceId");
+
+                    b.HasIndex("EngineerId");
+
+                    b.HasIndex("DeviceId", "EngineerId", "OperationType", "CreatedOnDeviceUtc")
+                        .IsUnique();
+
+                    b.ToTable("SyncQueues", (string)null);
+                });
+
             modelBuilder.Entity("TelecomPM.Domain.Entities.SystemSettings.SystemSetting", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1528,6 +1896,10 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .HasMaxLength(5000)
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ClientCode")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -1548,6 +1920,9 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsClientPortalUser")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
@@ -1604,6 +1979,8 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClientCode");
+
                     b.HasIndex("Email")
                         .IsUnique();
 
@@ -1629,6 +2006,12 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("CheckInTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("CheckInTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("CheckOutTimeUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid?>("ChecklistTemplateId")
@@ -1658,6 +2041,10 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal?>("DistanceFromSiteMeters")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
                     b.Property<Guid>("EngineerId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1681,6 +2068,12 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("IsReadingsComplete")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsWithinSiteRadius")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("PlannedOrder")
+                        .HasColumnType("int");
 
                     b.Property<string>("ReviewerNotes")
                         .HasMaxLength(1000)
@@ -2290,6 +2683,13 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("ResponseDeadlineUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasDefaultValue("ClientEquipment");
+
                     b.Property<string>("SiteCode")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -2330,6 +2730,48 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("WorkOrders", (string)null);
+                });
+
+            modelBuilder.Entity("TelecomPM.Domain.Entities.Assets.Asset", b =>
+                {
+                    b.OwnsMany("TelecomPM.Domain.Entities.Assets.AssetServiceRecord", "ServiceHistory", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<Guid>("AssetId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("EngineerId")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b1.Property<string>("Notes")
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)");
+
+                            b1.Property<string>("ServiceType")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b1.Property<DateTime>("ServicedAtUtc")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<Guid?>("VisitId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("AssetId");
+
+                            b1.ToTable("AssetServiceRecords", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("AssetId");
+                        });
+
+                    b.Navigation("ServiceHistory");
                 });
 
             modelBuilder.Entity("TelecomPM.Domain.Entities.ChecklistTemplates.ChecklistTemplate", b =>
@@ -2383,6 +2825,108 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("TelecomPM.Domain.Entities.DailyPlans.DailyPlan", b =>
+                {
+                    b.OwnsMany("TelecomPM.Domain.Entities.DailyPlans.EngineerDayPlan", "EngineerPlans", b1 =>
+                        {
+                            b1.Property<Guid>("DailyPlanId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<Guid>("EngineerId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<decimal>("TotalEstimatedDistanceKm")
+                                .HasPrecision(10, 3)
+                                .HasColumnType("decimal(10,3)");
+
+                            b1.Property<int>("TotalEstimatedTravelMinutes")
+                                .HasColumnType("int");
+
+                            b1.HasKey("DailyPlanId", "EngineerId");
+
+                            b1.ToTable("EngineerDayPlans", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("DailyPlanId");
+
+                            b1.OwnsMany("TelecomPM.Domain.Entities.DailyPlans.PlannedVisitStop", "Stops", b2 =>
+                                {
+                                    b2.Property<Guid>("Id")
+                                        .HasColumnType("uniqueidentifier");
+
+                                    b2.Property<Guid>("DailyPlanId")
+                                        .HasColumnType("uniqueidentifier");
+
+                                    b2.Property<decimal>("DistanceFromPreviousKm")
+                                        .HasPrecision(10, 3)
+                                        .HasColumnType("decimal(10,3)");
+
+                                    b2.Property<Guid>("EngineerId")
+                                        .HasColumnType("uniqueidentifier");
+
+                                    b2.Property<int>("EstimatedTravelMinutes")
+                                        .HasColumnType("int");
+
+                                    b2.Property<int>("Order")
+                                        .HasColumnType("int");
+
+                                    b2.Property<string>("Priority")
+                                        .IsRequired()
+                                        .HasMaxLength(10)
+                                        .HasColumnType("nvarchar(10)");
+
+                                    b2.Property<string>("SiteCode")
+                                        .IsRequired()
+                                        .HasMaxLength(50)
+                                        .HasColumnType("nvarchar(50)");
+
+                                    b2.Property<string>("VisitType")
+                                        .IsRequired()
+                                        .HasMaxLength(50)
+                                        .HasColumnType("nvarchar(50)");
+
+                                    b2.HasKey("Id");
+
+                                    b2.HasIndex("DailyPlanId", "EngineerId");
+
+                                    b2.ToTable("PlannedVisitStops", (string)null);
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("DailyPlanId", "EngineerId");
+
+                                    b2.OwnsOne("TelecomPM.Domain.ValueObjects.GeoLocation", "SiteLocation", b3 =>
+                                        {
+                                            b3.Property<Guid>("PlannedVisitStopId")
+                                                .HasColumnType("uniqueidentifier");
+
+                                            b3.Property<decimal>("Latitude")
+                                                .HasPrecision(10, 8)
+                                                .HasColumnType("decimal(10,8)")
+                                                .HasColumnName("SiteLatitude");
+
+                                            b3.Property<decimal>("Longitude")
+                                                .HasPrecision(11, 8)
+                                                .HasColumnType("decimal(11,8)")
+                                                .HasColumnName("SiteLongitude");
+
+                                            b3.HasKey("PlannedVisitStopId");
+
+                                            b3.ToTable("PlannedVisitStops");
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("PlannedVisitStopId");
+                                        });
+
+                                    b2.Navigation("SiteLocation")
+                                        .IsRequired();
+                                });
+
+                            b1.Navigation("Stops");
+                        });
+
+                    b.Navigation("EngineerPlans");
                 });
 
             modelBuilder.Entity("TelecomPM.Domain.Entities.Materials.Material", b =>
@@ -3224,8 +3768,40 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                     b.Navigation("MWLinks");
                 });
 
+            modelBuilder.Entity("TelecomPM.Domain.Entities.Sync.SyncConflict", b =>
+                {
+                    b.HasOne("TelecomPM.Domain.Entities.Sync.SyncQueue", null)
+                        .WithMany()
+                        .HasForeignKey("SyncQueueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TelecomPM.Domain.Entities.Visits.Visit", b =>
                 {
+                    b.OwnsOne("TelecomPM.Domain.ValueObjects.GeoLocation", "CheckInGeoLocation", b1 =>
+                        {
+                            b1.Property<Guid>("VisitId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<decimal>("Latitude")
+                                .HasPrecision(10, 8)
+                                .HasColumnType("decimal(10,8)")
+                                .HasColumnName("CheckInGeoLatitude");
+
+                            b1.Property<decimal>("Longitude")
+                                .HasPrecision(11, 8)
+                                .HasColumnType("decimal(11,8)")
+                                .HasColumnName("CheckInGeoLongitude");
+
+                            b1.HasKey("VisitId");
+
+                            b1.ToTable("Visits");
+
+                            b1.WithOwner()
+                                .HasForeignKey("VisitId");
+                        });
+
                     b.OwnsOne("TelecomPM.Domain.ValueObjects.Coordinates", "CheckInLocation", b1 =>
                         {
                             b1.Property<Guid>("VisitId")
@@ -3247,6 +3823,94 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("VisitId");
+                        });
+
+                    b.OwnsOne("TelecomPM.Domain.ValueObjects.GeoLocation", "CheckOutLocation", b1 =>
+                        {
+                            b1.Property<Guid>("VisitId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<decimal>("Latitude")
+                                .HasPrecision(10, 8)
+                                .HasColumnType("decimal(10,8)")
+                                .HasColumnName("CheckOutLatitude");
+
+                            b1.Property<decimal>("Longitude")
+                                .HasPrecision(11, 8)
+                                .HasColumnType("decimal(11,8)")
+                                .HasColumnName("CheckOutLongitude");
+
+                            b1.HasKey("VisitId");
+
+                            b1.ToTable("Visits");
+
+                            b1.WithOwner()
+                                .HasForeignKey("VisitId");
+                        });
+
+                    b.OwnsOne("TelecomPM.Domain.ValueObjects.Signature", "SiteContactSignature", b1 =>
+                        {
+                            b1.Property<Guid>("VisitId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("SignatureDataBase64")
+                                .IsRequired()
+                                .HasMaxLength(250000)
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("SiteContactSignatureBase64");
+
+                            b1.Property<DateTime>("SignedAtUtc")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("SiteContactSignedAtUtc");
+
+                            b1.Property<string>("SignerName")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("SiteContactSignerName");
+
+                            b1.Property<string>("SignerPhone")
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)")
+                                .HasColumnName("SiteContactSignerPhone");
+
+                            b1.Property<string>("SignerRole")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("SiteContactSignerRole");
+
+                            b1.HasKey("VisitId");
+
+                            b1.ToTable("Visits");
+
+                            b1.WithOwner()
+                                .HasForeignKey("VisitId");
+
+                            b1.OwnsOne("TelecomPM.Domain.ValueObjects.GeoLocation", "SignedAtLocation", b2 =>
+                                {
+                                    b2.Property<Guid>("SignatureVisitId")
+                                        .HasColumnType("uniqueidentifier");
+
+                                    b2.Property<decimal>("Latitude")
+                                        .HasPrecision(10, 8)
+                                        .HasColumnType("decimal(10,8)")
+                                        .HasColumnName("SiteContactSignedLatitude");
+
+                                    b2.Property<decimal>("Longitude")
+                                        .HasPrecision(11, 8)
+                                        .HasColumnType("decimal(11,8)")
+                                        .HasColumnName("SiteContactSignedLongitude");
+
+                                    b2.HasKey("SignatureVisitId");
+
+                                    b2.ToTable("Visits");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("SignatureVisitId");
+                                });
+
+                            b1.Navigation("SignedAtLocation");
                         });
 
                     b.OwnsOne("TelecomPM.Domain.ValueObjects.TimeRange", "ActualDuration", b1 =>
@@ -3272,7 +3936,13 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
 
                     b.Navigation("ActualDuration");
 
+                    b.Navigation("CheckInGeoLocation");
+
                     b.Navigation("CheckInLocation");
+
+                    b.Navigation("CheckOutLocation");
+
+                    b.Navigation("SiteContactSignature");
                 });
 
             modelBuilder.Entity("TelecomPM.Domain.Entities.Visits.VisitApproval", b =>
@@ -3436,6 +4106,143 @@ namespace TelecomPm.Infrastructure.Persistence.Migrations
                         .HasForeignKey("VisitId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TelecomPM.Domain.Entities.WorkOrders.WorkOrder", b =>
+                {
+                    b.OwnsOne("TelecomPM.Domain.ValueObjects.Signature", "ClientSignature", b1 =>
+                        {
+                            b1.Property<Guid>("WorkOrderId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("SignatureDataBase64")
+                                .IsRequired()
+                                .HasMaxLength(250000)
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("ClientSignatureBase64");
+
+                            b1.Property<DateTime>("SignedAtUtc")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("ClientSignedAtUtc");
+
+                            b1.Property<string>("SignerName")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("ClientSignerName");
+
+                            b1.Property<string>("SignerPhone")
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)")
+                                .HasColumnName("ClientSignerPhone");
+
+                            b1.Property<string>("SignerRole")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("ClientSignerRole");
+
+                            b1.HasKey("WorkOrderId");
+
+                            b1.ToTable("WorkOrders");
+
+                            b1.WithOwner()
+                                .HasForeignKey("WorkOrderId");
+
+                            b1.OwnsOne("TelecomPM.Domain.ValueObjects.GeoLocation", "SignedAtLocation", b2 =>
+                                {
+                                    b2.Property<Guid>("SignatureWorkOrderId")
+                                        .HasColumnType("uniqueidentifier");
+
+                                    b2.Property<decimal>("Latitude")
+                                        .HasPrecision(10, 8)
+                                        .HasColumnType("decimal(10,8)")
+                                        .HasColumnName("ClientSignedLatitude");
+
+                                    b2.Property<decimal>("Longitude")
+                                        .HasPrecision(11, 8)
+                                        .HasColumnType("decimal(11,8)")
+                                        .HasColumnName("ClientSignedLongitude");
+
+                                    b2.HasKey("SignatureWorkOrderId");
+
+                                    b2.ToTable("WorkOrders");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("SignatureWorkOrderId");
+                                });
+
+                            b1.Navigation("SignedAtLocation");
+                        });
+
+                    b.OwnsOne("TelecomPM.Domain.ValueObjects.Signature", "EngineerSignature", b1 =>
+                        {
+                            b1.Property<Guid>("WorkOrderId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("SignatureDataBase64")
+                                .IsRequired()
+                                .HasMaxLength(250000)
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("EngineerSignatureBase64");
+
+                            b1.Property<DateTime>("SignedAtUtc")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("EngineerSignedAtUtc");
+
+                            b1.Property<string>("SignerName")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("EngineerSignerName");
+
+                            b1.Property<string>("SignerPhone")
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)")
+                                .HasColumnName("EngineerSignerPhone");
+
+                            b1.Property<string>("SignerRole")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("EngineerSignerRole");
+
+                            b1.HasKey("WorkOrderId");
+
+                            b1.ToTable("WorkOrders");
+
+                            b1.WithOwner()
+                                .HasForeignKey("WorkOrderId");
+
+                            b1.OwnsOne("TelecomPM.Domain.ValueObjects.GeoLocation", "SignedAtLocation", b2 =>
+                                {
+                                    b2.Property<Guid>("SignatureWorkOrderId")
+                                        .HasColumnType("uniqueidentifier");
+
+                                    b2.Property<decimal>("Latitude")
+                                        .HasPrecision(10, 8)
+                                        .HasColumnType("decimal(10,8)")
+                                        .HasColumnName("EngineerSignedLatitude");
+
+                                    b2.Property<decimal>("Longitude")
+                                        .HasPrecision(11, 8)
+                                        .HasColumnType("decimal(11,8)")
+                                        .HasColumnName("EngineerSignedLongitude");
+
+                                    b2.HasKey("SignatureWorkOrderId");
+
+                                    b2.ToTable("WorkOrders");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("SignatureWorkOrderId");
+                                });
+
+                            b1.Navigation("SignedAtLocation");
+                        });
+
+                    b.Navigation("ClientSignature");
+
+                    b.Navigation("EngineerSignature");
                 });
 
             modelBuilder.Entity("TelecomPM.Domain.Entities.Materials.Material", b =>

@@ -13,6 +13,7 @@ public sealed class Site : AggregateRoot<Guid>
     public SiteCode SiteCode { get; private set; } = null!;
     public string Name { get; private set; } = string.Empty;
     public string OMCName { get; private set; } = string.Empty;
+    public string? ClientCode { get; private set; }
     
     // Location
     public Guid OfficeId { get; private set; }
@@ -26,6 +27,7 @@ public sealed class Site : AggregateRoot<Guid>
     public SiteComplexity Complexity { get; private set; }
     public SiteStatus Status { get; private set; }
     public DateTime? AnnouncementDate { get; private set; }
+    public decimal? AllowedCheckInRadiusMeters { get; private set; }
     
     // BSC Info
     public string BSCName { get; private set; } = string.Empty;
@@ -40,6 +42,12 @@ public sealed class Site : AggregateRoot<Guid>
     public string? GeneralNotes { get; private set; }
     public SiteEnclosureType? EnclosureType { get; private set; }
     public string? EnclosureTypeRaw { get; private set; }
+    public TowerOwnershipType TowerOwnershipType { get; private set; } = TowerOwnershipType.Host;
+    public ResponsibilityScope ResponsibilityScope { get; private set; } = ResponsibilityScope.Full;
+    public string? TowerOwnerName { get; private set; }
+    public string? SharingAgreementRef { get; private set; }
+    public string? HostContactName { get; private set; }
+    public string? HostContactPhone { get; private set; }
     
     // Components (Navigation Properties)
     public SiteTowerInfo TowerInfo { get; private set; } = null!;
@@ -85,6 +93,8 @@ public sealed class Site : AggregateRoot<Guid>
         SiteType = siteType;
         Status = SiteStatus.OnAir;
         Complexity = SiteComplexity.Low;
+        TowerOwnershipType = TowerOwnershipType.Host;
+        ResponsibilityScope = ResponsibilityScope.Full;
     }
 
     public static Site Create(
@@ -120,6 +130,13 @@ public sealed class Site : AggregateRoot<Guid>
         MarkAsUpdated("System");
     }
 
+    public void SetClientCode(string? clientCode)
+    {
+        ClientCode = string.IsNullOrWhiteSpace(clientCode)
+            ? null
+            : clientCode.Trim().ToUpperInvariant();
+    }
+
     public void SetBSCInfo(string bscName, string bscCode)
     {
         BSCName = bscName;
@@ -144,10 +161,40 @@ public sealed class Site : AggregateRoot<Guid>
         GeneralNotes = generalNotes;
     }
 
+    public void SetAllowedCheckInRadius(decimal? allowedRadiusMeters)
+    {
+        if (allowedRadiusMeters.HasValue && allowedRadiusMeters <= 0)
+            throw new DomainException("Allowed check-in radius must be greater than zero.");
+
+        AllowedCheckInRadiusMeters = allowedRadiusMeters;
+    }
+
     public void SetEnclosureInfo(SiteEnclosureType? enclosureType, string? enclosureTypeRaw)
     {
         EnclosureType = enclosureType;
         EnclosureTypeRaw = enclosureTypeRaw;
+    }
+
+    public void SetOwnership(
+        TowerOwnershipType towerOwnershipType,
+        string? towerOwnerName,
+        string? sharingAgreementRef,
+        string? hostContactName,
+        string? hostContactPhone)
+    {
+        TowerOwnershipType = towerOwnershipType;
+        TowerOwnerName = towerOwnerName;
+        SharingAgreementRef = sharingAgreementRef;
+        HostContactName = hostContactName;
+        HostContactPhone = hostContactPhone;
+
+        ResponsibilityScope = towerOwnershipType switch
+        {
+            TowerOwnershipType.Host => ResponsibilityScope.Full,
+            TowerOwnershipType.Guest => ResponsibilityScope.EquipmentOnly,
+            TowerOwnershipType.IndependentTower => ResponsibilityScope.EquipmentOnly,
+            _ => ResponsibilityScope.Full
+        };
     }
 
     public void SetTowerInfo(SiteTowerInfo towerInfo)

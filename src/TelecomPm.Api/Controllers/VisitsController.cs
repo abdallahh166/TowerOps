@@ -96,6 +96,26 @@ public sealed class VisitsController : ApiControllerBase
         return HandleResult(result);
     }
 
+    [HttpPost("{visitId:guid}/checkin")]
+    public async Task<IActionResult> CheckIn(
+        Guid visitId,
+        [FromBody] CheckInVisitRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("{visitId:guid}/checkout")]
+    public async Task<IActionResult> CheckOut(
+        Guid visitId,
+        [FromBody] CheckOutVisitRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
+        return HandleResult(result);
+    }
+
     [HttpPost("{visitId:guid}/complete")]
     public async Task<IActionResult> Complete(
         Guid visitId,
@@ -285,6 +305,23 @@ public sealed class VisitsController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(request.ToCommand(visitId, readingId), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("{visitId:guid}/signature")]
+    public async Task<IActionResult> CaptureSignature(
+        Guid visitId,
+        [FromBody] CaptureVisitSignatureRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpGet("{visitId:guid}/signature")]
+    public async Task<IActionResult> GetSignature(Guid visitId, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(visitId.ToVisitSignatureQuery(), cancellationToken);
         return HandleResult(result);
     }
 

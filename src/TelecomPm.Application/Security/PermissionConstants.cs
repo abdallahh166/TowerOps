@@ -61,6 +61,13 @@ public static class PermissionConstants
     public const string EscalationsCreate = "escalations.create";
     public const string EscalationsApprove = "escalations.approve";
 
+    // Client portal
+    public const string PortalViewSites = "portal.view_sites";
+    public const string PortalViewVisits = "portal.view_visits";
+    public const string PortalViewKpis = "portal.view_kpis";
+    public const string PortalViewWorkOrders = "portal.view_workorders";
+    public const string PortalViewSla = "portal.view_sla";
+
     public static readonly IReadOnlyList<string> All = new[]
     {
         SitesView, SitesCreate, SitesEdit, SitesImport, SitesExport,
@@ -72,6 +79,7 @@ public static class PermissionConstants
         UsersView, UsersCreate, UsersEdit, UsersDelete, UsersChangeRole,
         SettingsView, SettingsEdit,
         MaterialsView, MaterialsManage,
-        EscalationsView, EscalationsCreate, EscalationsApprove
+        EscalationsView, EscalationsCreate, EscalationsApprove,
+        PortalViewSites, PortalViewVisits, PortalViewKpis, PortalViewWorkOrders, PortalViewSla
     };
 }
