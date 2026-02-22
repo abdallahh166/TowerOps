@@ -21,13 +21,22 @@ public class VisitServicesTests
     }
 
     [Fact]
-    public void VisitValidationService_ShouldReportMissingPhotosAndReadings()
+    public void VisitValidationService_ShouldReportMaterialPhotoErrors()
     {
         var visit = Visit.Create("V1", Guid.NewGuid(), "TNT001", "Site1", Guid.NewGuid(), "Eng", DateTime.Today, VisitType.PreventiveMaintenance);
         var site = CreateSite();
+        visit.LogMaterialUsage(VisitMaterialUsage.Create(
+            visit.Id,
+            Guid.NewGuid(),
+            "M-1",
+            "Battery",
+            MaterialCategory.Power,
+            MaterialQuantity.Create(1, MaterialUnit.Pieces),
+            Money.Create(100m, "EGP"),
+            "Replacement"));
 
         var validation = new TelecomPM.Infrastructure.Services.VisitValidationService().ValidateVisitCompletion(visit, site);
-        validation.Errors.Should().NotBeEmpty();
+        validation.Errors.Should().ContainKey("Materials");
     }
 
     [Fact]

@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TelecomPM.Application.Common;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Exceptions;
 using TelecomPM.Domain.Interfaces.Repositories;
@@ -17,19 +18,22 @@ public class ApproveVisitCommandHandler : IRequestHandler<ApproveVisitCommand, R
     private readonly ISiteRepository _siteRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IVisitApprovalPolicyService _approvalPolicyService;
+    private readonly ICurrentUserService _currentUserService;
 
     public ApproveVisitCommandHandler(
         IVisitRepository visitRepository,
         IUserRepository userRepository,
         ISiteRepository siteRepository,
         IUnitOfWork unitOfWork,
-        IVisitApprovalPolicyService approvalPolicyService)
+        IVisitApprovalPolicyService approvalPolicyService,
+        ICurrentUserService currentUserService)
     {
         _visitRepository = visitRepository;
         _userRepository = userRepository;
         _siteRepository = siteRepository;
         _unitOfWork = unitOfWork;
         _approvalPolicyService = approvalPolicyService;
+        _currentUserService = currentUserService;
     }
 
     public async Task<Result> Handle(ApproveVisitCommand request, CancellationToken cancellationToken)
@@ -38,7 +42,10 @@ public class ApproveVisitCommandHandler : IRequestHandler<ApproveVisitCommand, R
         if (visit == null)
             return Result.Failure("Visit not found");
 
-        var reviewer = await _userRepository.GetByIdAsync(request.ReviewerId, cancellationToken);
+        if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
+            return Result.Failure("Authenticated reviewer is required");
+
+        var reviewer = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken);
         if (reviewer == null)
             return Result.Failure("Reviewer not found");
 
@@ -48,6 +55,11 @@ public class ApproveVisitCommandHandler : IRequestHandler<ApproveVisitCommand, R
 
         try
         {
+            if (visit.Status == VisitStatus.Submitted)
+            {
+                visit.StartReview();
+            }
+
             visit.Approve(reviewer.Id, reviewer.Name, request.Notes);
 
             // Update site last visit date

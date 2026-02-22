@@ -11,7 +11,7 @@ using TelecomPm.Api.Mappings;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Policy = ApiAuthorizationPolicies.CanManageOffices)]
 public sealed class OfficesController : ApiControllerBase
 {
     [HttpPost]

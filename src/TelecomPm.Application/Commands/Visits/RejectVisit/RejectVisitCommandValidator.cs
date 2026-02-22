@@ -9,9 +9,6 @@ public class RejectVisitCommandValidator : AbstractValidator<RejectVisitCommand>
         RuleFor(x => x.VisitId)
             .NotEmpty().WithMessage("Visit ID is required");
 
-        RuleFor(x => x.ReviewerId)
-            .NotEmpty().WithMessage("Reviewer ID is required");
-
         RuleFor(x => x.RejectionReason)
             .NotEmpty().WithMessage("Rejection reason is required")
             .MinimumLength(10).WithMessage("Rejection reason must be at least 10 characters")

@@ -4,8 +4,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TelecomPm.Api.Contracts.Settings;
 using TelecomPM.Api.Authorization;
+using TelecomPM.Application.Commands.Settings.UpsertSystemSettings;
 using TelecomPM.Application.Common.Interfaces;
-using TelecomPM.Domain.Entities.SystemSettings;
+using TelecomPM.Application.DTOs.Settings;
+using TelecomPM.Application.Queries.Settings.GetAllSystemSettings;
+using TelecomPM.Application.Queries.Settings.GetSystemSettingsByGroup;
 using TelecomPM.Domain.Interfaces.Repositories;
 
 [ApiController]
@@ -13,26 +16,17 @@ using TelecomPM.Domain.Interfaces.Repositories;
 [Authorize(Policy = ApiAuthorizationPolicies.CanManageSettings)]
 public sealed class SettingsController : ApiControllerBase
 {
-    private readonly ISystemSettingsRepository _settingsRepository;
-    private readonly ISettingsEncryptionService _settingsEncryptionService;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly INotificationService _notificationService;
     private readonly IEmailService _emailService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUserRepository _userRepository;
 
     public SettingsController(
-        ISystemSettingsRepository settingsRepository,
-        ISettingsEncryptionService settingsEncryptionService,
-        IUnitOfWork unitOfWork,
         INotificationService notificationService,
         IEmailService emailService,
         ICurrentUserService currentUserService,
         IUserRepository userRepository)
     {
-        _settingsRepository = settingsRepository;
-        _settingsEncryptionService = settingsEncryptionService;
-        _unitOfWork = unitOfWork;
         _notificationService = notificationService;
         _emailService = emailService;
         _currentUserService = currentUserService;
@@ -42,9 +36,11 @@ public sealed class SettingsController : ApiControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAllAsNoTrackingAsync(cancellationToken);
+        var result = await Mediator.Send(new GetAllSystemSettingsQuery(), cancellationToken);
+        if (!result.IsSuccess || result.Value is null)
+            return HandleResult(result);
 
-        var grouped = settings
+        var grouped = result.Value
             .GroupBy(s => s.Group)
             .OrderBy(g => g.Key)
             .ToDictionary(
@@ -60,8 +56,14 @@ public sealed class SettingsController : ApiControllerBase
     [HttpGet("{group}")]
     public async Task<IActionResult> GetByGroup(string group, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetByGroupAsync(group, cancellationToken);
-        var response = settings
+        var result = await Mediator.Send(
+            new GetSystemSettingsByGroupQuery { Group = group },
+            cancellationToken);
+
+        if (!result.IsSuccess || result.Value is null)
+            return HandleResult(result);
+
+        var response = result.Value
             .OrderBy(s => s.Key)
             .Select(ToResponse)
             .ToList();
@@ -74,31 +76,23 @@ public sealed class SettingsController : ApiControllerBase
         [FromBody] IReadOnlyList<UpsertSystemSettingRequest> request,
         CancellationToken cancellationToken)
     {
-        if (request.Count == 0)
-        {
-            return BadRequest("At least one setting is required.");
-        }
+        var result = await Mediator.Send(
+            new UpsertSystemSettingsCommand
+            {
+                UpdatedBy = ResolveUpdatedBy(),
+                Settings = request.Select(s => new UpsertSystemSettingItem
+                {
+                    Key = s.Key,
+                    Value = s.Value,
+                    Group = s.Group,
+                    DataType = s.DataType,
+                    Description = s.Description,
+                    IsEncrypted = s.IsEncrypted
+                }).ToList()
+            },
+            cancellationToken);
 
-        var updatedBy = ResolveUpdatedBy();
-
-        var settings = request
-            .Where(s => !string.IsNullOrWhiteSpace(s.Key))
-            .Select(s => SystemSetting.Create(
-                s.Key.Trim(),
-                s.IsEncrypted
-                    ? _settingsEncryptionService.Encrypt(s.Value ?? string.Empty)
-                    : s.Value ?? string.Empty,
-                string.IsNullOrWhiteSpace(s.Group) ? ResolveGroupFromKey(s.Key) : s.Group.Trim(),
-                string.IsNullOrWhiteSpace(s.DataType) ? "string" : s.DataType.Trim(),
-                s.Description,
-                s.IsEncrypted,
-                updatedBy))
-            .ToList();
-
-        await _settingsRepository.UpsertManyAsync(settings, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return Ok();
+        return HandleResult(result);
     }
 
     [HttpPost("test/{service}")]
@@ -163,7 +157,7 @@ public sealed class SettingsController : ApiControllerBase
         return Ok(new { message = "Firebase test sent." });
     }
 
-    private static SystemSettingResponse ToResponse(SystemSetting setting)
+    private static SystemSettingResponse ToResponse(SystemSettingDto setting)
     {
         return new SystemSettingResponse
         {
@@ -174,7 +168,7 @@ public sealed class SettingsController : ApiControllerBase
             IsEncrypted = setting.IsEncrypted,
             UpdatedAtUtc = setting.UpdatedAtUtc,
             UpdatedBy = setting.UpdatedBy,
-            Value = setting.IsEncrypted ? "***" : setting.Value
+            Value = setting.Value
         };
     }
 
@@ -184,11 +178,5 @@ public sealed class SettingsController : ApiControllerBase
             return _currentUserService.Email;
 
         return "System";
-    }
-
-    private static string ResolveGroupFromKey(string key)
-    {
-        var parts = key.Split(':', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length > 0 ? parts[0] : "General";
     }
 }

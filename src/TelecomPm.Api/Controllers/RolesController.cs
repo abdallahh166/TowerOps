@@ -4,31 +4,27 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TelecomPm.Api.Contracts.Roles;
 using TelecomPM.Api.Authorization;
+using TelecomPM.Application.Commands.Roles.CreateApplicationRole;
+using TelecomPM.Application.Commands.Roles.DeleteApplicationRole;
+using TelecomPM.Application.Commands.Roles.UpdateApplicationRole;
+using TelecomPM.Application.DTOs.Roles;
+using TelecomPM.Application.Queries.Roles.GetAllApplicationRoles;
+using TelecomPM.Application.Queries.Roles.GetApplicationRoleById;
 using TelecomPM.Application.Security;
-using TelecomPM.Domain.Entities.ApplicationRoles;
-using TelecomPM.Domain.Interfaces.Repositories;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Policy = ApiAuthorizationPolicies.CanManageSettings)]
 public sealed class RolesController : ApiControllerBase
 {
-    private readonly IApplicationRoleRepository _roleRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public RolesController(
-        IApplicationRoleRepository roleRepository,
-        IUnitOfWork unitOfWork)
-    {
-        _roleRepository = roleRepository;
-        _unitOfWork = unitOfWork;
-    }
-
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var roles = await _roleRepository.GetAllAsNoTrackingAsync(cancellationToken);
-        return Ok(roles.OrderBy(r => r.Name).Select(ToResponse).ToList());
+        var result = await Mediator.Send(new GetAllApplicationRolesQuery(), cancellationToken);
+        if (!result.IsSuccess || result.Value is null)
+            return HandleResult(result);
+
+        return Ok(result.Value.Select(ToResponse).ToList());
     }
 
     [HttpGet("permissions")]
@@ -40,82 +36,85 @@ public sealed class RolesController : ApiControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
     {
-        var role = await _roleRepository.GetByIdAsNoTrackingAsync(id, cancellationToken);
-        if (role is null)
-            return NotFound();
+        var result = await Mediator.Send(
+            new GetApplicationRoleByIdQuery { Id = id },
+            cancellationToken);
 
-        return Ok(ToResponse(role));
+        if (!result.IsSuccess || result.Value is null)
+            return HandleResult(result);
+
+        return Ok(ToResponse(result.Value));
     }
 
     [HttpPost]
-    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSettings)]
     public async Task<IActionResult> Create(
         [FromBody] CreateRoleRequest request,
         CancellationToken cancellationToken)
     {
-        var name = request.Name.Trim();
-        if (string.IsNullOrWhiteSpace(name))
-            return BadRequest("Role name is required.");
+        var result = await Mediator.Send(
+            new CreateApplicationRoleCommand
+            {
+                Name = request.Name,
+                DisplayName = request.DisplayName,
+                Description = request.Description,
+                IsActive = request.IsActive,
+                Permissions = request.Permissions
+            },
+            cancellationToken);
 
-        var existing = await _roleRepository.GetByIdAsync(name, cancellationToken);
-        if (existing is not null)
-            return Conflict($"Role '{name}' already exists.");
+        if (!result.IsSuccess || result.Value is null)
+        {
+            if (result.Error.Contains("already exists", StringComparison.OrdinalIgnoreCase))
+                return Conflict(result.Error);
 
-        var role = ApplicationRole.Create(
-            name,
-            request.DisplayName,
-            request.Description,
-            isSystem: false,
-            isActive: request.IsActive,
-            request.Permissions);
+            return HandleResult(result);
+        }
 
-        await _roleRepository.AddAsync(role, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return CreatedAtAction(nameof(GetById), new { id = role.Id }, ToResponse(role));
+        return CreatedAtAction(nameof(GetById), new { id = result.Value.Name }, ToResponse(result.Value));
     }
 
     [HttpPut("{id}")]
-    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSettings)]
     public async Task<IActionResult> Update(
         string id,
         [FromBody] UpdateRoleRequest request,
         CancellationToken cancellationToken)
     {
-        var role = await _roleRepository.GetByIdAsync(id, cancellationToken);
-        if (role is null)
-            return NotFound();
+        var result = await Mediator.Send(
+            new UpdateApplicationRoleCommand
+            {
+                Id = id,
+                DisplayName = request.DisplayName,
+                Description = request.Description,
+                IsActive = request.IsActive,
+                Permissions = request.Permissions
+            },
+            cancellationToken);
 
-        role.Update(
-            request.DisplayName,
-            request.Description,
-            request.IsActive,
-            request.Permissions);
+        if (!result.IsSuccess || result.Value is null)
+            return HandleResult(result);
 
-        await _roleRepository.UpdateAsync(role, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return Ok(ToResponse(role));
+        return Ok(ToResponse(result.Value));
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSettings)]
     public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
     {
-        var role = await _roleRepository.GetByIdAsync(id, cancellationToken);
-        if (role is null)
-            return NotFound();
+        var result = await Mediator.Send(
+            new DeleteApplicationRoleCommand { Id = id },
+            cancellationToken);
 
-        if (!role.CanBeDeleted())
-            return BadRequest("System roles cannot be deleted.");
+        if (!result.IsSuccess)
+        {
+            if (result.Error.Contains("system roles cannot be deleted", StringComparison.OrdinalIgnoreCase))
+                return BadRequest(result.Error);
 
-        await _roleRepository.DeleteAsync(role, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+            return HandleResult(result);
+        }
 
         return NoContent();
     }
 
-    private static RoleResponse ToResponse(ApplicationRole role)
+    private static RoleResponse ToResponse(ApplicationRoleDto role)
     {
         return new RoleResponse
         {

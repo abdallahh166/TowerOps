@@ -11,21 +11,21 @@ public sealed class GetPortalVisitsQueryHandler : IRequestHandler<GetPortalVisit
     private readonly ICurrentUserService _currentUserService;
     private readonly IUserRepository _userRepository;
     private readonly ISiteRepository _siteRepository;
-    private readonly IVisitRepository _visitRepository;
     private readonly ISystemSettingsService _settingsService;
+    private readonly IPortalReadRepository _portalReadRepository;
 
     public GetPortalVisitsQueryHandler(
         ICurrentUserService currentUserService,
         IUserRepository userRepository,
         ISiteRepository siteRepository,
-        IVisitRepository visitRepository,
-        ISystemSettingsService settingsService)
+        ISystemSettingsService settingsService,
+        IPortalReadRepository portalReadRepository)
     {
         _currentUserService = currentUserService;
         _userRepository = userRepository;
         _siteRepository = siteRepository;
-        _visitRepository = visitRepository;
         _settingsService = settingsService;
+        _portalReadRepository = portalReadRepository;
     }
 
     public async Task<Result<IReadOnlyList<PortalVisitDto>>> Handle(GetPortalVisitsQuery request, CancellationToken cancellationToken)
@@ -39,20 +39,16 @@ public sealed class GetPortalVisitsQueryHandler : IRequestHandler<GetPortalVisit
             return Result.Failure<IReadOnlyList<PortalVisitDto>>("Site not found.");
 
         var anonymizeEngineers = await _settingsService.GetAsync("Portal:AnonymizeEngineers", true, cancellationToken);
-        var visits = await _visitRepository.GetBySiteIdAsNoTrackingAsync(site.Id, cancellationToken);
+        var safePageNumber = request.PageNumber < 1 ? 1 : request.PageNumber;
+        var safePageSize = Math.Clamp(request.PageSize, 1, 200);
 
-        var result = visits
-            .OrderByDescending(v => v.ScheduledDate)
-            .Select(v => new PortalVisitDto
-            {
-                VisitId = v.Id,
-                VisitNumber = v.VisitNumber,
-                Status = v.Status,
-                Type = v.Type,
-                ScheduledDate = v.ScheduledDate,
-                EngineerDisplayName = anonymizeEngineers ? "Field Engineer" : v.EngineerName
-            })
-            .ToList();
+        var result = await _portalReadRepository.GetVisitsAsync(
+            portalUser.ClientCode,
+            request.SiteCode,
+            safePageNumber,
+            safePageSize,
+            anonymizeEngineers,
+            cancellationToken);
 
         return Result.Success<IReadOnlyList<PortalVisitDto>>(result);
     }

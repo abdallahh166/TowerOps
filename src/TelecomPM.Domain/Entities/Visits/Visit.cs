@@ -85,7 +85,7 @@ public sealed class Visit : AggregateRoot<Guid>
         EngineerId = engineerId;
         EngineerName = engineerName;
         ScheduledDate = scheduledDate;
-        Type = type;
+        Type = type.ToCanonical();
         Status = VisitStatus.Scheduled;
     }
 

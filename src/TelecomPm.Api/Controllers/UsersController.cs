@@ -13,7 +13,7 @@ using TelecomPM.Domain.Enums;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Policy = ApiAuthorizationPolicies.CanViewUsers)]
 public sealed class UsersController : ApiControllerBase
 {
     private readonly ICurrentUserService _currentUserService;

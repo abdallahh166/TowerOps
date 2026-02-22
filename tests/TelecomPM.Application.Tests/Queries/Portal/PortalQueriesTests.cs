@@ -6,7 +6,6 @@ using TelecomPM.Application.Queries.Portal.GetPortalSites;
 using TelecomPM.Application.Queries.Portal.GetPortalVisits;
 using TelecomPM.Domain.Entities.Sites;
 using TelecomPM.Domain.Entities.Users;
-using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Interfaces.Repositories;
 using TelecomPM.Domain.ValueObjects;
@@ -61,15 +60,6 @@ public class PortalQueriesTests
         portalUser.EnableClientPortalAccess("ORANGE");
 
         var site = CreateSite("CAI001", "ORANGE");
-        var visit = Visit.Create(
-            "V1001",
-            site.Id,
-            site.SiteCode.Value,
-            site.Name,
-            Guid.NewGuid(),
-            "Ahmed Engineer",
-            DateTime.UtcNow,
-            VisitType.BM);
 
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.SetupGet(x => x.UserId).Returns(portalUser.Id);
@@ -81,20 +71,32 @@ public class PortalQueriesTests
         sites.Setup(r => r.GetBySiteCodeAsNoTrackingAsync("CAI001", It.IsAny<CancellationToken>()))
             .ReturnsAsync(site);
 
-        var visits = new Mock<IVisitRepository>();
-        visits.Setup(r => r.GetBySiteIdAsNoTrackingAsync(site.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Visit> { visit });
-
         var settings = new Mock<ISystemSettingsService>();
         settings.Setup(s => s.GetAsync("Portal:AnonymizeEngineers", true, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
+
+        var portalReadRepository = new Mock<IPortalReadRepository>();
+        portalReadRepository
+            .Setup(r => r.GetVisitsAsync("ORANGE", "CAI001", 1, 50, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<PortalVisitDto>
+            {
+                new()
+                {
+                    VisitId = Guid.NewGuid(),
+                    VisitNumber = "V1001",
+                    Status = VisitStatus.Scheduled,
+                    Type = VisitType.BM,
+                    ScheduledDate = DateTime.UtcNow,
+                    EngineerDisplayName = "Field Engineer"
+                }
+            });
 
         var sut = new GetPortalVisitsQueryHandler(
             currentUser.Object,
             users.Object,
             sites.Object,
-            visits.Object,
-            settings.Object);
+            settings.Object,
+            portalReadRepository.Object);
 
         var result = await sut.Handle(new GetPortalVisitsQuery { SiteCode = "CAI001" }, CancellationToken.None);
 
