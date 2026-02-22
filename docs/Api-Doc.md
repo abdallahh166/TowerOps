@@ -3,6 +3,8 @@
 ## Overview
 The API layer exposes domain/application capabilities over RESTful ASP.NET Core Web API (`net8.0`). It follows Clean Architecture and keeps business rules in Application + Domain.
 
+Related: operational process and lifecycle diagrams are documented in `docs/Operational-Workflow.md`.
+
 ## Runtime Setup
 - JWT authentication (`JwtSettings`)
 - Policy-based authorization
