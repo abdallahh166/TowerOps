@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using TelecomPm.Api.Services;
@@ -15,7 +16,7 @@ namespace TelecomPM.Application.Tests.Services;
 public class JwtTokenServiceTests
 {
     [Fact]
-    public void GenerateToken_ShouldIncludePermissionsClaims()
+    public async Task GenerateToken_ShouldIncludePermissionsClaims()
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -38,7 +39,10 @@ public class JwtTokenServiceTests
                 isActive: true,
                 new[] { PermissionConstants.WorkOrdersAssign, PermissionConstants.SitesView }));
 
-        var service = new JwtTokenService(configuration, roleRepository.Object);
+        var service = new JwtTokenService(
+            configuration,
+            roleRepository.Object,
+            new MemoryCache(new MemoryCacheOptions()));
         var user = User.Create(
             "Manager User",
             "manager@example.com",
@@ -46,7 +50,7 @@ public class JwtTokenServiceTests
             UserRole.Manager,
             Guid.NewGuid());
 
-        var (token, _) = service.GenerateToken(user);
+        var (token, _) = await service.GenerateTokenAsync(user);
 
         var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
         jwt.Claims.Should().Contain(c =>

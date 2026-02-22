@@ -1,28 +1,39 @@
 using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Domain.Entities.SystemSettings;
 using TelecomPM.Domain.Interfaces.Repositories;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace TelecomPM.Infrastructure.Services;
 
 public sealed class SystemSettingsService : ISystemSettingsService
 {
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
     private readonly ISystemSettingsRepository _settingsRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISettingsEncryptionService _encryptionService;
+    private readonly IMemoryCache _memoryCache;
 
     public SystemSettingsService(
         ISystemSettingsRepository settingsRepository,
         IUnitOfWork unitOfWork,
-        ISettingsEncryptionService encryptionService)
+        ISettingsEncryptionService encryptionService,
+        IMemoryCache memoryCache)
     {
         _settingsRepository = settingsRepository;
         _unitOfWork = unitOfWork;
         _encryptionService = encryptionService;
+        _memoryCache = memoryCache;
     }
 
     public async Task<T> GetAsync<T>(string key, T defaultValue, CancellationToken cancellationToken = default)
     {
-        var setting = await _settingsRepository.GetAsync(key, cancellationToken);
+        var cacheKey = BuildCacheKey(key);
+        var setting = await _memoryCache.GetOrCreateAsync(cacheKey, async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = CacheDuration;
+            return await _settingsRepository.GetAsync(key, cancellationToken);
+        });
+
         if (setting is null)
         {
             return defaultValue;
@@ -58,11 +69,19 @@ public sealed class SystemSettingsService : ISystemSettingsService
 
         await _settingsRepository.UpsertAsync(setting, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _memoryCache.Remove(BuildCacheKey(key));
+        _memoryCache.Remove(BuildGroupCacheKey(group));
     }
 
     public async Task<Dictionary<string, string>> GetGroupAsync(string group, CancellationToken cancellationToken = default)
     {
-        var settings = await _settingsRepository.GetByGroupAsync(group, cancellationToken);
+        var normalizedGroup = string.IsNullOrWhiteSpace(group) ? "General" : group.Trim();
+        var settings = await _memoryCache.GetOrCreateAsync(BuildGroupCacheKey(normalizedGroup), async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = CacheDuration;
+            return await _settingsRepository.GetByGroupAsync(normalizedGroup, cancellationToken);
+        }) ?? Array.Empty<SystemSetting>();
 
         return settings.ToDictionary(
             setting => setting.Key,
@@ -144,4 +163,8 @@ public sealed class SystemSettingsService : ISystemSettingsService
                || key.Contains("key", StringComparison.OrdinalIgnoreCase)
                || key.Contains("auth", StringComparison.OrdinalIgnoreCase);
     }
+
+    private static string BuildCacheKey(string key) => $"system-setting:{key}";
+
+    private static string BuildGroupCacheKey(string group) => $"system-setting-group:{group}";
 }

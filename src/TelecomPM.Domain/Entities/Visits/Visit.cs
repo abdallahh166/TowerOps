@@ -473,20 +473,6 @@ public sealed class Visit : AggregateRoot<Guid>
     
     private void ValidateCompletion()
     {
-        // Check if all mandatory readings are collected
-        var requiredReadingsCount = 15; // Based on site complexity
-        IsReadingsComplete = Readings.Count >= requiredReadingsCount;
-
-        // Check if all mandatory photos are taken
-        var beforePhotos = Photos.Count(p => p.Type == PhotoType.Before);
-        var afterPhotos = Photos.Count(p => p.Type == PhotoType.After);
-        IsPhotosComplete = beforePhotos >= 30 && afterPhotos >= 30; // Minimum required
-
-        // Check if all checklist items are completed
-        var totalChecklistItems = Checklists.Count;
-        var completedItems = Checklists.Count(c => c.Status != CheckStatus.NA);
-        IsChecklistComplete = totalChecklistItems > 0 && completedItems == totalChecklistItems;
-
         CalculateCompletionPercentage();
     }
 
@@ -518,28 +504,34 @@ public sealed class Visit : AggregateRoot<Guid>
 
     private void CalculateCompletionPercentage()
     {
+        var beforePhotos = Photos.Count(p => p.Type == PhotoType.Before);
+        var afterPhotos = Photos.Count(p => p.Type == PhotoType.After);
+        var totalChecklistItems = Checklists.Count;
+        var completedChecklistItems = Checklists.Count(c => c.Status != CheckStatus.NA);
+
+        // Baseline completion snapshot without policy thresholds.
+        IsPhotosComplete = beforePhotos > 0 && afterPhotos > 0;
+        IsReadingsComplete = Readings.Count > 0;
+        IsChecklistComplete = totalChecklistItems > 0 && completedChecklistItems == totalChecklistItems;
+
         var achievedWeight = 0;
 
         // Photos: 40%
         var photosWeight = 40;
-        var beforePhotos = Photos.Count(p => p.Type == PhotoType.Before);
-        var afterPhotos = Photos.Count(p => p.Type == PhotoType.After);
-        var requiredPhotos = 30;
-        var photosScore = Math.Min(100, (beforePhotos + afterPhotos) * 100 / (requiredPhotos * 2));
+        var completedPhotoParts = (beforePhotos > 0 ? 1 : 0) + (afterPhotos > 0 ? 1 : 0);
+        var photosScore = completedPhotoParts * 50;
         achievedWeight += (int)(photosWeight * photosScore / 100);
 
         // Readings: 30%
         var readingsWeight = 30;
-        var requiredReadings = 15;
-        var readingsScore = Math.Min(100, Readings.Count * 100 / requiredReadings);
+        var readingsScore = Readings.Count > 0 ? 100 : 0;
         achievedWeight += (int)(readingsWeight * readingsScore / 100);
 
         // Checklist: 30%
         var checklistWeight = 30;
-        if (Checklists.Count > 0)
+        if (totalChecklistItems > 0)
         {
-            var completedChecklist = Checklists.Count(c => c.Status != CheckStatus.NA);
-            var checklistScore = completedChecklist * 100 / Checklists.Count;
+            var checklistScore = completedChecklistItems * 100 / totalChecklistItems;
             achievedWeight += (int)(checklistWeight * checklistScore / 100);
         }
 

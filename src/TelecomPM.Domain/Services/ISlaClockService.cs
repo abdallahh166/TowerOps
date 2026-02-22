@@ -5,7 +5,16 @@ namespace TelecomPM.Domain.Services;
 
 public interface ISlaClockService
 {
-    bool IsBreached(DateTime createdAtUtc, int responseMinutes, SlaClass slaClass);
-    DateTime CalculateDeadline(DateTime createdAtUtc, SlaClass slaClass);
-    SlaStatus EvaluateStatus(WorkOrder workOrder);
+    Task<bool> IsBreachedAsync(
+        DateTime createdAtUtc,
+        int responseMinutes,
+        SlaClass slaClass,
+        CancellationToken cancellationToken = default);
+
+    Task<DateTime> CalculateDeadlineAsync(
+        DateTime createdAtUtc,
+        SlaClass slaClass,
+        CancellationToken cancellationToken = default);
+
+    Task<SlaStatus> EvaluateStatusAsync(WorkOrder workOrder, CancellationToken cancellationToken = default);
 }

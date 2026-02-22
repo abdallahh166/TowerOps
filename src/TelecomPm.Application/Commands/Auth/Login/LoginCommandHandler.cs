@@ -39,7 +39,7 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, Result<A
             return Result.Failure<AuthTokenDto>("Invalid credentials.");
         }
 
-        var (token, expiresAtUtc) = _jwtTokenService.GenerateToken(user);
+        var (token, expiresAtUtc) = await _jwtTokenService.GenerateTokenAsync(user, cancellationToken);
         return Result.Success(new AuthTokenDto
         {
             AccessToken = token,

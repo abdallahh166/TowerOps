@@ -30,7 +30,10 @@ public sealed class GetVisitEvidenceStatusQueryHandler : IRequestHandler<GetVisi
         var beforePhotos = visit.Photos.Count(p => p.Type == PhotoType.Before);
         var afterPhotos = visit.Photos.Count(p => p.Type == PhotoType.After);
         var completedChecklistItems = visit.Checklists.Count(c => c.Status != CheckStatus.NA);
-        var effectivePolicy = _evidencePolicyService.GetEffectivePolicy(visit.Type, EvidencePolicy.DefaultFor(visit.Type));
+        var effectivePolicy = await _evidencePolicyService.GetEffectivePolicyAsync(
+            visit.Type,
+            EvidencePolicy.DefaultFor(visit.Type),
+            cancellationToken);
 
         var requiredPhotos = effectivePolicy.MinPhotosRequired;
         var requiredReadings = effectivePolicy.ReadingsRequired ? 1 : 0;

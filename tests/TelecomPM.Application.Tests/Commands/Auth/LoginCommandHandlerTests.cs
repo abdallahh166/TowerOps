@@ -32,8 +32,8 @@ public class LoginCommandHandlerTests
 
         var jwtService = new Mock<IJwtTokenService>();
         jwtService
-            .Setup(s => s.GenerateToken(user))
-            .Returns(("token", DateTime.UtcNow.AddMinutes(60)));
+            .Setup(s => s.GenerateTokenAsync(user, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(("token", DateTime.UtcNow.AddMinutes(60)));
 
         var handler = new LoginCommandHandler(
             userRepository.Object,

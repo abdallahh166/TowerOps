@@ -49,8 +49,8 @@ public class GetVisitEvidenceStatusQueryHandlerTests
         repo.Setup(r => r.GetByIdAsync(visit.Id, It.IsAny<CancellationToken>())).ReturnsAsync(visit);
         var evidencePolicyService = new Mock<IEvidencePolicyService>();
         evidencePolicyService
-            .Setup(s => s.GetEffectivePolicy(visit.Type, It.IsAny<EvidencePolicy>()))
-            .Returns(EvidencePolicy.Create(VisitType.BM, 30, true, true, 100));
+            .Setup(s => s.GetEffectivePolicyAsync(visit.Type, It.IsAny<EvidencePolicy>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(EvidencePolicy.Create(VisitType.BM, 30, true, true, 100));
 
         var handler = new GetVisitEvidenceStatusQueryHandler(repo.Object, evidencePolicyService.Object);
         var result = await handler.Handle(new GetVisitEvidenceStatusQuery { VisitId = visit.Id }, CancellationToken.None);

@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.Security;
@@ -12,18 +13,24 @@ using TelecomPM.Domain.Interfaces.Repositories;
 
 public sealed class JwtTokenService : IJwtTokenService
 {
+    private static readonly TimeSpan PermissionsCacheDuration = TimeSpan.FromMinutes(5);
     private readonly IConfiguration _configuration;
     private readonly IApplicationRoleRepository _applicationRoleRepository;
+    private readonly IMemoryCache _memoryCache;
 
     public JwtTokenService(
         IConfiguration configuration,
-        IApplicationRoleRepository applicationRoleRepository)
+        IApplicationRoleRepository applicationRoleRepository,
+        IMemoryCache memoryCache)
     {
         _configuration = configuration;
         _applicationRoleRepository = applicationRoleRepository;
+        _memoryCache = memoryCache;
     }
 
-    public (string token, DateTime expiresAtUtc) GenerateToken(User user)
+    public async Task<(string token, DateTime expiresAtUtc)> GenerateTokenAsync(
+        User user,
+        CancellationToken cancellationToken = default)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var secret = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT secret key is not configured.");
@@ -46,7 +53,7 @@ public sealed class JwtTokenService : IJwtTokenService
             new("OfficeId", user.OfficeId.ToString())
         };
 
-        foreach (var permission in ResolvePermissions(user.Role.ToString()))
+        foreach (var permission in await ResolvePermissionsAsync(user.Role.ToString(), cancellationToken))
         {
             claims.Add(new Claim(PermissionConstants.ClaimType, permission));
         }
@@ -65,18 +72,22 @@ public sealed class JwtTokenService : IJwtTokenService
         return (token, expiresAtUtc);
     }
 
-    private IReadOnlyList<string> ResolvePermissions(string roleName)
+    private async Task<IReadOnlyList<string>> ResolvePermissionsAsync(string roleName, CancellationToken cancellationToken)
     {
-        var role = _applicationRoleRepository
-            .GetByNameAsync(roleName)
-            .GetAwaiter()
-            .GetResult();
+        var cacheKey = $"jwt-role-permissions:{roleName.ToLowerInvariant()}";
 
-        if (role is not null && role.Permissions.Count > 0)
+        var cachedPermissions = await _memoryCache.GetOrCreateAsync(cacheKey, async entry =>
         {
-            return role.Permissions.ToList();
-        }
+            entry.AbsoluteExpirationRelativeToNow = PermissionsCacheDuration;
+            var role = await _applicationRoleRepository.GetByNameAsync(roleName, cancellationToken);
+            if (role is not null && role.Permissions.Count > 0)
+            {
+                return role.Permissions.ToList();
+            }
 
-        return RolePermissionDefaults.GetDefaultPermissions(roleName);
+            return RolePermissionDefaults.GetDefaultPermissions(roleName).ToList();
+        });
+
+        return cachedPermissions ?? RolePermissionDefaults.GetDefaultPermissions(roleName);
     }
 }

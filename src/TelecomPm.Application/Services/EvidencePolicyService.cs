@@ -15,9 +15,12 @@ public sealed class EvidencePolicyService : IEvidencePolicyService
         _settingsService = settingsService;
     }
 
-    public ValidationResult Validate(Visit visit, EvidencePolicy policy)
+    public async Task<ValidationResult> ValidateAsync(
+        Visit visit,
+        EvidencePolicy policy,
+        CancellationToken cancellationToken = default)
     {
-        var effectivePolicy = GetEffectivePolicy(visit.Type, policy);
+        var effectivePolicy = await GetEffectivePolicyAsync(visit.Type, policy, cancellationToken);
         var result = new ValidationResult();
 
         if (visit.Photos.Count < effectivePolicy.MinPhotosRequired)
@@ -46,9 +49,12 @@ public sealed class EvidencePolicyService : IEvidencePolicyService
         return result;
     }
 
-    public EvidencePolicy GetEffectivePolicy(VisitType visitType, EvidencePolicy fallback)
+    public async Task<EvidencePolicy> GetEffectivePolicyAsync(
+        VisitType visitType,
+        EvidencePolicy fallback,
+        CancellationToken cancellationToken = default)
     {
-        return ResolveEffectivePolicy(visitType, fallback);
+        return await ResolveEffectivePolicyAsync(visitType, fallback, cancellationToken);
     }
 
     private static int CalculateChecklistCompletionPercent(Visit visit)
@@ -60,20 +66,23 @@ public sealed class EvidencePolicyService : IEvidencePolicyService
         return completedCount * 100 / visit.Checklists.Count;
     }
 
-    private EvidencePolicy ResolveEffectivePolicy(VisitType visitType, EvidencePolicy fallback)
+    private async Task<EvidencePolicy> ResolveEffectivePolicyAsync(
+        VisitType visitType,
+        EvidencePolicy fallback,
+        CancellationToken cancellationToken)
     {
         var canonicalVisitType = visitType.ToCanonical();
         var keyPrefix = canonicalVisitType.IsCm() ? "CM" : "BM";
 
-        var minPhotos = _settingsService
-            .GetAsync($"Evidence:{keyPrefix}:MinPhotos", fallback.MinPhotosRequired)
-            .GetAwaiter()
-            .GetResult();
+        var minPhotos = await _settingsService.GetAsync(
+            $"Evidence:{keyPrefix}:MinPhotos",
+            fallback.MinPhotosRequired,
+            cancellationToken);
 
-        var checklistPercent = _settingsService
-            .GetAsync($"Evidence:{keyPrefix}:ChecklistCompletionPercent", fallback.MinChecklistCompletionPercent)
-            .GetAwaiter()
-            .GetResult();
+        var checklistPercent = await _settingsService.GetAsync(
+            $"Evidence:{keyPrefix}:ChecklistCompletionPercent",
+            fallback.MinChecklistCompletionPercent,
+            cancellationToken);
 
         return EvidencePolicy.Create(
             canonicalVisitType,

@@ -52,8 +52,16 @@ public class SubmitVisitCommandHandler : IRequestHandler<SubmitVisitCommand, Res
         }
 
         var evidencePolicy = EvidencePolicy.DefaultFor(visit.Type);
-        var effectivePolicy = _evidencePolicyService.GetEffectivePolicy(visit.Type, evidencePolicy);
-        var evidenceResult = _evidencePolicyService.Validate(visit, evidencePolicy);
+        var effectivePolicy = await _evidencePolicyService.GetEffectivePolicyAsync(
+            visit.Type,
+            evidencePolicy,
+            cancellationToken);
+
+        var evidenceResult = await _evidencePolicyService.ValidateAsync(
+            visit,
+            evidencePolicy,
+            cancellationToken);
+
         if (!evidenceResult.IsValid)
         {
             var errors = string.Join(", ", evidenceResult.Errors.SelectMany(e => e.Value));

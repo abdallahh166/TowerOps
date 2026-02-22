@@ -24,7 +24,7 @@ public class EvidencePolicyServiceTests
     }
 
     [Fact]
-    public void Validate_ShouldFail_WhenPhotosAreInsufficient()
+    public async Task Validate_ShouldFail_WhenPhotosAreInsufficient()
     {
         var visit = CreateVisit(VisitType.PreventiveMaintenance);
         visit.AddPhoto(CreatePhoto(visit.Id, "before-1.jpg"));
@@ -36,14 +36,14 @@ public class EvidencePolicyServiceTests
             checklistRequired: false,
             minChecklistCompletionPercent: 0);
 
-        var result = _service.Validate(visit, policy);
+        var result = await _service.ValidateAsync(visit, policy);
 
         result.IsValid.Should().BeFalse();
         result.Errors.Should().ContainKey("EvidencePolicy.Photos");
     }
 
     [Fact]
-    public void Validate_ShouldPass_WhenPolicyIsMet()
+    public async Task Validate_ShouldPass_WhenPolicyIsMet()
     {
         var visit = CreateVisit(VisitType.PreventiveMaintenance);
 
@@ -68,13 +68,13 @@ public class EvidencePolicyServiceTests
             checklistRequired: true,
             minChecklistCompletionPercent: 80);
 
-        var result = _service.Validate(visit, policy);
+        var result = await _service.ValidateAsync(visit, policy);
 
         result.IsValid.Should().BeTrue();
     }
 
     [Fact]
-    public void Validate_ShouldReadThresholdsFromSettings()
+    public async Task Validate_ShouldReadThresholdsFromSettings()
     {
         var visit = CreateVisit(VisitType.BM);
         visit.AddPhoto(CreatePhoto(visit.Id, "only-one.jpg"));
@@ -89,7 +89,7 @@ public class EvidencePolicyServiceTests
 
         var policy = EvidencePolicy.Create(VisitType.BM, 3, false, false, 80);
 
-        var result = _service.Validate(visit, policy);
+        var result = await _service.ValidateAsync(visit, policy);
 
         result.IsValid.Should().BeTrue();
     }

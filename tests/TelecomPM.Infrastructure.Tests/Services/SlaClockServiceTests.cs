@@ -39,60 +39,60 @@ public class SlaClockServiceTests
     [InlineData(SlaClass.P2, 241, true)]
     [InlineData(SlaClass.P3, 1439, false)]
     [InlineData(SlaClass.P3, 1441, true)]
-    public void IsBreached_ShouldRespectFrozenSlaMatrix(SlaClass slaClass, int responseMinutes, bool expectedBreached)
+    public async Task IsBreached_ShouldRespectFrozenSlaMatrix(SlaClass slaClass, int responseMinutes, bool expectedBreached)
     {
         var createdAtUtc = DateTime.UtcNow;
 
-        var isBreached = _service.IsBreached(createdAtUtc, responseMinutes, slaClass);
+        var isBreached = await _service.IsBreachedAsync(createdAtUtc, responseMinutes, slaClass);
 
         isBreached.Should().Be(expectedBreached);
     }
 
     [Fact]
-    public void EvaluateStatus_ShouldReturnOnTime_WhenFarFromDeadline()
+    public async Task EvaluateStatus_ShouldReturnOnTime_WhenFarFromDeadline()
     {
         var workOrder = WorkOrder.Create("WO-SLA-1", "S-1", "CAI", SlaClass.P1, "Issue");
         SetResponseDeadline(workOrder, DateTime.UtcNow.AddMinutes(50));
 
-        var status = _service.EvaluateStatus(workOrder);
+        var status = await _service.EvaluateStatusAsync(workOrder);
 
         status.Should().Be(SlaStatus.OnTime);
     }
 
     [Fact]
-    public void EvaluateStatus_ShouldReturnAtRisk_WhenWithinThirtyMinutesToDeadline()
+    public async Task EvaluateStatus_ShouldReturnAtRisk_WhenWithinThirtyMinutesToDeadline()
     {
         var workOrder = WorkOrder.Create("WO-SLA-2", "S-2", "CAI", SlaClass.P1, "Issue");
         SetResponseDeadline(workOrder, DateTime.UtcNow.AddMinutes(15));
 
-        var status = _service.EvaluateStatus(workOrder);
+        var status = await _service.EvaluateStatusAsync(workOrder);
 
         status.Should().Be(SlaStatus.AtRisk);
     }
 
     [Fact]
-    public void EvaluateStatus_ShouldReturnBreached_WhenPastDeadline()
+    public async Task EvaluateStatus_ShouldReturnBreached_WhenPastDeadline()
     {
         var workOrder = WorkOrder.Create("WO-SLA-3", "S-3", "CAI", SlaClass.P1, "Issue");
         SetResponseDeadline(workOrder, DateTime.UtcNow.AddMinutes(-1));
 
-        var status = _service.EvaluateStatus(workOrder);
+        var status = await _service.EvaluateStatusAsync(workOrder);
 
         status.Should().Be(SlaStatus.Breached);
     }
 
     [Fact]
-    public void EvaluateStatus_ShouldReturnOnTime_ForBacklogP4()
+    public async Task EvaluateStatus_ShouldReturnOnTime_ForBacklogP4()
     {
         var workOrder = WorkOrder.Create("WO-SLA-4", "S-4", "CAI", SlaClass.P4, "Issue");
 
-        var status = _service.EvaluateStatus(workOrder);
+        var status = await _service.EvaluateStatusAsync(workOrder);
 
         status.Should().Be(SlaStatus.OnTime);
     }
 
     [Fact]
-    public void CalculateDeadline_ShouldUseSettingsValue_NotHardcoded()
+    public async Task CalculateDeadline_ShouldUseSettingsValue_NotHardcoded()
     {
         _settingsServiceMock
             .Setup(s => s.GetAsync("SLA:P1:ResponseMinutes", 60, It.IsAny<CancellationToken>()))
@@ -100,7 +100,7 @@ public class SlaClockServiceTests
 
         var createdAt = new DateTime(2026, 2, 21, 0, 0, 0, DateTimeKind.Utc);
 
-        var deadline = _service.CalculateDeadline(createdAt, SlaClass.P1);
+        var deadline = await _service.CalculateDeadlineAsync(createdAt, SlaClass.P1);
 
         deadline.Should().Be(createdAt.AddMinutes(90));
     }

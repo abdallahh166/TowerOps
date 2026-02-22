@@ -4,5 +4,5 @@ using TelecomPM.Domain.Entities.Users;
 
 public interface IJwtTokenService
 {
-    (string token, DateTime expiresAtUtc) GenerateToken(User user);
+    Task<(string token, DateTime expiresAtUtc)> GenerateTokenAsync(User user, CancellationToken cancellationToken = default);
 }

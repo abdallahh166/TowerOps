@@ -37,7 +37,7 @@ public class SubmitVisitCommandHandlerTests
         visit.AddChecklistItem(checklist);
         visit.CompleteVisit();
 
-        visit.IsPhotosComplete.Should().BeFalse(); // Legacy 30-photo threshold is not met.
+        visit.IsPhotosComplete.Should().BeFalse(); // Missing "After" evidence at completion stage.
 
         var site = Site.Create(
             "TNT778",
@@ -68,11 +68,11 @@ public class SubmitVisitCommandHandlerTests
         var effectivePolicy = EvidencePolicy.Create(VisitType.BM, 1, false, false, 0);
         var evidencePolicyService = new Mock<IEvidencePolicyService>();
         evidencePolicyService
-            .Setup(v => v.GetEffectivePolicy(visit.Type, It.IsAny<EvidencePolicy>()))
-            .Returns(effectivePolicy);
+            .Setup(v => v.GetEffectivePolicyAsync(visit.Type, It.IsAny<EvidencePolicy>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(effectivePolicy);
         evidencePolicyService
-            .Setup(v => v.Validate(visit, It.IsAny<EvidencePolicy>()))
-            .Returns(new ValidationResult());
+            .Setup(v => v.ValidateAsync(visit, It.IsAny<EvidencePolicy>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult());
 
         var unitOfWork = new Mock<IUnitOfWork>();
 
@@ -135,8 +135,11 @@ public class SubmitVisitCommandHandlerTests
         var evidenceFailure = new ValidationResult();
         evidenceFailure.AddError("EvidencePolicy.Photos", "Insufficient photos");
         evidencePolicyService
-            .Setup(v => v.Validate(visit, It.IsAny<EvidencePolicy>()))
-            .Returns(evidenceFailure);
+            .Setup(v => v.GetEffectivePolicyAsync(visit.Type, It.IsAny<EvidencePolicy>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(EvidencePolicy.Create(VisitType.BM, 1, true, true, 80));
+        evidencePolicyService
+            .Setup(v => v.ValidateAsync(visit, It.IsAny<EvidencePolicy>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(evidenceFailure);
 
         var unitOfWork = new Mock<IUnitOfWork>();
 

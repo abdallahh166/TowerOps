@@ -20,33 +20,41 @@ public class SlaClockService : ISlaClockService
         _memoryCache = memoryCache;
     }
 
-    public bool IsBreached(DateTime createdAtUtc, int responseMinutes, SlaClass slaClass)
+    public async Task<bool> IsBreachedAsync(
+        DateTime createdAtUtc,
+        int responseMinutes,
+        SlaClass slaClass,
+        CancellationToken cancellationToken = default)
     {
         if (slaClass == SlaClass.P4)
             return false;
 
         var respondedAtUtc = createdAtUtc.AddMinutes(responseMinutes);
-        return respondedAtUtc > CalculateDeadline(createdAtUtc, slaClass);
+        var deadlineUtc = await CalculateDeadlineAsync(createdAtUtc, slaClass, cancellationToken);
+        return respondedAtUtc > deadlineUtc;
     }
 
-    public DateTime CalculateDeadline(DateTime createdAtUtc, SlaClass slaClass)
+    public async Task<DateTime> CalculateDeadlineAsync(
+        DateTime createdAtUtc,
+        SlaClass slaClass,
+        CancellationToken cancellationToken = default)
     {
         return slaClass switch
         {
-            SlaClass.P1 => createdAtUtc.AddMinutes(GetResponseMinutes(slaClass, 60)),
-            SlaClass.P2 => createdAtUtc.AddMinutes(GetResponseMinutes(slaClass, 240)),
-            SlaClass.P3 => createdAtUtc.AddMinutes(GetResponseMinutes(slaClass, 1440)),
+            SlaClass.P1 => createdAtUtc.AddMinutes(await GetResponseMinutesAsync(slaClass, 60, cancellationToken)),
+            SlaClass.P2 => createdAtUtc.AddMinutes(await GetResponseMinutesAsync(slaClass, 240, cancellationToken)),
+            SlaClass.P3 => createdAtUtc.AddMinutes(await GetResponseMinutesAsync(slaClass, 1440, cancellationToken)),
             SlaClass.P4 => DateTime.MaxValue,
-            _ => createdAtUtc.AddMinutes(GetResponseMinutes(slaClass, 1440))
+            _ => createdAtUtc.AddMinutes(await GetResponseMinutesAsync(slaClass, 1440, cancellationToken))
         };
     }
 
-    public SlaStatus EvaluateStatus(WorkOrder workOrder)
+    public Task<SlaStatus> EvaluateStatusAsync(WorkOrder workOrder, CancellationToken cancellationToken = default)
     {
         if (workOrder.SlaClass == SlaClass.P4)
         {
             workOrder.ApplySlaStatus(SlaStatus.OnTime, DateTime.UtcNow);
-            return SlaStatus.OnTime;
+            return Task.FromResult(SlaStatus.OnTime);
         }
 
         var nowUtc = DateTime.UtcNow;
@@ -59,14 +67,17 @@ public class SlaClockService : ISlaClockService
                 : SlaStatus.OnTime;
 
         workOrder.ApplySlaStatus(status, nowUtc);
-        return status;
+        return Task.FromResult(status);
     }
 
-    private int GetResponseMinutes(SlaClass slaClass, int defaultValue)
+    private async Task<int> GetResponseMinutesAsync(
+        SlaClass slaClass,
+        int defaultValue,
+        CancellationToken cancellationToken)
     {
         var cacheKey = $"sla-response:{slaClass}";
 
-        return _memoryCache.GetOrCreate(cacheKey, entry =>
+        var cachedValue = await _memoryCache.GetOrCreateAsync(cacheKey, async entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = CacheDuration;
             var settingKey = slaClass switch
@@ -83,10 +94,9 @@ public class SlaClockService : ISlaClockService
                 return defaultValue;
             }
 
-            return _settingsService
-                .GetAsync(settingKey, defaultValue)
-                .GetAwaiter()
-                .GetResult();
+            return await _settingsService.GetAsync(settingKey, defaultValue, cancellationToken);
         });
+
+        return cachedValue;
     }
 }

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Domain.Entities.SystemSettings;
@@ -21,7 +22,11 @@ public class SystemSettingsServiceTests
         var unitOfWork = new Mock<IUnitOfWork>();
         var encryption = new Mock<ISettingsEncryptionService>();
 
-        var service = new SystemSettingsService(repository.Object, unitOfWork.Object, encryption.Object);
+        var service = new SystemSettingsService(
+            repository.Object,
+            unitOfWork.Object,
+            encryption.Object,
+            new MemoryCache(new MemoryCacheOptions()));
 
         var value = await service.GetAsync("Missing:Key", 123);
 
@@ -46,7 +51,11 @@ public class SystemSettingsServiceTests
             .Callback<SystemSetting, CancellationToken>((s, _) => captured = s)
             .Returns(Task.CompletedTask);
 
-        var service = new SystemSettingsService(repository.Object, unitOfWork.Object, encryption.Object);
+        var service = new SystemSettingsService(
+            repository.Object,
+            unitOfWork.Object,
+            encryption.Object,
+            new MemoryCache(new MemoryCacheOptions()));
 
         await service.SetAsync("Notifications:Twilio:AuthToken", "raw-token", "admin");
 

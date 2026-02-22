@@ -6,6 +6,13 @@ namespace TelecomPM.Domain.Services;
 
 public interface IEvidencePolicyService
 {
-    EvidencePolicy GetEffectivePolicy(VisitType visitType, EvidencePolicy fallback);
-    ValidationResult Validate(Visit visit, EvidencePolicy policy);
+    Task<EvidencePolicy> GetEffectivePolicyAsync(
+        VisitType visitType,
+        EvidencePolicy fallback,
+        CancellationToken cancellationToken = default);
+
+    Task<ValidationResult> ValidateAsync(
+        Visit visit,
+        EvidencePolicy policy,
+        CancellationToken cancellationToken = default);
 }
