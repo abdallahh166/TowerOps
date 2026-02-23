@@ -65,10 +65,31 @@ public class WorkOrderRepository : Repository<WorkOrder, Guid>, IWorkOrderReposi
             .AsNoTracking()
             .Where(a =>
                 a.EntityType == "WorkOrder" &&
-                a.NewState == "Reopened" &&
+                (a.NewState == nameof(WorkOrderStatus.Rework) || a.NewState == "Reopened") &&
                 closedFilteredWorkOrders.Contains(a.EntityId))
             .Select(a => a.EntityId)
             .Distinct()
+            .CountAsync(cancellationToken);
+    }
+
+    public async Task<int> CountAtRiskAsync(
+        string? officeCode,
+        SlaClass? slaClass,
+        DateTime? fromDateUtc,
+        DateTime? toDateUtc,
+        int atRiskThresholdPercent,
+        DateTime nowUtc,
+        CancellationToken cancellationToken = default)
+    {
+        var thresholdFraction = Math.Clamp(atRiskThresholdPercent, 1, 99) / 100d;
+
+        return await ApplyKpiFilters(officeCode, slaClass, fromDateUtc, toDateUtc)
+            .Where(wo =>
+                wo.Status != WorkOrderStatus.Closed &&
+                wo.Status != WorkOrderStatus.Cancelled &&
+                nowUtc <= wo.ResponseDeadlineUtc &&
+                (EF.Functions.DateDiffMinute(wo.CreatedAt, nowUtc) * 1d) >=
+                (EF.Functions.DateDiffMinute(wo.CreatedAt, wo.ResponseDeadlineUtc) * thresholdFraction))
             .CountAsync(cancellationToken);
     }
 

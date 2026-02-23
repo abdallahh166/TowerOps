@@ -2,6 +2,7 @@ namespace TelecomPM.Application.Queries.Kpi.GetOperationsDashboard;
 
 using MediatR;
 using TelecomPM.Application.Common;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.DTOs.Kpi;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Interfaces.Repositories;
@@ -12,13 +13,16 @@ public sealed class GetOperationsDashboardQueryHandler : IRequestHandler<GetOper
 {
     private readonly IWorkOrderRepository _workOrderRepository;
     private readonly IVisitRepository _visitRepository;
+    private readonly ISystemSettingsService _systemSettingsService;
 
     public GetOperationsDashboardQueryHandler(
         IWorkOrderRepository workOrderRepository,
-        IVisitRepository visitRepository)
+        IVisitRepository visitRepository,
+        ISystemSettingsService systemSettingsService)
     {
         _workOrderRepository = workOrderRepository;
         _visitRepository = visitRepository;
+        _systemSettingsService = systemSettingsService;
     }
 
     public async Task<Result<OperationsKpiDashboardDto>> Handle(GetOperationsDashboardQuery request, CancellationToken cancellationToken)
@@ -52,14 +56,18 @@ public sealed class GetOperationsDashboardQueryHandler : IRequestHandler<GetOper
                 nowUtc: nowUtc),
             cancellationToken);
 
-        var atRiskWorkOrders = await _workOrderRepository.CountAsync(
-            new OperationsDashboardWorkOrdersSpecification(
-                request.OfficeCode,
-                request.SlaClass,
-                request.FromDateUtc,
-                request.ToDateUtc,
-                onlyAtRisk: true,
-                nowUtc: nowUtc),
+        var atRiskThresholdPercent = await _systemSettingsService.GetAsync(
+            "SLA:AtRiskThresholdPercent",
+            70,
+            cancellationToken);
+
+        var atRiskWorkOrders = await _workOrderRepository.CountAtRiskAsync(
+            request.OfficeCode,
+            request.SlaClass,
+            request.FromDateUtc,
+            request.ToDateUtc,
+            atRiskThresholdPercent,
+            nowUtc,
             cancellationToken);
 
         var reviewedVisitsCount = await _visitRepository.CountAsync(

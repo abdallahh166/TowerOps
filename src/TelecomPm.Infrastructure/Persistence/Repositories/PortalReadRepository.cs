@@ -256,8 +256,14 @@ public sealed class PortalReadRepository : IPortalReadRepository
                 g.Key.Month,
                 g.Key.SlaClass,
                 Total = g.Count(),
-                Breaches = g.Count(x => nowUtc > x.ResolutionDeadlineUtc && x.Status != WorkOrderStatus.Closed),
-                AverageResponseMinutes = g.Average(x => (double?)EF.Functions.DateDiffMinute(x.CreatedAt, x.ResponseDeadlineUtc))
+                Breaches = g.Count(x =>
+                    (x.Status == WorkOrderStatus.Closed
+                        ? x.UpdatedAt
+                        : nowUtc) > x.ResolutionDeadlineUtc),
+                AverageResponseMinutes = g.Average(x =>
+                    x.AssignedAtUtc.HasValue
+                        ? (double?)EF.Functions.DateDiffMinute(x.CreatedAt, x.AssignedAtUtc.Value)
+                        : null)
             })
             .ToListAsync(cancellationToken);
 

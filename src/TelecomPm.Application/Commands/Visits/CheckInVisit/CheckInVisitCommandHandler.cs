@@ -55,8 +55,14 @@ public sealed class CheckInVisitCommandHandler : IRequestHandler<CheckInVisitCom
             var siteLocation = GeoLocation.Create((decimal)site.Coordinates.Latitude, (decimal)site.Coordinates.Longitude);
             var defaultRadius = await _settingsService.GetAsync("GPS:AllowedRadiusMeters", 200m, cancellationToken);
             var allowedRadius = site.AllowedCheckInRadiusMeters ?? defaultRadius;
+            var blockOutsideRadius = await _settingsService.GetAsync("GPS:BlockCheckInOutsideRadius", false, cancellationToken);
 
-            _geoCheckInService.CheckIn(visit, engineerLocation, siteLocation, allowedRadius);
+            var checkInResult = _geoCheckInService.CheckIn(visit, engineerLocation, siteLocation, allowedRadius);
+            if (blockOutsideRadius && !checkInResult.IsWithinSiteRadius)
+            {
+                return Result.Failure(
+                    $"Check-in is outside the allowed radius ({allowedRadius}m). Distance: {checkInResult.DistanceFromSiteMeters}m.");
+            }
 
             await _visitRepository.UpdateAsync(visit, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

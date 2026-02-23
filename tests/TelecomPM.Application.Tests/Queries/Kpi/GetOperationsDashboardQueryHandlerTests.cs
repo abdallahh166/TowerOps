@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.Queries.Kpi.GetOperationsDashboard;
 using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Entities.WorkOrders;
@@ -15,7 +16,7 @@ public class GetOperationsDashboardQueryHandlerTests
     [Fact]
     public async Task Handle_ShouldCalculateFtfRatePercent()
     {
-        var workOrderRepo = CreateWorkOrderRepoForKpiTests(
+        var (workOrderRepo, settingsService) = CreateWorkOrderRepoForKpiTests(
             totalWorkOrders: 20,
             openWorkOrders: 5,
             closedWorkOrders: 15,
@@ -30,7 +31,7 @@ public class GetOperationsDashboardQueryHandlerTests
             submittedVisits: 8,
             evidenceCompleteSubmittedVisits: 6);
 
-        var sut = new GetOperationsDashboardQueryHandler(workOrderRepo.Object, visitRepo.Object);
+        var sut = new GetOperationsDashboardQueryHandler(workOrderRepo.Object, visitRepo.Object, settingsService.Object);
 
         var result = await sut.Handle(new GetOperationsDashboardQuery(), CancellationToken.None);
 
@@ -41,7 +42,7 @@ public class GetOperationsDashboardQueryHandlerTests
     [Fact]
     public async Task Handle_ShouldCalculateMttrHours()
     {
-        var workOrderRepo = CreateWorkOrderRepoForKpiTests(
+        var (workOrderRepo, settingsService) = CreateWorkOrderRepoForKpiTests(
             totalWorkOrders: 10,
             openWorkOrders: 2,
             closedWorkOrders: 8,
@@ -56,7 +57,7 @@ public class GetOperationsDashboardQueryHandlerTests
             submittedVisits: 4,
             evidenceCompleteSubmittedVisits: 3);
 
-        var sut = new GetOperationsDashboardQueryHandler(workOrderRepo.Object, visitRepo.Object);
+        var sut = new GetOperationsDashboardQueryHandler(workOrderRepo.Object, visitRepo.Object, settingsService.Object);
 
         var result = await sut.Handle(new GetOperationsDashboardQuery(), CancellationToken.None);
 
@@ -67,7 +68,7 @@ public class GetOperationsDashboardQueryHandlerTests
     [Fact]
     public async Task Handle_ShouldCalculateReopenRatePercent()
     {
-        var workOrderRepo = CreateWorkOrderRepoForKpiTests(
+        var (workOrderRepo, settingsService) = CreateWorkOrderRepoForKpiTests(
             totalWorkOrders: 12,
             openWorkOrders: 2,
             closedWorkOrders: 10,
@@ -82,7 +83,7 @@ public class GetOperationsDashboardQueryHandlerTests
             submittedVisits: 5,
             evidenceCompleteSubmittedVisits: 4);
 
-        var sut = new GetOperationsDashboardQueryHandler(workOrderRepo.Object, visitRepo.Object);
+        var sut = new GetOperationsDashboardQueryHandler(workOrderRepo.Object, visitRepo.Object, settingsService.Object);
 
         var result = await sut.Handle(new GetOperationsDashboardQuery(), CancellationToken.None);
 
@@ -93,7 +94,7 @@ public class GetOperationsDashboardQueryHandlerTests
     [Fact]
     public async Task Handle_ShouldCalculateEvidenceCompletenessPercent()
     {
-        var workOrderRepo = CreateWorkOrderRepoForKpiTests(
+        var (workOrderRepo, settingsService) = CreateWorkOrderRepoForKpiTests(
             totalWorkOrders: 8,
             openWorkOrders: 3,
             closedWorkOrders: 5,
@@ -108,7 +109,7 @@ public class GetOperationsDashboardQueryHandlerTests
             submittedVisits: 7,
             evidenceCompleteSubmittedVisits: 4);
 
-        var sut = new GetOperationsDashboardQueryHandler(workOrderRepo.Object, visitRepo.Object);
+        var sut = new GetOperationsDashboardQueryHandler(workOrderRepo.Object, visitRepo.Object, settingsService.Object);
 
         var result = await sut.Handle(new GetOperationsDashboardQuery(), CancellationToken.None);
 
@@ -136,12 +137,25 @@ public class GetOperationsDashboardQueryHandlerTests
             .ReturnsAsync(0);
         workOrderRepo.Setup(x => x.GetClosedMeanTimeToRepairHoursAsync(It.IsAny<string?>(), It.IsAny<SlaClass?>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(1.5m);
+        workOrderRepo.Setup(x => x.CountAtRiskAsync(
+                It.IsAny<string?>(),
+                It.IsAny<SlaClass?>(),
+                It.IsAny<DateTime?>(),
+                It.IsAny<DateTime?>(),
+                It.IsAny<int>(),
+                It.IsAny<DateTime>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(0);
+
+        var settingsService = new Mock<ISystemSettingsService>();
+        settingsService.Setup(x => x.GetAsync("SLA:AtRiskThresholdPercent", 70, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(70);
 
         var visitRepo = new Mock<IVisitRepository>();
         visitRepo.Setup(x => x.CountAsync(It.IsAny<ISpecification<Visit>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ISpecification<Visit> spec, CancellationToken _) => Apply(spec, visits).Count());
 
-        var sut = new GetOperationsDashboardQueryHandler(workOrderRepo.Object, visitRepo.Object);
+        var sut = new GetOperationsDashboardQueryHandler(workOrderRepo.Object, visitRepo.Object, settingsService.Object);
 
         var result = await sut.Handle(new GetOperationsDashboardQuery
         {
@@ -157,7 +171,7 @@ public class GetOperationsDashboardQueryHandlerTests
         visitRepo.Verify(x => x.CountAsync(It.IsAny<ISpecification<Visit>>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
     }
 
-    private static Mock<IWorkOrderRepository> CreateWorkOrderRepoForKpiTests(
+    private static (Mock<IWorkOrderRepository> Repo, Mock<ISystemSettingsService> SettingsService) CreateWorkOrderRepoForKpiTests(
         int totalWorkOrders,
         int openWorkOrders,
         int closedWorkOrders,
@@ -180,10 +194,17 @@ public class GetOperationsDashboardQueryHandlerTests
                     return openWorkOrders;
                 if (text.Contains("ResolutionDeadlineUtc") && text.Contains("<"))
                     return breachedWorkOrders;
-                if (text.Contains("ResolutionDeadlineUtc") && text.Contains("AddHours"))
-                    return atRiskWorkOrders;
                 return totalWorkOrders;
             });
+        repo.Setup(x => x.CountAtRiskAsync(
+                It.IsAny<string?>(),
+                It.IsAny<SlaClass?>(),
+                It.IsAny<DateTime?>(),
+                It.IsAny<DateTime?>(),
+                It.IsAny<int>(),
+                It.IsAny<DateTime>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(atRiskWorkOrders);
 
         repo.Setup(x => x.CountClosedAsync(It.IsAny<string?>(), It.IsAny<SlaClass?>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(closedWorkOrders);
@@ -194,7 +215,11 @@ public class GetOperationsDashboardQueryHandlerTests
         repo.Setup(x => x.GetClosedMeanTimeToRepairHoursAsync(It.IsAny<string?>(), It.IsAny<SlaClass?>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mttrHours);
 
-        return repo;
+        var settingsService = new Mock<ISystemSettingsService>();
+        settingsService.Setup(x => x.GetAsync("SLA:AtRiskThresholdPercent", 70, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(70);
+
+        return (repo, settingsService);
     }
 
     private static Mock<IVisitRepository> CreateVisitRepoForKpiTests(

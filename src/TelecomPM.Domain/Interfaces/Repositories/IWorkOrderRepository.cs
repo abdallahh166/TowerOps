@@ -24,6 +24,14 @@ public interface IWorkOrderRepository : IRepository<WorkOrder, Guid>
         DateTime? fromDateUtc,
         DateTime? toDateUtc,
         CancellationToken cancellationToken = default);
+    Task<int> CountAtRiskAsync(
+        string? officeCode,
+        SlaClass? slaClass,
+        DateTime? fromDateUtc,
+        DateTime? toDateUtc,
+        int atRiskThresholdPercent,
+        DateTime nowUtc,
+        CancellationToken cancellationToken = default);
     Task<decimal> GetClosedMeanTimeToRepairHoursAsync(
         string? officeCode,
         SlaClass? slaClass,
