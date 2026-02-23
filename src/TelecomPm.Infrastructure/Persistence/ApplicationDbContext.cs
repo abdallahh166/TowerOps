@@ -18,6 +18,7 @@ using TelecomPM.Domain.Entities.PasswordResetTokens;
 using TelecomPM.Domain.Entities.Sites;
 using TelecomPM.Domain.Entities.Sync;
 using TelecomPM.Domain.Entities.SystemSettings;
+using TelecomPM.Domain.Entities.UnusedAssets;
 using TelecomPM.Domain.Entities.Users;
 using TelecomPM.Domain.Entities.Escalations;
 using TelecomPM.Domain.Entities.Visits;
@@ -81,6 +82,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<SyncQueue> SyncQueues => Set<SyncQueue>();
     public DbSet<SyncConflict> SyncConflicts => Set<SyncConflict>();
     public DbSet<Asset> Assets => Set<Asset>();
+    public DbSet<UnusedAsset> UnusedAssets => Set<UnusedAsset>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -13,10 +13,12 @@ using TelecomPM.Application.Commands.Imports.ImportSiteAssets;
 using TelecomPM.Application.Commands.Imports.ImportSiteRadioData;
 using TelecomPM.Application.Commands.Imports.ImportSiteSharingData;
 using TelecomPM.Application.Commands.Imports.ImportSiteTxData;
+using TelecomPM.Application.Commands.Imports.ImportUnusedAssets;
 using TelecomPM.Application.DTOs.Sites;
 using TelecomPM.Domain.Entities.BatteryDischargeTests;
 using TelecomPM.Domain.Entities.ChecklistTemplates;
 using TelecomPM.Domain.Entities.Sites;
+using TelecomPM.Domain.Entities.UnusedAssets;
 using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Interfaces.Repositories;
@@ -52,6 +54,7 @@ public class Sprint12DryRunReconciliationTests
 
         var visitRepo = new Mock<IVisitRepository>();
         visitRepo.Setup(x => x.GetByIdAsync(visit.Id, It.IsAny<CancellationToken>())).ReturnsAsync(visit);
+        visitRepo.Setup(x => x.GetByIdAsNoTrackingAsync(visit.Id, It.IsAny<CancellationToken>())).ReturnsAsync(visit);
         visitRepo.Setup(x => x.UpdateAsync(visit, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         var templateRepo = new Mock<IChecklistTemplateRepository>();
@@ -66,6 +69,12 @@ public class Sprint12DryRunReconciliationTests
         var addedBdts = new List<BatteryDischargeTest>();
         bdtRepo.Setup(x => x.AddAsync(It.IsAny<BatteryDischargeTest>(), It.IsAny<CancellationToken>()))
             .Callback<BatteryDischargeTest, CancellationToken>((entity, _) => addedBdts.Add(entity))
+            .Returns(Task.CompletedTask);
+
+        var unusedAssetRepo = new Mock<IUnusedAssetRepository>();
+        var addedUnusedAssets = new List<UnusedAsset>();
+        unusedAssetRepo.Setup(x => x.AddAsync(It.IsAny<UnusedAsset>(), It.IsAny<CancellationToken>()))
+            .Callback<UnusedAsset, CancellationToken>((entity, _) => addedUnusedAssets.Add(entity))
             .Returns(Task.CompletedTask);
 
         var unitOfWork = new Mock<IUnitOfWork>();
@@ -144,8 +153,17 @@ public class Sprint12DryRunReconciliationTests
                 },
                 CancellationToken.None)));
 
+        runs.Add(await Run("ImportUnusedAssetsCommand", "GH-DE  Checklist.xlsx",
+            () => new ImportUnusedAssetsCommandHandler(visitRepo.Object, unusedAssetRepo.Object, unitOfWork.Object).Handle(
+                new ImportUnusedAssetsCommand
+                {
+                    VisitId = visit.Id,
+                    FileContent = RealExcelTestSupport.LoadExcelBytes("GH-DE  Checklist.xlsx")
+                },
+                CancellationToken.None)));
+
         var postSnapshot = CaptureSnapshot(sites);
-        var report = BuildReport(runs, preSnapshot, postSnapshot, visit, addedTemplates, addedBdts);
+        var report = BuildReport(runs, preSnapshot, postSnapshot, visit, addedTemplates, addedBdts, addedUnusedAssets);
 
         var reportPath = Path.Combine(RealExcelTestSupport.GetRepoRoot(), "docs", "phase-2", "10-sprint-12-dry-run-reconciliation.md");
         File.WriteAllText(reportPath, report, Encoding.UTF8);
@@ -193,7 +211,8 @@ public class Sprint12DryRunReconciliationTests
         Dictionary<Guid, SiteSnapshot> after,
         Visit visit,
         List<ChecklistTemplate> templates,
-        List<BatteryDischargeTest> bdts)
+        List<BatteryDischargeTest> bdts,
+        List<UnusedAsset> unusedAssets)
     {
         var sb = new StringBuilder();
         sb.AppendLine("# Sprint 12 Dry-Run Reconciliation Report");
@@ -257,6 +276,7 @@ public class Sprint12DryRunReconciliationTests
         sb.AppendLine($"- Checklist templates created: {templates.Count}");
         sb.AppendLine($"- Checklist items imported: {templates.Sum(t => t.Items.Count)}");
         sb.AppendLine($"- Battery discharge tests imported: {bdts.Count}");
+        sb.AppendLine($"- Unused assets imported: {unusedAssets.Count}");
         sb.AppendLine($"- Visit evidence photos after dry-run: {visit.Photos.Count}");
 
         return sb.ToString();

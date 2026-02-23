@@ -32,6 +32,7 @@ public sealed class Site : AggregateRoot<Guid>
     // BSC Info
     public string BSCName { get; private set; } = string.Empty;
     public string BSCCode { get; private set; } = string.Empty;
+    public string? LegacyShortCode { get; private set; }
     public string? TelecomEgyptName { get; private set; }
     public string? OperationalZone { get; private set; }
     
@@ -40,6 +41,7 @@ public sealed class Site : AggregateRoot<Guid>
     public string MaintenanceArea { get; private set; } = string.Empty;
     public string? ZTEMonitoringStatus { get; private set; }
     public string? GeneralNotes { get; private set; }
+    public string? ExternalContextNotes { get; private set; }
     public SiteEnclosureType? EnclosureType { get; private set; }
     public string? EnclosureTypeRaw { get; private set; }
     public TowerOwnershipType TowerOwnershipType { get; private set; } = TowerOwnershipType.Host;
@@ -93,6 +95,7 @@ public sealed class Site : AggregateRoot<Guid>
         SiteType = siteType;
         Status = SiteStatus.OnAir;
         Complexity = SiteComplexity.Low;
+        LegacyShortCode = siteCode.ShortCode;
         TowerOwnershipType = TowerOwnershipType.Host;
         ResponsibilityScope = ResponsibilityScope.Full;
     }
@@ -143,6 +146,13 @@ public sealed class Site : AggregateRoot<Guid>
         BSCCode = bscCode;
     }
 
+    public void SetLegacyShortCode(string? legacyShortCode)
+    {
+        LegacyShortCode = string.IsNullOrWhiteSpace(legacyShortCode)
+            ? null
+            : legacyShortCode.Trim().ToUpperInvariant();
+    }
+
     public void SetNetworkContext(string? telecomEgyptName, string? operationalZone)
     {
         TelecomEgyptName = telecomEgyptName;
@@ -159,6 +169,12 @@ public sealed class Site : AggregateRoot<Guid>
     {
         ZTEMonitoringStatus = zteMonitoringStatus;
         GeneralNotes = generalNotes;
+        ExternalContextNotes = generalNotes;
+    }
+
+    public void SetExternalContextNotes(string? externalContextNotes)
+    {
+        ExternalContextNotes = externalContextNotes;
     }
 
     public void SetAllowedCheckInRadius(decimal? allowedRadiusMeters)

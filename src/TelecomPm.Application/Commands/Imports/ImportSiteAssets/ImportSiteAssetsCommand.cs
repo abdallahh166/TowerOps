@@ -82,6 +82,8 @@ public sealed class ImportSiteAssetsCommandHandler : IRequestHandler<ImportSiteA
                 continue;
             }
 
+            site.SetLegacyShortCode(key);
+
             var subcontractor = ImportExcelSupport.GetCellText(row, columnMap, "Subcontractor");
             var maintenanceArea = ImportExcelSupport.GetCellText(row, columnMap, "Maintenance Area");
             if (!ImportExcelSupport.IsBlankOrNa(subcontractor) || !ImportExcelSupport.IsBlankOrNa(maintenanceArea))
@@ -98,6 +100,9 @@ public sealed class ImportSiteAssetsCommandHandler : IRequestHandler<ImportSiteA
                 site.SetMonitoringInfo(
                     ImportExcelSupport.IsBlankOrNa(zteMonitoring) ? null : zteMonitoring,
                     ImportExcelSupport.IsBlankOrNa(generalNotes) ? null : generalNotes);
+
+                site.SetExternalContextNotes(
+                    ImportExcelSupport.IsBlankOrNa(generalNotes) ? site.ExternalContextNotes : generalNotes);
             }
 
             var statusText = ImportExcelSupport.GetCellText(row, columnMap, "On / Off  Air", "Status", "On/Off Air");

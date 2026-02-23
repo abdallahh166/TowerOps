@@ -62,6 +62,7 @@ public static class DependencyInjection
         services.AddScoped<ISyncQueueRepository, SyncQueueRepository>();
         services.AddScoped<ISyncConflictRepository, SyncConflictRepository>();
         services.AddScoped<IAssetRepository, AssetRepository>();
+        services.AddScoped<IUnusedAssetRepository, UnusedAssetRepository>();
         services.AddScoped<IPortalReadRepository, PortalReadRepository>();
 
         // Domain event dispatcher

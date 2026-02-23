@@ -29,19 +29,30 @@ public sealed class ExportChecklistCommandHandler : IRequestHandler<ExportCheckl
 {
     private readonly IVisitRepository _visitRepository;
     private readonly IChecklistTemplateRepository _checklistTemplateRepository;
+    private readonly IUnusedAssetRepository? _unusedAssetRepository;
 
     public ExportChecklistCommandHandler(
         IVisitRepository visitRepository,
         IChecklistTemplateRepository checklistTemplateRepository)
+        : this(visitRepository, checklistTemplateRepository, null)
+    {
+    }
+
+    public ExportChecklistCommandHandler(
+        IVisitRepository visitRepository,
+        IChecklistTemplateRepository checklistTemplateRepository,
+        IUnusedAssetRepository? unusedAssetRepository)
     {
         _visitRepository = visitRepository;
         _checklistTemplateRepository = checklistTemplateRepository;
+        _unusedAssetRepository = unusedAssetRepository;
     }
 
     public async Task<Result<byte[]>> Handle(ExportChecklistCommand request, CancellationToken cancellationToken)
     {
         var visits = await LoadVisitsAsync(request.VisitId, cancellationToken);
         var templates = await LoadTemplatesAsync(request.VisitType, cancellationToken);
+        var unusedAssets = await LoadUnusedAssetsAsync(visits, cancellationToken);
 
         using var workbook = new XLWorkbook();
         BuildSitesReadingSheet(workbook, visits);
@@ -50,7 +61,7 @@ public sealed class ExportChecklistCommandHandler : IRequestHandler<ExportCheckl
         BuildPanoramaSheet(workbook, "Tower Panorama", visits, p => p.Category == PhotoCategory.Tower);
         BuildBeforeAfterSheet(workbook, visits);
         BuildPendingReservesSheet(workbook, visits);
-        BuildUnusedAssetsSheet(workbook, visits);
+        BuildUnusedAssetsSheet(workbook, visits, unusedAssets);
         BuildAlarmsCaptureSheet(workbook, visits);
         BuildAuditMatrixSheet(workbook, templates);
 
@@ -99,6 +110,17 @@ public sealed class ExportChecklistCommandHandler : IRequestHandler<ExportCheckl
         }
 
         return unique.Values.OrderByDescending(t => t.EffectiveFromUtc).ToList();
+    }
+
+    private async Task<IReadOnlyList<TelecomPM.Domain.Entities.UnusedAssets.UnusedAsset>> LoadUnusedAssetsAsync(
+        IReadOnlyList<Visit> visits,
+        CancellationToken cancellationToken)
+    {
+        if (_unusedAssetRepository is null || visits.Count == 0)
+            return Array.Empty<TelecomPM.Domain.Entities.UnusedAssets.UnusedAsset>();
+
+        var visitIds = visits.Select(v => v.Id).ToList();
+        return await _unusedAssetRepository.GetByVisitIdsAsNoTrackingAsync(visitIds, cancellationToken);
     }
 
     private static void BuildSitesReadingSheet(XLWorkbook workbook, IReadOnlyList<Visit> visits)
@@ -173,7 +195,7 @@ public sealed class ExportChecklistCommandHandler : IRequestHandler<ExportCheckl
                 ws.Cell(row, 1).Value = visit.VisitNumber;
                 ws.Cell(row, 2).Value = visit.SiteCode;
                 ws.Cell(row, 3).Value = photo.FileName;
-                ws.Cell(row, 4).Value = photo.CreatedAt;
+                ws.Cell(row, 4).Value = photo.CapturedAtUtc ?? photo.CreatedAt;
                 row++;
             }
         }
@@ -232,27 +254,53 @@ public sealed class ExportChecklistCommandHandler : IRequestHandler<ExportCheckl
         ws.Columns().AdjustToContents();
     }
 
-    private static void BuildUnusedAssetsSheet(XLWorkbook workbook, IReadOnlyList<Visit> visits)
+    private static void BuildUnusedAssetsSheet(
+        XLWorkbook workbook,
+        IReadOnlyList<Visit> visits,
+        IReadOnlyList<TelecomPM.Domain.Entities.UnusedAssets.UnusedAsset> unusedAssets)
     {
         var ws = workbook.AddWorksheet("unused assets");
         ws.Cell(1, 1).Value = "No.";
         ws.Cell(1, 2).Value = "Visit Number";
         ws.Cell(1, 3).Value = "Site Code";
-        ws.Cell(1, 4).Value = "Material";
+        ws.Cell(1, 4).Value = "Asset";
         ws.Cell(1, 5).Value = "Quantity";
+        ws.Cell(1, 6).Value = "Notes";
+        ws.Cell(1, 7).Value = "Recorded At";
 
         var row = 2;
         var index = 1;
-        foreach (var visit in visits)
+        var visitLookup = visits.ToDictionary(v => v.Id);
+        if (unusedAssets.Count > 0)
         {
-            foreach (var material in visit.MaterialsUsed.Where(m => m.Quantity.Value > 0))
+            foreach (var asset in unusedAssets)
             {
+                visitLookup.TryGetValue(asset.VisitId ?? Guid.Empty, out var visit);
+
                 ws.Cell(row, 1).Value = index++;
-                ws.Cell(row, 2).Value = visit.VisitNumber;
-                ws.Cell(row, 3).Value = visit.SiteCode;
-                ws.Cell(row, 4).Value = material.MaterialName;
-                ws.Cell(row, 5).Value = material.Quantity.Value;
+                ws.Cell(row, 2).Value = visit?.VisitNumber;
+                ws.Cell(row, 3).Value = visit?.SiteCode;
+                ws.Cell(row, 4).Value = asset.AssetName;
+                ws.Cell(row, 5).Value = asset.Quantity;
+                ws.Cell(row, 6).Value = asset.Notes;
+                ws.Cell(row, 7).Value = asset.RecordedAtUtc;
                 row++;
+            }
+        }
+        else
+        {
+            foreach (var visit in visits)
+            {
+                foreach (var material in visit.MaterialsUsed.Where(m => m.Quantity.Value > 0))
+                {
+                    ws.Cell(row, 1).Value = index++;
+                    ws.Cell(row, 2).Value = visit.VisitNumber;
+                    ws.Cell(row, 3).Value = visit.SiteCode;
+                    ws.Cell(row, 4).Value = material.MaterialName;
+                    ws.Cell(row, 5).Value = material.Quantity.Value;
+                    ws.Cell(row, 7).Value = visit.ScheduledDate;
+                    row++;
+                }
             }
         }
 

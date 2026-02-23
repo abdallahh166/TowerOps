@@ -231,6 +231,9 @@ internal static class ImportExcelSupport
 
             if (!string.IsNullOrWhiteSpace(site.SiteCode.ShortCode))
                 lookup[site.SiteCode.ShortCode.Trim()] = site.Id;
+
+            if (!string.IsNullOrWhiteSpace(site.LegacyShortCode))
+                lookup[site.LegacyShortCode.Trim()] = site.Id;
         }
 
         return lookup;
@@ -247,6 +250,9 @@ internal static class ImportExcelSupport
 
             if (!string.IsNullOrWhiteSpace(site.SiteCode.ShortCode))
                 lookup[site.SiteCode.ShortCode.Trim()] = site;
+
+            if (!string.IsNullOrWhiteSpace(site.LegacyShortCode))
+                lookup[site.LegacyShortCode.Trim()] = site;
         }
 
         return lookup;

@@ -46,6 +46,7 @@ public sealed class ImportBatteryDischargeTestCommandHandler : IRequestHandler<I
     public async Task<Result<ImportSiteDataResult>> Handle(ImportBatteryDischargeTestCommand request, CancellationToken cancellationToken)
     {
         var result = new ImportSiteDataResult();
+        var trackedSites = new Dictionary<Guid, Site>();
 
         using var stream = new MemoryStream(request.FileContent);
         using var workbook = new XLWorkbook(stream);
@@ -104,6 +105,22 @@ public sealed class ImportBatteryDischargeTestCommandHandler : IRequestHandler<I
                 notes: ImportExcelSupport.GetCellText(row, columnMap, "Comment"),
                 week: ImportExcelSupport.GetCellText(row, columnMap, "Week"));
 
+            var chargingCurrentLimit = ImportExcelSupport.ParseDecimal(
+                ImportExcelSupport.GetCellText(row, columnMap, "Batteries Charnging current limit", "Charging Current Limit"));
+            if (chargingCurrentLimit.HasValue)
+            {
+                var trackedSite = await GetTrackedSiteAsync(site.Id, trackedSites, cancellationToken);
+                if (trackedSite is not null)
+                {
+                    var powerSystem = trackedSite.PowerSystem ??
+                                      SitePowerSystem.Create(trackedSite.Id, PowerConfiguration.ACOnly, RectifierBrand.Other, BatteryType.VRLA);
+
+                    powerSystem.SetChargingCurrentLimit(chargingCurrentLimit);
+                    if (trackedSite.PowerSystem is null)
+                        trackedSite.SetPowerSystem(powerSystem);
+                }
+            }
+
             await _batteryDischargeTestRepository.AddAsync(bdt, cancellationToken);
             result.ImportedCount++;
         }
@@ -138,5 +155,20 @@ public sealed class ImportBatteryDischargeTestCommandHandler : IRequestHandler<I
             return ImportExcelSupport.ParseInt(normalized[..plusIndex]);
 
         return ImportExcelSupport.ParseInt(normalized);
+    }
+
+    private async Task<Site?> GetTrackedSiteAsync(
+        Guid siteId,
+        Dictionary<Guid, Site> trackedSites,
+        CancellationToken cancellationToken)
+    {
+        if (trackedSites.TryGetValue(siteId, out var site))
+            return site;
+
+        site = await _siteRepository.GetByIdAsync(siteId, cancellationToken);
+        if (site is not null)
+            trackedSites[siteId] = site;
+
+        return site;
     }
 }

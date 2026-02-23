@@ -14,6 +14,7 @@ namespace TelecomPM.Domain.Entities.Visits
         public string FilePath { get; private set; } = string.Empty;
         public string? ThumbnailPath { get; private set; }
         public string? Description { get; private set; }
+        public DateTime? CapturedAtUtc { get; private set; }
         public Location Location { get; private set; } = Location.Empty;
         public Visit? Visit { get; private set; }
 
@@ -38,6 +39,7 @@ namespace TelecomPM.Domain.Entities.Visits
             FilePath = filePath;
             ThumbnailPath = thumbnailPath;
             Description = description;
+            CapturedAtUtc = DateTime.UtcNow;
             Location = location ?? Location.Empty;
         }
 
@@ -62,6 +64,16 @@ namespace TelecomPM.Domain.Entities.Visits
         public void SetLocation(Coordinates coordinates)
         {
             Location = new Location(coordinates.Latitude, coordinates.Longitude);
+        }
+
+        public void SetCapturedAtUtc(DateTime capturedAtUtc)
+        {
+            CapturedAtUtc = capturedAtUtc.Kind switch
+            {
+                DateTimeKind.Utc => capturedAtUtc,
+                DateTimeKind.Local => capturedAtUtc.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(capturedAtUtc, DateTimeKind.Utc)
+            };
         }
 
         // ✅ Validation Helper

@@ -27,6 +27,8 @@ public record SitePowerSystemDto
     public bool HasSolarPanel { get; init; }
     public string? GeneratorType { get; init; }
     public int? GeneratorKVA { get; init; }
+    public string? CabinetType { get; init; }
+    public decimal? ChargingCurrentLimit { get; init; }
 }
 
 public record SiteRadioEquipmentDto

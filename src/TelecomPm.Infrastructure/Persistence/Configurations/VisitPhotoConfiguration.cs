@@ -40,6 +40,8 @@ public class VisitPhotoConfiguration : IEntityTypeConfiguration<VisitPhoto>
         builder.Property(p => p.Description)
             .HasMaxLength(500);
 
+        builder.Property(p => p.CapturedAtUtc);
+
         // Owned Type: Location
         builder.OwnsOne(p => p.Location, coords =>
         {

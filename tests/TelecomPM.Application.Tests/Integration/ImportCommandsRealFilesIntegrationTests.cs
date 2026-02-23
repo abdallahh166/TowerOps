@@ -11,9 +11,11 @@ using TelecomPM.Application.Commands.Imports.ImportSiteAssets;
 using TelecomPM.Application.Commands.Imports.ImportSiteRadioData;
 using TelecomPM.Application.Commands.Imports.ImportSiteSharingData;
 using TelecomPM.Application.Commands.Imports.ImportSiteTxData;
+using TelecomPM.Application.Commands.Imports.ImportUnusedAssets;
 using TelecomPM.Domain.Entities.BatteryDischargeTests;
 using TelecomPM.Domain.Entities.ChecklistTemplates;
 using TelecomPM.Domain.Entities.Sites;
+using TelecomPM.Domain.Entities.UnusedAssets;
 using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Interfaces.Repositories;
@@ -240,6 +242,37 @@ public class ImportCommandsRealFilesIntegrationTests
 
         result.IsSuccess.Should().BeTrue();
         (result.Value!.ImportedCount > 0 || result.Value.SkippedCount > 0).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ImportUnusedAssetsCommand_ShouldReadRealChecklistWorkbook_AndReturnProcessedResult()
+    {
+        var site = RealExcelTestSupport.CreateSite("3564DE", Guid.NewGuid());
+        var visit = RealExcelTestSupport.CreateVisit(site);
+
+        var visitRepo = new Mock<IVisitRepository>();
+        visitRepo.Setup(x => x.GetByIdAsNoTrackingAsync(visit.Id, It.IsAny<CancellationToken>())).ReturnsAsync(visit);
+
+        var unusedAssetRepo = new Mock<IUnusedAssetRepository>();
+        var added = new List<UnusedAsset>();
+        unusedAssetRepo.Setup(x => x.AddAsync(It.IsAny<UnusedAsset>(), It.IsAny<CancellationToken>()))
+            .Callback<UnusedAsset, CancellationToken>((entity, _) => added.Add(entity))
+            .Returns(Task.CompletedTask);
+
+        var unitOfWork = CreateUnitOfWork();
+        var sut = new ImportUnusedAssetsCommandHandler(visitRepo.Object, unusedAssetRepo.Object, unitOfWork.Object);
+
+        var result = await sut.Handle(new ImportUnusedAssetsCommand
+        {
+            VisitId = visit.Id,
+            FileContent = RealExcelTestSupport.LoadExcelBytes("GH-DE  Checklist.xlsx")
+        }, CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        (result.Value!.ImportedCount > 0 || result.Value.SkippedCount > 0).Should().BeTrue();
+
+        if (result.Value.ImportedCount > 0)
+            added.Count.Should().Be(result.Value.ImportedCount);
     }
 
     private static Mock<IUnitOfWork> CreateUnitOfWork()
