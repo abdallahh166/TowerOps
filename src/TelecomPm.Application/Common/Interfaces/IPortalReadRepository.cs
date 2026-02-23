@@ -19,5 +19,13 @@ public interface IPortalReadRepository
         int pageSize,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<PortalVisitDto>> GetVisitsAsync(
+        string clientCode,
+        string siteCode,
+        int pageNumber,
+        int pageSize,
+        bool anonymizeEngineers,
+        CancellationToken cancellationToken = default);
+
     Task<PortalSlaReportDto> GetSlaReportAsync(string clientCode, CancellationToken cancellationToken = default);
 }

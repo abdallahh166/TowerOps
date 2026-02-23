@@ -199,6 +199,43 @@ public sealed class PortalReadRepository : IPortalReadRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<PortalVisitDto>> GetVisitsAsync(
+        string clientCode,
+        string siteCode,
+        int pageNumber,
+        int pageSize,
+        bool anonymizeEngineers,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedClientCode = NormalizeClientCode(clientCode);
+        var normalizedSiteCode = string.IsNullOrWhiteSpace(siteCode) ? string.Empty : siteCode.Trim();
+        var safePageNumber = pageNumber < 1 ? 1 : pageNumber;
+        var safePageSize = Math.Clamp(pageSize, 1, 200);
+        var skip = (safePageNumber - 1) * safePageSize;
+        var engineerName = anonymizeEngineers ? "Field Engineer" : null;
+
+        var query =
+            from visit in _context.Visits.AsNoTracking()
+            join site in _context.Sites.AsNoTracking() on visit.SiteId equals site.Id
+            where site.ClientCode == normalizedClientCode &&
+                  site.SiteCode.Value == normalizedSiteCode
+            orderby visit.ScheduledDate descending
+            select new PortalVisitDto
+            {
+                VisitId = visit.Id,
+                VisitNumber = visit.VisitNumber,
+                Status = visit.Status,
+                Type = visit.Type,
+                ScheduledDate = visit.ScheduledDate,
+                EngineerDisplayName = engineerName ?? visit.EngineerName
+            };
+
+        return await query
+            .Skip(skip)
+            .Take(safePageSize)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<PortalSlaReportDto> GetSlaReportAsync(string clientCode, CancellationToken cancellationToken = default)
     {
         var normalizedClientCode = NormalizeClientCode(clientCode);

@@ -85,7 +85,6 @@ public static class VisitsContractMapper
         => new()
         {
             VisitId = visitId,
-            EngineerId = request.EngineerId,
             Latitude = request.Latitude,
             Longitude = request.Longitude
         };
@@ -94,7 +93,6 @@ public static class VisitsContractMapper
         => new()
         {
             VisitId = visitId,
-            EngineerId = request.EngineerId,
             Latitude = request.Latitude,
             Longitude = request.Longitude
         };
@@ -113,7 +111,6 @@ public static class VisitsContractMapper
         => new()
         {
             VisitId = visitId,
-            ReviewerId = request.ReviewerId,
             Notes = request.Notes
         };
 
@@ -121,7 +118,6 @@ public static class VisitsContractMapper
         => new()
         {
             VisitId = visitId,
-            ReviewerId = request.ReviewerId,
             RejectionReason = request.RejectionReason
         };
 
@@ -129,7 +125,6 @@ public static class VisitsContractMapper
         => new()
         {
             VisitId = visitId,
-            ReviewerId = request.ReviewerId,
             CorrectionNotes = request.CorrectionNotes
         };
 

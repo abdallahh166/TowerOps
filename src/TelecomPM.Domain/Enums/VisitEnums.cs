@@ -17,7 +17,9 @@ public enum VisitStatus
 public enum VisitType
 {
     // Deprecated aliases kept for backward compatibility with legacy persisted/imported values.
+    [Obsolete("Use BM as the canonical value for preventive maintenance.")]
     PreventiveMaintenance = 1,
+    [Obsolete("Use CM as the canonical value for corrective maintenance.")]
     CorrectiveMaintenance = 2,
     Emergency = 3,
     Installation = 4,

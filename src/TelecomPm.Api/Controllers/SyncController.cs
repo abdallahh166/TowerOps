@@ -2,13 +2,14 @@ namespace TelecomPm.Api.Controllers;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TelecomPM.Api.Authorization;
 using TelecomPM.Application.Common.Interfaces;
 using TelecomPm.Api.Contracts.Sync;
 using TelecomPm.Api.Mappings;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
 public sealed class SyncController : ApiControllerBase
 {
     private readonly ICurrentUserService _currentUserService;

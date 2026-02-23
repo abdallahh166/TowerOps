@@ -52,9 +52,13 @@ public sealed class ClientPortalController : ApiControllerBase
     }
 
     [HttpGet("visits/{siteCode}")]
-    public async Task<IActionResult> GetVisits(string siteCode, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetVisits(
+        string siteCode,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
     {
-        var result = await Mediator.Send(siteCode.ToPortalVisitsQuery(), cancellationToken);
+        var result = await Mediator.Send(siteCode.ToPortalVisitsQuery(pageNumber, pageSize), cancellationToken);
         return HandleResult(result);
     }
 }

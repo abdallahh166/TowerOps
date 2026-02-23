@@ -6,6 +6,5 @@ using TelecomPM.Application.Common;
 public record ApproveVisitCommand : ICommand
 {
     public Guid VisitId { get; init; }
-    public Guid ReviewerId { get; init; }
     public string? Notes { get; init; }
 }

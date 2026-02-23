@@ -1,11 +1,15 @@
 using FluentAssertions;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TelecomPm.Api.Contracts.Roles;
 using TelecomPm.Api.Controllers;
-using TelecomPM.Domain.Entities.ApplicationRoles;
-using TelecomPM.Domain.Interfaces.Repositories;
+using TelecomPM.Application.Commands.Roles.CreateApplicationRole;
+using TelecomPM.Application.Commands.Roles.DeleteApplicationRole;
+using TelecomPM.Application.Common;
+using TelecomPM.Application.DTOs.Roles;
 using Xunit;
 
 namespace TelecomPM.Application.Tests.Services;
@@ -15,20 +19,12 @@ public class RolesControllerTests
     [Fact]
     public async Task Delete_ShouldRejectSystemRole()
     {
-        var systemRole = ApplicationRole.Create(
-            "Admin",
-            "Administrator",
-            null,
-            isSystem: true,
-            isActive: true,
-            Array.Empty<string>());
+        var sender = new Mock<ISender>();
+        sender
+            .Setup(s => s.Send(It.IsAny<DeleteApplicationRoleCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Failure("System roles cannot be deleted."));
 
-        var repository = new Mock<IApplicationRoleRepository>();
-        repository
-            .Setup(r => r.GetByIdAsync("Admin", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(systemRole);
-
-        var controller = CreateController(repository.Object);
+        var controller = BuildController(sender.Object);
 
         var result = await controller.Delete("Admin", CancellationToken.None);
 
@@ -38,24 +34,23 @@ public class RolesControllerTests
     [Fact]
     public async Task CustomRole_CanBeCreatedAndDeleted()
     {
-        ApplicationRole? createdRole = null;
+        var sender = new Mock<ISender>();
+        sender
+            .Setup(s => s.Send(It.IsAny<CreateApplicationRoleCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success(new ApplicationRoleDto
+            {
+                Name = "CustomOps",
+                DisplayName = "Custom Ops",
+                IsSystem = false,
+                IsActive = true,
+                Permissions = new List<string> { "sites.view" }
+            }));
 
-        var repository = new Mock<IApplicationRoleRepository>();
-        repository
-            .Setup(r => r.GetByIdAsync("CustomOps", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => createdRole);
-        repository
-            .Setup(r => r.AddAsync(It.IsAny<ApplicationRole>(), It.IsAny<CancellationToken>()))
-            .Callback<ApplicationRole, CancellationToken>((role, _) => createdRole = role)
-            .Returns(Task.CompletedTask);
-        repository
-            .Setup(r => r.DeleteAsync(It.IsAny<ApplicationRole>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+        sender
+            .Setup(s => s.Send(It.IsAny<DeleteApplicationRoleCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
 
-        var unitOfWork = new Mock<IUnitOfWork>();
-        unitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
-
-        var controller = CreateController(repository.Object, unitOfWork.Object);
+        var controller = BuildController(sender.Object);
 
         var createResult = await controller.Create(new CreateRoleRequest
         {
@@ -66,21 +61,25 @@ public class RolesControllerTests
         }, CancellationToken.None);
 
         createResult.Should().BeOfType<CreatedAtActionResult>();
-        createdRole.Should().NotBeNull();
 
         var deleteResult = await controller.Delete("CustomOps", CancellationToken.None);
         deleteResult.Should().BeOfType<NoContentResult>();
     }
 
-    private static RolesController CreateController(
-        IApplicationRoleRepository roleRepository,
-        IUnitOfWork? unitOfWork = null)
+    private static RolesController BuildController(ISender sender)
     {
-        var controller = new RolesController(roleRepository, unitOfWork ?? Mock.Of<IUnitOfWork>())
+        var services = new ServiceCollection();
+        services.AddSingleton(sender);
+        var provider = services.BuildServiceProvider();
+
+        var controller = new RolesController
         {
             ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext()
+                HttpContext = new DefaultHttpContext
+                {
+                    RequestServices = provider
+                }
             }
         };
 

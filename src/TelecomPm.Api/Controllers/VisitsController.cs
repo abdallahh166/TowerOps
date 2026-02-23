@@ -6,14 +6,22 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TelecomPM.Api.Authorization;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPm.Api.Contracts.Visits;
 using TelecomPm.Api.Mappings;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Policy = ApiAuthorizationPolicies.CanViewVisits)]
 public sealed class VisitsController : ApiControllerBase
 {
+    private readonly ICurrentUserService _currentUserService;
+
+    public VisitsController(ICurrentUserService currentUserService)
+    {
+        _currentUserService = currentUserService;
+    }
+
     [HttpGet("{visitId:guid}")]
     public async Task<IActionResult> GetById(Guid visitId, CancellationToken cancellationToken)
     {
@@ -59,6 +67,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> Create(
         [FromBody] CreateVisitRequest request,
         CancellationToken cancellationToken)
@@ -87,6 +96,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/start")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> Start(
         Guid visitId,
         [FromBody] StartVisitRequest request,
@@ -97,26 +107,39 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/checkin")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> CheckIn(
         Guid visitId,
         [FromBody] CheckInVisitRequest request,
         CancellationToken cancellationToken)
     {
+        if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
         var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
         return HandleResult(result);
     }
 
     [HttpPost("{visitId:guid}/checkout")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> CheckOut(
         Guid visitId,
         [FromBody] CheckOutVisitRequest request,
         CancellationToken cancellationToken)
     {
+        if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
         var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
         return HandleResult(result);
     }
 
     [HttpPost("{visitId:guid}/complete")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> Complete(
         Guid visitId,
         [FromBody] CompleteVisitRequest request,
@@ -127,6 +150,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/submit")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> Submit(Guid visitId, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(
@@ -143,6 +167,11 @@ public sealed class VisitsController : ApiControllerBase
         [FromBody] ApproveVisitRequest request,
         CancellationToken cancellationToken)
     {
+        if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
         var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
         return HandleResult(result);
     }
@@ -154,6 +183,11 @@ public sealed class VisitsController : ApiControllerBase
         [FromBody] RejectVisitRequest request,
         CancellationToken cancellationToken)
     {
+        if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
         var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
         return HandleResult(result);
     }
@@ -165,11 +199,17 @@ public sealed class VisitsController : ApiControllerBase
         [FromBody] RequestCorrectionRequest request,
         CancellationToken cancellationToken)
     {
+        if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
         var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
         return HandleResult(result);
     }
 
     [HttpPost("{visitId:guid}/checklist-items")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> AddChecklistItem(
         Guid visitId,
         [FromBody] AddChecklistItemRequest request,
@@ -180,6 +220,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPatch("{visitId:guid}/checklist-items/{checklistItemId:guid}")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> UpdateChecklistItem(
         Guid visitId,
         Guid checklistItemId,
@@ -191,6 +232,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/issues")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> AddIssue(
         Guid visitId,
         [FromBody] AddVisitIssueRequest request,
@@ -201,6 +243,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/issues/{issueId:guid}/resolve")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> ResolveIssue(
         Guid visitId,
         Guid issueId,
@@ -212,6 +255,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/readings")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> AddReading(
         Guid visitId,
         [FromBody] AddVisitReadingRequest request,
@@ -223,6 +267,7 @@ public sealed class VisitsController : ApiControllerBase
 
     [HttpPost("{visitId:guid}/photos")]
     [RequestSizeLimit(25 * 1024 * 1024)]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> AddPhoto(
         Guid visitId,
         [FromForm] AddVisitPhotoRequest request,
@@ -240,6 +285,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/import/panorama")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> ImportPanoramaEvidence(
         Guid visitId,
         [FromForm] ImportVisitEvidenceRequest request,
@@ -254,6 +300,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/import/alarms")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> ImportAlarmCaptureEvidence(
         Guid visitId,
         [FromForm] ImportVisitEvidenceRequest request,
@@ -268,6 +315,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/cancel")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> Cancel(
         Guid visitId,
         [FromBody] CancelVisitRequest request,
@@ -278,6 +326,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/reschedule")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> Reschedule(
         Guid visitId,
         [FromBody] RescheduleVisitRequest request,
@@ -288,6 +337,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpDelete("{visitId:guid}/photos/{photoId:guid}")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> RemovePhoto(
         Guid visitId,
         Guid photoId,
@@ -298,6 +348,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPatch("{visitId:guid}/readings/{readingId:guid}")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> UpdateReading(
         Guid visitId,
         Guid readingId,
@@ -309,6 +360,7 @@ public sealed class VisitsController : ApiControllerBase
     }
 
     [HttpPost("{visitId:guid}/signature")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageVisits)]
     public async Task<IActionResult> CaptureSignature(
         Guid visitId,
         [FromBody] CaptureVisitSignatureRequest request,

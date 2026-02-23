@@ -23,6 +23,6 @@ public static class PortalContractMapper
     public static GetPortalSlaReportQuery ToPortalSlaReportQuery(this object _)
         => new();
 
-    public static GetPortalVisitsQuery ToPortalVisitsQuery(this string siteCode)
-        => new() { SiteCode = siteCode };
+    public static GetPortalVisitsQuery ToPortalVisitsQuery(this string siteCode, int pageNumber, int pageSize)
+        => new() { SiteCode = siteCode, PageNumber = pageNumber, PageSize = pageSize };
 }

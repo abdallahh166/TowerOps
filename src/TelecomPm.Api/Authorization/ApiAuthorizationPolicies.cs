@@ -7,11 +7,14 @@ public static class ApiAuthorizationPolicies
 {
     public const string CanManageWorkOrders = "CanManageWorkOrders";
     public const string CanViewWorkOrders = "CanViewWorkOrders";
+    public const string CanManageVisits = "CanManageVisits";
+    public const string CanViewVisits = "CanViewVisits";
     public const string CanReviewVisits = "CanReviewVisits";
     public const string CanManageEscalations = "CanManageEscalations";
     public const string CanViewEscalations = "CanViewEscalations";
     public const string CanViewKpis = "CanViewKpis";
     public const string CanManageUsers = "CanManageUsers";
+    public const string CanViewUsers = "CanViewUsers";
     public const string CanManageOffices = "CanManageOffices";
     public const string CanManageSites = "CanManageSites";
     public const string CanViewAnalytics = "CanViewAnalytics";
@@ -34,6 +37,16 @@ public static class ApiAuthorizationPolicies
         options.AddPolicy(CanViewWorkOrders, policy =>
             RequireAnyPermission(policy, PermissionConstants.WorkOrdersView));
 
+        options.AddPolicy(CanManageVisits, policy =>
+            RequireAnyPermission(policy,
+                PermissionConstants.VisitsCreate,
+                PermissionConstants.VisitsStart,
+                PermissionConstants.VisitsSubmit,
+                PermissionConstants.VisitsCancel));
+
+        options.AddPolicy(CanViewVisits, policy =>
+            RequireAnyPermission(policy, PermissionConstants.VisitsView));
+
         options.AddPolicy(CanReviewVisits, policy =>
             RequireAnyPermission(policy,
                 PermissionConstants.VisitsReview,
@@ -54,6 +67,9 @@ public static class ApiAuthorizationPolicies
                 PermissionConstants.UsersEdit,
                 PermissionConstants.UsersDelete,
                 PermissionConstants.UsersChangeRole));
+
+        options.AddPolicy(CanViewUsers, policy =>
+            RequireAnyPermission(policy, PermissionConstants.UsersView));
 
         options.AddPolicy(CanManageOffices, policy =>
             RequireAnyPermission(policy, PermissionConstants.OfficesManage));

@@ -23,11 +23,14 @@ public class ApiAuthorizationPoliciesTests
 
         var options = provider.GetRequiredService<IOptions<AuthorizationOptions>>().Value;
 
+        options.GetPolicy(ApiAuthorizationPolicies.CanManageVisits).Should().NotBeNull();
+        options.GetPolicy(ApiAuthorizationPolicies.CanViewVisits).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanReviewVisits).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanManageEscalations).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewEscalations).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewKpis).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanManageUsers).Should().NotBeNull();
+        options.GetPolicy(ApiAuthorizationPolicies.CanViewUsers).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanManageOffices).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanManageSites).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewAnalytics).Should().NotBeNull();
@@ -157,10 +160,14 @@ public class ApiAuthorizationPoliciesTests
     }
 
     [Theory]
+    [InlineData(typeof(VisitsController), ApiAuthorizationPolicies.CanManageVisits)]
+    [InlineData(typeof(VisitsController), ApiAuthorizationPolicies.CanViewVisits)]
     [InlineData(typeof(VisitsController), ApiAuthorizationPolicies.CanReviewVisits)]
+    [InlineData(typeof(SyncController), ApiAuthorizationPolicies.CanManageVisits)]
     [InlineData(typeof(EscalationsController), ApiAuthorizationPolicies.CanManageEscalations)]
     [InlineData(typeof(KpiController), ApiAuthorizationPolicies.CanViewKpis)]
     [InlineData(typeof(UsersController), ApiAuthorizationPolicies.CanManageUsers)]
+    [InlineData(typeof(UsersController), ApiAuthorizationPolicies.CanViewUsers)]
     [InlineData(typeof(OfficesController), ApiAuthorizationPolicies.CanManageOffices)]
     [InlineData(typeof(SitesController), ApiAuthorizationPolicies.CanManageSites)]
     [InlineData(typeof(DailyPlansController), ApiAuthorizationPolicies.CanManageSites)]

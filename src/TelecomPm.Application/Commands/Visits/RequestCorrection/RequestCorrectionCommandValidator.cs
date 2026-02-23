@@ -9,9 +9,6 @@ public class RequestCorrectionCommandValidator : AbstractValidator<RequestCorrec
         RuleFor(x => x.VisitId)
             .NotEmpty().WithMessage("Visit ID is required");
 
-        RuleFor(x => x.ReviewerId)
-            .NotEmpty().WithMessage("Reviewer ID is required");
-
         RuleFor(x => x.CorrectionNotes)
             .NotEmpty().WithMessage("Correction notes are required")
             .MinimumLength(10).WithMessage("Correction notes must be at least 10 characters")

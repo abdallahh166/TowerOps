@@ -13,6 +13,7 @@ public sealed class CheckInVisitCommandHandler : IRequestHandler<CheckInVisitCom
     private readonly IVisitRepository _visitRepository;
     private readonly ISiteRepository _siteRepository;
     private readonly IGeoCheckInService _geoCheckInService;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ISystemSettingsService _settingsService;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -20,12 +21,14 @@ public sealed class CheckInVisitCommandHandler : IRequestHandler<CheckInVisitCom
         IVisitRepository visitRepository,
         ISiteRepository siteRepository,
         IGeoCheckInService geoCheckInService,
+        ICurrentUserService currentUserService,
         ISystemSettingsService settingsService,
         IUnitOfWork unitOfWork)
     {
         _visitRepository = visitRepository;
         _siteRepository = siteRepository;
         _geoCheckInService = geoCheckInService;
+        _currentUserService = currentUserService;
         _settingsService = settingsService;
         _unitOfWork = unitOfWork;
     }
@@ -36,7 +39,10 @@ public sealed class CheckInVisitCommandHandler : IRequestHandler<CheckInVisitCom
         if (visit is null)
             return Result.Failure("Visit not found.");
 
-        if (visit.EngineerId != request.EngineerId)
+        if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
+            return Result.Failure("Authenticated user is required.");
+
+        if (visit.EngineerId != _currentUserService.UserId)
             return Result.Failure("Only the assigned engineer can check in.");
 
         var site = await _siteRepository.GetByIdAsNoTrackingAsync(visit.SiteId, cancellationToken);

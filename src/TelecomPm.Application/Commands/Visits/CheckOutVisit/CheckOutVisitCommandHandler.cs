@@ -2,6 +2,7 @@ namespace TelecomPM.Application.Commands.Visits.CheckOutVisit;
 
 using MediatR;
 using TelecomPM.Application.Common;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Domain.Exceptions;
 using TelecomPM.Domain.Interfaces.Repositories;
 using TelecomPM.Domain.ValueObjects;
@@ -9,13 +10,16 @@ using TelecomPM.Domain.ValueObjects;
 public sealed class CheckOutVisitCommandHandler : IRequestHandler<CheckOutVisitCommand, Result>
 {
     private readonly IVisitRepository _visitRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public CheckOutVisitCommandHandler(
         IVisitRepository visitRepository,
+        ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
         _visitRepository = visitRepository;
+        _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }
 
@@ -25,7 +29,10 @@ public sealed class CheckOutVisitCommandHandler : IRequestHandler<CheckOutVisitC
         if (visit is null)
             return Result.Failure("Visit not found.");
 
-        if (visit.EngineerId != request.EngineerId)
+        if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
+            return Result.Failure("Authenticated user is required.");
+
+        if (visit.EngineerId != _currentUserService.UserId)
             return Result.Failure("Only the assigned engineer can check out.");
 
         try
