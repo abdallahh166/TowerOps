@@ -435,6 +435,7 @@ public class DatabaseSeeder
             CreateSetting("SLA:P2:ResponseMinutes", "240", "SLA", "int", "Response deadline for P2 in minutes", false, seededBy),
             CreateSetting("SLA:P3:ResponseMinutes", "1440", "SLA", "int", "Response deadline for P3 in minutes", false, seededBy),
             CreateSetting("SLA:P4:ResponseMinutes", "2880", "SLA", "int", "Response deadline for P4 in minutes", false, seededBy),
+            CreateSetting("SLA:AtRiskThresholdPercent", "70", "SLA", "int", "At-risk threshold as percent of response window elapsed", false, seededBy),
 
             // Evidence
             CreateSetting("Evidence:BM:MinPhotos", "3", "Evidence", "int", "Minimum BM photos", false, seededBy),

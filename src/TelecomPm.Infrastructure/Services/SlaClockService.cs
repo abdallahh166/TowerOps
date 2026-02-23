@@ -49,25 +49,32 @@ public class SlaClockService : ISlaClockService
         };
     }
 
-    public Task<SlaStatus> EvaluateStatusAsync(WorkOrder workOrder, CancellationToken cancellationToken = default)
+    public async Task<SlaStatus> EvaluateStatusAsync(WorkOrder workOrder, CancellationToken cancellationToken = default)
     {
         if (workOrder.SlaClass == SlaClass.P4)
         {
             workOrder.ApplySlaStatus(SlaStatus.OnTime, DateTime.UtcNow);
-            return Task.FromResult(SlaStatus.OnTime);
+            return SlaStatus.OnTime;
         }
 
         var nowUtc = DateTime.UtcNow;
         var deadlineUtc = workOrder.ResponseDeadlineUtc;
+        var atRiskThresholdPercent = await GetAtRiskThresholdPercentAsync(cancellationToken);
+        var totalWindowMinutes = Math.Max(1d, (workOrder.ResponseDeadlineUtc - workOrder.CreatedAt).TotalMinutes);
+        var atRiskStartUtc = workOrder.CreatedAt.AddMinutes(totalWindowMinutes * (atRiskThresholdPercent / 100d));
+        var remainingToDeadlineMinutes = (deadlineUtc - nowUtc).TotalMinutes;
+        var isAtRiskByPercent = nowUtc >= atRiskStartUtc;
+        const int legacyAbsoluteAtRiskWindowMinutes = 30;
+        var isAtRiskByAbsoluteWindow = remainingToDeadlineMinutes <= legacyAbsoluteAtRiskWindowMinutes;
 
         var status = nowUtc > deadlineUtc
             ? SlaStatus.Breached
-            : nowUtc >= deadlineUtc.AddMinutes(-30)
+            : isAtRiskByPercent || isAtRiskByAbsoluteWindow
                 ? SlaStatus.AtRisk
                 : SlaStatus.OnTime;
 
         workOrder.ApplySlaStatus(status, nowUtc);
-        return Task.FromResult(status);
+        return status;
     }
 
     private async Task<int> GetResponseMinutesAsync(
@@ -98,5 +105,20 @@ public class SlaClockService : ISlaClockService
         });
 
         return cachedValue;
+    }
+
+    private async Task<int> GetAtRiskThresholdPercentAsync(CancellationToken cancellationToken)
+    {
+        const string cacheKey = "sla-at-risk-threshold-percent";
+        const int defaultThresholdPercent = 70;
+
+        var cachedValue = await _memoryCache.GetOrCreateAsync(cacheKey, async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = CacheDuration;
+            return await _settingsService.GetAsync("SLA:AtRiskThresholdPercent", defaultThresholdPercent, cancellationToken);
+        });
+
+        var thresholdPercent = cachedValue;
+        return Math.Clamp(thresholdPercent, 1, 99);
     }
 }
