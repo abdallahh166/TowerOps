@@ -37,3 +37,7 @@ Date: 2026-02-21
 ## Known Constraints
 - Local execution of `dotnet` commands depends on environment SDK availability.
 - In CI environments with .NET SDK, run `dotnet build --no-restore` and `dotnet test` as release gates.
+
+## Residual Backlog
+- Remaining post-Sprint-12 gaps are tracked in `docs/phase-2/11-residual-gap-checklist.md`.
+- Sprint 13 implementation delivered explicit schema precision items (`LegacyShortCode`, `CapturedAtUtc`, `ChargingCurrentLimit`, `CabinetType`) and introduced `UnusedAsset` aggregate lifecycle support.

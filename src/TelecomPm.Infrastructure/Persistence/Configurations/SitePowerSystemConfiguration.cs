@@ -38,11 +38,17 @@ namespace TelecomPm.Infrastructure.Persistence.Configurations
             builder.Property(p => p.CabinetVendor)
                 .HasMaxLength(100);
 
+            builder.Property(p => p.CabinetType)
+                .HasMaxLength(100);
+
             builder.Property(p => p.PowerSourceLabel)
                 .HasMaxLength(100);
 
             builder.Property(p => p.RectifierBrandRaw)
                 .HasMaxLength(200);
+
+            builder.Property(p => p.ChargingCurrentLimit)
+                .HasPrecision(18, 2);
 
             builder.HasIndex(p => p.SiteId);
         }

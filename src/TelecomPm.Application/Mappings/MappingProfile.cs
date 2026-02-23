@@ -40,7 +40,8 @@ public class MappingProfile : Profile
 
         CreateMap<VisitPhoto, VisitPhotoDto>()
             .ForMember(d => d.FileUrl, opt => opt.MapFrom(s => s.FilePath))
-            .ForMember(d => d.ThumbnailUrl, opt => opt.MapFrom(s => s.ThumbnailPath));
+            .ForMember(d => d.ThumbnailUrl, opt => opt.MapFrom(s => s.ThumbnailPath))
+            .ForMember(d => d.CapturedAt, opt => opt.MapFrom(s => s.CapturedAtUtc ?? s.CreatedAt));
 
         CreateMap<VisitReading, VisitReadingDto>();
         CreateMap<VisitChecklist, VisitChecklistDto>();

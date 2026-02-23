@@ -84,6 +84,8 @@ public sealed class ImportPowerDataCommandHandler : IRequestHandler<ImportPowerD
                 continue;
             }
 
+            site.SetLegacyShortCode(key);
+
             var siteTypeRaw = ImportExcelSupport.GetCellText(row, columnMap, "Site Type");
             var siteName = ImportExcelSupport.GetCellText(row, columnMap, "OEG Site Name", "Site Name");
             var normalizedType = ImportExcelSupport.ParseSiteTypeOrDefault(siteTypeRaw, site.SiteType);
@@ -103,6 +105,7 @@ public sealed class ImportPowerDataCommandHandler : IRequestHandler<ImportPowerD
             var modemRaw = ImportExcelSupport.GetCellText(row, columnMap, "Modem");
             var modulesRaw = ImportExcelSupport.GetCellText(row, columnMap, "No of Modules", "Rectifier No.");
             var cabinetRaw = ImportExcelSupport.GetCellText(row, columnMap, "Cabinet Type (Y/N) Y=Rectifier in Cabinet", "Cabinet Type");
+            var chargingCurrentRaw = ImportExcelSupport.GetCellText(row, columnMap, "Batteries Charnging current limit", "Charging Current Limit");
 
             var existingPower = site.PowerSystem ?? SitePowerSystem.Create(site.Id, PowerConfiguration.ACOnly, RectifierBrand.Other, BatteryType.VRLA);
             var parsedBattery = BatteryFieldParser.Parse(batteryRaw);
@@ -129,7 +132,9 @@ public sealed class ImportPowerDataCommandHandler : IRequestHandler<ImportPowerD
 
             var cabinetFlag = ParseCabinetFlag(cabinetRaw);
             var cabinetVendor = ParseCabinetVendor(cabinetRaw);
-            power.SetCabinetInfo(cabinetFlag, cabinetVendor);
+            var cabinetType = ParseCabinetType(cabinetRaw);
+            power.SetCabinetInfo(cabinetFlag, cabinetVendor, cabinetType);
+            power.SetChargingCurrentLimit(ImportExcelSupport.ParseDecimal(chargingCurrentRaw));
             power.SetRawPowerLabels(ImportExcelSupport.IsBlankOrNa(acPowerRaw) ? existingPower.PowerSourceLabel : acPowerRaw, rectifierTypeRaw);
 
             site.SetPowerSystem(power);
@@ -202,5 +207,13 @@ public sealed class ImportPowerDataCommandHandler : IRequestHandler<ImportPowerD
 
         var parts = cabinetRaw!.Split('/', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         return parts.Length > 1 ? parts[1] : null;
+    }
+
+    private static string? ParseCabinetType(string? cabinetRaw)
+    {
+        if (ImportExcelSupport.IsBlankOrNa(cabinetRaw))
+            return null;
+
+        return cabinetRaw!.Trim();
     }
 }

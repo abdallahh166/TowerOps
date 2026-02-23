@@ -7,6 +7,7 @@ public record SiteDto
 {
     public Guid Id { get; init; }
     public string SiteCode { get; init; } = string.Empty;
+    public string? LegacyShortCode { get; init; }
     public string Name { get; init; } = string.Empty;
     public string OMCName { get; init; } = string.Empty;
     public string Region { get; init; } = string.Empty;
@@ -19,6 +20,7 @@ public record SiteDto
     public string? TowerOwnerName { get; init; }
     public string? HostContactName { get; init; }
     public string? HostContactPhone { get; init; }
+    public string? ExternalContextNotes { get; init; }
     public int EstimatedVisitDurationMinutes { get; init; }
     public DateTime? LastVisitDate { get; init; }
     public int RequiredPhotosCount { get; init; }

@@ -99,6 +99,8 @@ public sealed class ImportDeltaSitesCommandHandler : IRequestHandler<ImportDelta
                 continue;
             }
 
+            site.SetLegacyShortCode(key);
+
             var operationalZone = ImportExcelSupport.GetCellText(row, columnMap, "OZ");
             site.SetNetworkContext(site.TelecomEgyptName, ImportExcelSupport.IsBlankOrNa(operationalZone) ? site.OperationalZone : operationalZone);
 
@@ -145,6 +147,8 @@ public sealed class ImportDeltaSitesCommandHandler : IRequestHandler<ImportDelta
                 result.Errors.Add($"Sheet2 row {rowNumber}: site '{key}' could not be loaded for update.");
                 continue;
             }
+
+            site.SetLegacyShortCode(key);
 
             var nodalRaw = ImportExcelSupport.GetCellText(row, columnMap, "Nodal Degree");
             var rectifierRaw = ImportExcelSupport.GetCellText(row, columnMap, "Rectifier Brand");

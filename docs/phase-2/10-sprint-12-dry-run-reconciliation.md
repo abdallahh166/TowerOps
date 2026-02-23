@@ -1,6 +1,6 @@
 ﻿# Sprint 12 Dry-Run Reconciliation Report
 
-Generated At UTC: 2026-02-23 22:01:35
+Generated At UTC: 2026-02-23 23:14:42
 
 ## Coverage Summary
 | Command | Source File | Success | Imported | Skipped |
@@ -16,6 +16,7 @@ Generated At UTC: 2026-02-23 22:01:35
 | ImportChecklistTemplateCommand | GH-DE  Checklist.xlsx | Yes | 259 | 0 |
 | ImportPanoramaEvidenceCommand | GH-DE  Checklist.xlsx | Yes | 147 | 0 |
 | ImportAlarmCaptureCommand | GH-DE  Checklist.xlsx | Yes | 0 | 1 |
+| ImportUnusedAssetsCommand | GH-DE  Checklist.xlsx | Yes | 3 | 37 |
 
 ## Top Error Reasons
 - Row 6: site '1009DE' not found. (x2)
@@ -48,4 +49,5 @@ Generated At UTC: 2026-02-23 22:01:35
 - Checklist templates created: 1
 - Checklist items imported: 259
 - Battery discharge tests imported: 0
+- Unused assets imported: 3
 - Visit evidence photos after dry-run: 147

@@ -63,6 +63,7 @@ Related: operational process and lifecycle diagrams are documented in `docs/Oper
 - `POST /{visitId}/photos`
 - `POST /{visitId}/import/panorama`
 - `POST /{visitId}/import/alarms`
+- `POST /{visitId}/import/unused-assets`
 - `DELETE /{visitId}/photos/{photoId}`
 - `POST /{visitId}/cancel`
 - `POST /{visitId}/reschedule`
@@ -147,6 +148,8 @@ Related: operational process and lifecycle diagrams are documented in `docs/Oper
 - `GET /sites` (**CanViewPortal**)
 - `GET /sites/{siteCode}` (**CanViewPortal**)
 - `GET /workorders` (**CanViewPortal**)
+- `PATCH /workorders/{id}/accept` (**CanViewPortal**)
+- `PATCH /workorders/{id}/reject` (**CanViewPortal**)
 - `GET /sla-report` (**CanViewPortal**)
 - `GET /visits/{siteCode}` (**CanViewPortal**)
 

@@ -12,6 +12,7 @@ using TelecomPM.Domain.Entities.BatteryDischargeTests;
 using TelecomPM.Domain.Entities.ChecklistTemplates;
 using TelecomPM.Domain.Entities.Offices;
 using TelecomPM.Domain.Entities.Sites;
+using TelecomPM.Domain.Entities.UnusedAssets;
 using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Interfaces.Repositories;
@@ -72,6 +73,49 @@ public class ExportCommandsRealFilesIntegrationTests
         required.Should().OnlyContain(name => exportedNames.Contains(name));
         exported.Worksheet("site's reading").Row(1).CellsUsed().Should().NotBeEmpty();
         exported.Worksheet("Common checklist").Row(1).CellsUsed().Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task ExportChecklistCommand_ShouldUseUnusedAssetsRepository_WhenDataExists()
+    {
+        var site = RealExcelTestSupport.CreateSite("3564DE", Guid.NewGuid());
+        var visit = RealExcelTestSupport.CreateVisit(site);
+        var nowUtc = DateTime.UtcNow;
+
+        var visitRepo = new Mock<IVisitRepository>();
+        visitRepo.Setup(x => x.GetAllAsNoTrackingAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Visit> { visit });
+        visitRepo.Setup(x => x.GetByIdAsNoTrackingAsync(visit.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(visit);
+
+        var templateRepo = new Mock<IChecklistTemplateRepository>();
+        templateRepo.Setup(x => x.GetByVisitTypeAsync(It.IsAny<VisitType>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<ChecklistTemplate>());
+
+        var unusedAsset = UnusedAsset.Create(
+            site.Id,
+            visit.Id,
+            "Unused Rectifier Module",
+            1,
+            "pcs",
+            nowUtc,
+            "Spare");
+
+        var unusedAssetRepo = new Mock<IUnusedAssetRepository>();
+        unusedAssetRepo.Setup(x => x.GetByVisitIdsAsNoTrackingAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<UnusedAsset> { unusedAsset });
+
+        var sut = new ExportChecklistCommandHandler(visitRepo.Object, templateRepo.Object, unusedAssetRepo.Object);
+        var result = await sut.Handle(new ExportChecklistCommand { VisitType = VisitType.BM }, CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+
+        using var workbook = new XLWorkbook(new MemoryStream(result.Value!));
+        var sheet = workbook.Worksheet("unused assets");
+
+        sheet.Cell(2, 4).GetString().Should().Be("Unused Rectifier Module");
+        sheet.Cell(2, 5).GetDouble().Should().Be(1d);
     }
 
     [Fact]

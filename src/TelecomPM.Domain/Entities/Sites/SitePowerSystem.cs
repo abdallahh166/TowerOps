@@ -26,6 +26,7 @@ public sealed class SitePowerSystem : Entity<Guid>
     public string? BatteryHealthStatus { get; private set; }
     public bool? IsCabinetized { get; private set; }
     public string? CabinetVendor { get; private set; }
+    public string? CabinetType { get; private set; }
     
     // Solar (if applicable)
     public bool HasSolarPanel { get; private set; }
@@ -42,6 +43,7 @@ public sealed class SitePowerSystem : Entity<Guid>
     // Power Meter
     public bool HasPowerMeter { get; private set; }
     public int? PowerMeterRate { get; private set; }
+    public decimal? ChargingCurrentLimit { get; private set; }
     public string? ElectricityPhaseType { get; private set; }
     public string? PowerSourceLabel { get; private set; }
     public int? RouterCount { get; private set; }
@@ -96,10 +98,11 @@ public sealed class SitePowerSystem : Entity<Guid>
         BatteryHealthStatus = batteryHealthStatus;
     }
 
-    public void SetCabinetInfo(bool? isCabinetized, string? cabinetVendor)
+    public void SetCabinetInfo(bool? isCabinetized, string? cabinetVendor, string? cabinetType = null)
     {
         IsCabinetized = isCabinetized;
         CabinetVendor = cabinetVendor;
+        CabinetType = cabinetType;
     }
 
     public void SetSolarPanel(int panelWatt, int panelsCount)
@@ -123,6 +126,14 @@ public sealed class SitePowerSystem : Entity<Guid>
         HasPowerMeter = true;
         PowerMeterRate = rate;
         ElectricityPhaseType = phaseType;
+    }
+
+    public void SetChargingCurrentLimit(decimal? chargingCurrentLimit)
+    {
+        if (chargingCurrentLimit.HasValue && chargingCurrentLimit <= 0)
+            throw new DomainException("Charging current limit must be greater than zero.");
+
+        ChargingCurrentLimit = chargingCurrentLimit;
     }
 
     public void SetNetworkEquipmentCounts(int? routerCount, int? modemCount)

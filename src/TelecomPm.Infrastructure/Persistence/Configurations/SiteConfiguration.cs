@@ -105,6 +105,9 @@ public class SiteConfiguration : IEntityTypeConfiguration<Site>
         builder.Property(s => s.BSCCode)
             .HasMaxLength(50);
 
+        builder.Property(s => s.LegacyShortCode)
+            .HasMaxLength(20);
+
         builder.Property(s => s.TelecomEgyptName)
             .HasMaxLength(200);
 
@@ -121,6 +124,9 @@ public class SiteConfiguration : IEntityTypeConfiguration<Site>
             .HasMaxLength(200);
 
         builder.Property(s => s.GeneralNotes)
+            .HasMaxLength(2000);
+
+        builder.Property(s => s.ExternalContextNotes)
             .HasMaxLength(2000);
 
         builder.Property(s => s.EnclosureTypeRaw)
