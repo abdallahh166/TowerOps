@@ -2,6 +2,7 @@ using System.Text;
 using FluentAssertions;
 using Moq;
 using TelecomPM.Application.Common;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.Commands.Imports.ImportAlarmCapture;
 using TelecomPM.Application.Commands.Imports.ImportBatteryDischargeTest;
 using TelecomPM.Application.Commands.Imports.ImportChecklistTemplate;
@@ -79,51 +80,52 @@ public class Sprint12DryRunReconciliationTests
 
         var unitOfWork = new Mock<IUnitOfWork>();
         unitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+        var settings = BuildImportSettings();
 
         var runs = new List<RunResult>();
 
         runs.Add(await Run("ImportSiteAssetsCommand", "Data collection from 1-1-2023 till 31-12-2023.xlsx",
-            () => new ImportSiteAssetsCommandHandler(siteRepo.Object, unitOfWork.Object).Handle(
+            () => new ImportSiteAssetsCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object).Handle(
                 new ImportSiteAssetsCommand { FileContent = RealExcelTestSupport.LoadExcelBytes("Data collection from 1-1-2023 till 31-12-2023.xlsx") },
                 CancellationToken.None)));
 
         runs.Add(await Run("ImportPowerDataCommand", "Data collection from 1-1-2023 till 31-12-2023.xlsx",
-            () => new ImportPowerDataCommandHandler(siteRepo.Object, unitOfWork.Object).Handle(
+            () => new ImportPowerDataCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object).Handle(
                 new ImportPowerDataCommand { FileContent = RealExcelTestSupport.LoadExcelBytes("Data collection from 1-1-2023 till 31-12-2023.xlsx") },
                 CancellationToken.None)));
 
         runs.Add(await Run("ImportSiteRadioDataCommand", "Data collection from 1-1-2023 till 31-12-2023.xlsx",
-            () => new ImportSiteRadioDataCommandHandler(siteRepo.Object, unitOfWork.Object).Handle(
+            () => new ImportSiteRadioDataCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object).Handle(
                 new ImportSiteRadioDataCommand { FileContent = RealExcelTestSupport.LoadExcelBytes("Data collection from 1-1-2023 till 31-12-2023.xlsx") },
                 CancellationToken.None)));
 
         runs.Add(await Run("ImportSiteTxDataCommand", "Data collection from 1-1-2023 till 31-12-2023.xlsx",
-            () => new ImportSiteTxDataCommandHandler(siteRepo.Object, unitOfWork.Object).Handle(
+            () => new ImportSiteTxDataCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object).Handle(
                 new ImportSiteTxDataCommand { FileContent = RealExcelTestSupport.LoadExcelBytes("Data collection from 1-1-2023 till 31-12-2023.xlsx") },
                 CancellationToken.None)));
 
         runs.Add(await Run("ImportSiteSharingDataCommand", "Data collection from 1-1-2023 till 31-12-2023.xlsx",
-            () => new ImportSiteSharingDataCommandHandler(siteRepo.Object, unitOfWork.Object).Handle(
+            () => new ImportSiteSharingDataCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object).Handle(
                 new ImportSiteSharingDataCommand { FileContent = RealExcelTestSupport.LoadExcelBytes("Data collection from 1-1-2023 till 31-12-2023.xlsx") },
                 CancellationToken.None)));
 
         runs.Add(await Run("ImportRFStatusCommand", "GH-DE Data Collection.xlsx",
-            () => new ImportRFStatusCommandHandler(siteRepo.Object, unitOfWork.Object).Handle(
+            () => new ImportRFStatusCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object).Handle(
                 new ImportRFStatusCommand { FileContent = RealExcelTestSupport.LoadExcelBytes("GH-DE Data Collection.xlsx") },
                 CancellationToken.None)));
 
         runs.Add(await Run("ImportBatteryDischargeTestCommand", "GH-BDT_BDT.xlsx",
-            () => new ImportBatteryDischargeTestCommandHandler(siteRepo.Object, bdtRepo.Object, unitOfWork.Object).Handle(
+            () => new ImportBatteryDischargeTestCommandHandler(siteRepo.Object, bdtRepo.Object, unitOfWork.Object, settings.Object).Handle(
                 new ImportBatteryDischargeTestCommand { FileContent = RealExcelTestSupport.LoadExcelBytes("GH-BDT_BDT.xlsx") },
                 CancellationToken.None)));
 
         runs.Add(await Run("ImportDeltaSitesCommand", "Delta Sites (1).xlsx",
-            () => new ImportDeltaSitesCommandHandler(siteRepo.Object, unitOfWork.Object).Handle(
+            () => new ImportDeltaSitesCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object).Handle(
                 new ImportDeltaSitesCommand { FileContent = RealExcelTestSupport.LoadExcelBytes("Delta Sites (1).xlsx") },
                 CancellationToken.None)));
 
         runs.Add(await Run("ImportChecklistTemplateCommand", "GH-DE  Checklist.xlsx",
-            () => new ImportChecklistTemplateCommandHandler(templateRepo.Object, unitOfWork.Object).Handle(
+            () => new ImportChecklistTemplateCommandHandler(templateRepo.Object, unitOfWork.Object, settings.Object).Handle(
                 new ImportChecklistTemplateCommand
                 {
                     FileContent = RealExcelTestSupport.LoadExcelBytes("GH-DE  Checklist.xlsx"),
@@ -136,7 +138,7 @@ public class Sprint12DryRunReconciliationTests
                 CancellationToken.None)));
 
         runs.Add(await Run("ImportPanoramaEvidenceCommand", "GH-DE  Checklist.xlsx",
-            () => new ImportPanoramaEvidenceCommandHandler(visitRepo.Object, unitOfWork.Object).Handle(
+            () => new ImportPanoramaEvidenceCommandHandler(visitRepo.Object, unitOfWork.Object, settings.Object).Handle(
                 new ImportPanoramaEvidenceCommand
                 {
                     VisitId = visit.Id,
@@ -145,7 +147,7 @@ public class Sprint12DryRunReconciliationTests
                 CancellationToken.None)));
 
         runs.Add(await Run("ImportAlarmCaptureCommand", "GH-DE  Checklist.xlsx",
-            () => new ImportAlarmCaptureCommandHandler(visitRepo.Object, unitOfWork.Object).Handle(
+            () => new ImportAlarmCaptureCommandHandler(visitRepo.Object, unitOfWork.Object, settings.Object).Handle(
                 new ImportAlarmCaptureCommand
                 {
                     VisitId = visit.Id,
@@ -154,7 +156,7 @@ public class Sprint12DryRunReconciliationTests
                 CancellationToken.None)));
 
         runs.Add(await Run("ImportUnusedAssetsCommand", "GH-DE  Checklist.xlsx",
-            () => new ImportUnusedAssetsCommandHandler(visitRepo.Object, unusedAssetRepo.Object, unitOfWork.Object).Handle(
+            () => new ImportUnusedAssetsCommandHandler(visitRepo.Object, unusedAssetRepo.Object, unitOfWork.Object, settings.Object).Handle(
                 new ImportUnusedAssetsCommand
                 {
                     VisitId = visit.Id,
@@ -170,6 +172,20 @@ public class Sprint12DryRunReconciliationTests
 
         File.Exists(reportPath).Should().BeTrue();
         report.Should().Contain("Coverage Summary");
+    }
+
+    private static Mock<ISystemSettingsService> BuildImportSettings()
+    {
+        var settings = new Mock<ISystemSettingsService>();
+        settings.Setup(x => x.GetAsync("Import:SkipInvalidRows", true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        settings.Setup(x => x.GetAsync("Import:MaxRows", 5000, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(25000);
+        settings.Setup(x => x.GetAsync("Import:MaxFileSizeBytes", 10 * 1024 * 1024, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(20 * 1024 * 1024);
+        settings.Setup(x => x.GetAsync("Import:DefaultDateFormat", "dd/MM/yyyy", It.IsAny<CancellationToken>()))
+            .ReturnsAsync("dd/MM/yyyy");
+        return settings;
     }
 
     private static async Task<RunResult> Run(string commandName, string sourceFile, Func<Task<Result<ImportSiteDataResult>>> run)

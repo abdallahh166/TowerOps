@@ -59,6 +59,7 @@ public class NotificationHttpClientResilienceTests
                 EndpointBaseUrl = "https://twilio.test"
             }),
             settingsService.Object,
+            Mock.Of<IOperationalMetrics>(),
             Mock.Of<ILogger<NotificationService>>());
 
         await sut.SendSmsAsync("+201111111111", "hello");

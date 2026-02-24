@@ -2,6 +2,7 @@ namespace TelecomPM.Api.Middleware;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 public class RequestLoggingMiddleware
 {
@@ -18,23 +19,30 @@ public class RequestLoggingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var startedAt = DateTime.UtcNow;
+        var stopwatch = Stopwatch.StartNew();
+        var correlationId = context.TraceIdentifier;
 
         _logger.LogInformation(
-            "Incoming {Method} request to {Path}",
-            context.Request.Method,
-            context.Request.Path);
-
-        await _next(context);
-
-        var duration = DateTime.UtcNow - startedAt;
-
-        _logger.LogInformation(
-            "Completed {Method} {Path} with status {StatusCode} in {ElapsedMilliseconds}ms",
+            "Incoming {Method} request to {Path} (CorrelationId: {CorrelationId})",
             context.Request.Method,
             context.Request.Path,
-            context.Response.StatusCode,
-            duration.TotalMilliseconds);
+            correlationId);
+
+        try
+        {
+            await _next(context);
+        }
+        finally
+        {
+            stopwatch.Stop();
+            _logger.LogInformation(
+                "Completed {Method} {Path} with status {StatusCode} in {ElapsedMilliseconds}ms (CorrelationId: {CorrelationId})",
+                context.Request.Method,
+                context.Request.Path,
+                context.Response.StatusCode,
+                stopwatch.Elapsed.TotalMilliseconds,
+                correlationId);
+        }
     }
 }
 

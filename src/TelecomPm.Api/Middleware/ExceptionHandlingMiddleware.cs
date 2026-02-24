@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using TelecomPM.Api.Errors;
 using TelecomPm.Api.Localization;
 using TelecomPM.Domain.Exceptions;
 using DomainUnauthorizedAccessException = TelecomPM.Domain.Exceptions.UnauthorizedAccessException;
@@ -51,82 +52,68 @@ public class ExceptionHandlingMiddleware
         IValidationErrorLocalizer validationLocalizer)
     {
         context.Response.ContentType = "application/json";
+        var correlationId = context.TraceIdentifier;
 
-        var (statusCode, responseBody) = exception switch
+        var mapped = exception switch
         {
-            ValidationException validationException => (
-                (int)HttpStatusCode.BadRequest,
-                (object)new
-                {
-                    Message = ResolveLocalizedMessage(validationException, localizer),
-                    Errors = validationLocalizer.Localize(validationException.Errors)
-                }),
-            AppValidationException validationException => (
-                (int)HttpStatusCode.BadRequest,
-                (object)new
-                {
-                    Message = ResolveLocalizedMessage(validationException, localizer),
-                    Errors = validationLocalizer.Localize(validationException.Errors)
-                }),
-            EntityNotFoundException notFoundException => (
+            ValidationException validationException => ApiErrorFactory.Validation(
+                validationLocalizer.Localize(validationException.Errors),
+                localizer,
+                correlationId),
+            AppValidationException validationException => ApiErrorFactory.Validation(
+                validationLocalizer.Localize(validationException.Errors),
+                localizer,
+                correlationId),
+            EntityNotFoundException notFoundException => ApiErrorFactory.Build(
                 (int)HttpStatusCode.NotFound,
-                (object)new
-                {
-                    Message = ResolveLocalizedMessage(notFoundException, localizer)
-                }),
-            BusinessRuleViolationException businessRuleException => (
+                ApiErrorCodes.ResourceNotFound,
+                ResolveLocalizedMessage(notFoundException, localizer),
+                correlationId),
+            BusinessRuleViolationException businessRuleException => ApiErrorFactory.Build(
                 (int)HttpStatusCode.BadRequest,
-                (object)new
-                {
-                    Message = ResolveLocalizedMessage(businessRuleException, localizer),
-                    Rule = businessRuleException.RuleName
-                }),
-            DomainUnauthorizedAccessException unauthorizedException => (
+                ApiErrorCodes.BusinessRuleViolation,
+                ResolveLocalizedMessage(businessRuleException, localizer),
+                correlationId,
+                meta: new Dictionary<string, string> { ["Rule"] = businessRuleException.RuleName }),
+            DomainUnauthorizedAccessException unauthorizedException => ApiErrorFactory.Build(
                 (int)HttpStatusCode.Forbidden,
-                (object)new
-                {
-                    Message = ResolveLocalizedMessage(unauthorizedException, localizer)
-                }),
-            DomainException domainException => (
+                ApiErrorCodes.Forbidden,
+                ResolveLocalizedMessage(unauthorizedException, localizer),
+                correlationId),
+            DomainException domainException => ApiErrorFactory.Build(
                 (int)HttpStatusCode.BadRequest,
-                (object)new
-                {
-                    Message = ResolveLocalizedMessage(domainException, localizer)
-                }),
-            AppNotFoundException notFoundException => (
+                ApiErrorCodes.BusinessRuleViolation,
+                ResolveLocalizedMessage(domainException, localizer),
+                correlationId),
+            AppNotFoundException notFoundException => ApiErrorFactory.Build(
                 (int)HttpStatusCode.NotFound,
-                (object)new
-                {
-                    Message = ResolveLocalizedMessage(notFoundException, localizer)
-                }),
-            AppUnauthorizedException unauthorizedException => (
+                ApiErrorCodes.ResourceNotFound,
+                ResolveLocalizedMessage(notFoundException, localizer),
+                correlationId),
+            AppUnauthorizedException unauthorizedException => ApiErrorFactory.Build(
                 (int)HttpStatusCode.Forbidden,
-                (object)new
-                {
-                    Message = ResolveLocalizedMessage(unauthorizedException, localizer)
-                }),
-            AppConflictException conflictException => (
+                ApiErrorCodes.Forbidden,
+                ResolveLocalizedMessage(unauthorizedException, localizer),
+                correlationId),
+            AppConflictException conflictException => ApiErrorFactory.Build(
                 (int)HttpStatusCode.Conflict,
-                (object)new
-                {
-                    Message = ResolveLocalizedMessage(conflictException, localizer)
-                }),
-            AppBaseException applicationException => (
+                ApiErrorCodes.Conflict,
+                ResolveLocalizedMessage(conflictException, localizer),
+                correlationId),
+            AppBaseException applicationException => ApiErrorFactory.Build(
                 (int)HttpStatusCode.BadRequest,
-                (object)new
-                {
-                    Message = ResolveLocalizedMessage(applicationException, localizer)
-                }),
-            _ => (
+                ApiErrorCodes.RequestFailed,
+                ResolveLocalizedMessage(applicationException, localizer),
+                correlationId),
+            _ => ApiErrorFactory.Build(
                 (int)HttpStatusCode.InternalServerError,
-                (object)new
-                {
-                    Message = localizer.Get("InternalServerError", "An internal server error occurred")
-                })
+                ApiErrorCodes.InternalError,
+                localizer.Get("InternalServerError", "An internal server error occurred"),
+                correlationId)
         };
 
-        context.Response.StatusCode = statusCode;
-        await context.Response.WriteAsync(JsonSerializer.Serialize(responseBody));
+        context.Response.StatusCode = mapped.StatusCode;
+        await context.Response.WriteAsync(JsonSerializer.Serialize(mapped.Error));
     }
 
     private static string ResolveLocalizedMessage(Exception exception, ILocalizedTextService localizer)

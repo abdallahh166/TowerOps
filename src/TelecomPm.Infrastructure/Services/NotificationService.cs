@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TelecomPM.Application.Common.Interfaces;
@@ -14,6 +15,7 @@ public class NotificationService : INotificationService
     private readonly PushNotificationOptions _pushOptions;
     private readonly TwilioOptions _twilioOptions;
     private readonly ISystemSettingsService _systemSettingsService;
+    private readonly IOperationalMetrics _metrics;
     private readonly ILogger<NotificationService> _logger;
 
     public NotificationService(
@@ -22,6 +24,7 @@ public class NotificationService : INotificationService
         IOptions<PushNotificationOptions> pushOptions,
         IOptions<TwilioOptions> twilioOptions,
         ISystemSettingsService systemSettingsService,
+        IOperationalMetrics metrics,
         ILogger<NotificationService> logger)
     {
         _emailService = emailService;
@@ -29,6 +32,7 @@ public class NotificationService : INotificationService
         _pushOptions = pushOptions.Value;
         _twilioOptions = twilioOptions.Value;
         _systemSettingsService = systemSettingsService;
+        _metrics = metrics;
         _logger = logger;
     }
 
@@ -38,8 +42,20 @@ public class NotificationService : INotificationService
         string body,
         CancellationToken cancellationToken = default)
     {
-        await _emailService.SendEmailAsync(to, subject, body, cancellationToken);
-        _logger.LogInformation("Email sent to {To} with subject {Subject}", to, subject);
+        var stopwatch = Stopwatch.StartNew();
+        try
+        {
+            await _emailService.SendEmailAsync(to, subject, body, cancellationToken);
+            stopwatch.Stop();
+            _metrics.RecordNotification("email", "success", stopwatch.Elapsed.TotalMilliseconds);
+            _logger.LogInformation("Email sent to {To} with subject {Subject}", to, subject);
+        }
+        catch
+        {
+            stopwatch.Stop();
+            _metrics.RecordNotification("email", "failed", stopwatch.Elapsed.TotalMilliseconds);
+            throw;
+        }
     }
 
     public async Task SendPushNotificationAsync(
@@ -73,6 +89,7 @@ public class NotificationService : INotificationService
 
         if (!hasSignalR && !hasFirebase)
         {
+            _metrics.RecordNotification("push", "skipped", 0);
             _logger.LogWarning("Push notification skipped for user {UserId}. SignalR/Firebase are not configured.", userId);
             return;
         }
@@ -93,6 +110,8 @@ public class NotificationService : INotificationService
         string message,
         CancellationToken cancellationToken = default)
     {
+        var stopwatch = Stopwatch.StartNew();
+
         var accountSid = await _systemSettingsService.GetAsync(
             "Notifications:Twilio:AccountSid",
             _twilioOptions.AccountSid ?? string.Empty,
@@ -112,6 +131,8 @@ public class NotificationService : INotificationService
             string.IsNullOrWhiteSpace(authToken) ||
             string.IsNullOrWhiteSpace(fromNumber))
         {
+            stopwatch.Stop();
+            _metrics.RecordNotification("sms", "skipped", stopwatch.Elapsed.TotalMilliseconds);
             _logger.LogWarning("SMS skipped for {PhoneNumber}. Twilio is not configured.", phoneNumber);
             return;
         }
@@ -135,15 +156,26 @@ public class NotificationService : INotificationService
         request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authBytes));
 
         var client = _httpClientFactory.CreateClient(nameof(NotificationService));
-        var response = await client.SendAsync(request, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new InvalidOperationException($"Twilio SMS failed with status {(int)response.StatusCode}: {body}");
-        }
+            var response = await client.SendAsync(request, cancellationToken);
 
-        _logger.LogInformation("SMS sent to {PhoneNumber}", phoneNumber);
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                throw new InvalidOperationException($"Twilio SMS failed with status {(int)response.StatusCode}: {body}");
+            }
+
+            stopwatch.Stop();
+            _metrics.RecordNotification("sms", "success", stopwatch.Elapsed.TotalMilliseconds);
+            _logger.LogInformation("SMS sent to {PhoneNumber}", phoneNumber);
+        }
+        catch
+        {
+            stopwatch.Stop();
+            _metrics.RecordNotification("sms", "failed", stopwatch.Elapsed.TotalMilliseconds);
+            throw;
+        }
     }
 
     private async Task SendSignalRNotificationAsync(
@@ -153,6 +185,8 @@ public class NotificationService : INotificationService
         string signalRWebhookUrl,
         CancellationToken cancellationToken)
     {
+        var stopwatch = Stopwatch.StartNew();
+
         var payload = new
         {
             userId,
@@ -167,15 +201,26 @@ public class NotificationService : INotificationService
         };
 
         var client = _httpClientFactory.CreateClient(nameof(NotificationService));
-        var response = await client.SendAsync(request, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new InvalidOperationException($"SignalR push failed with status {(int)response.StatusCode}: {body}");
-        }
+            var response = await client.SendAsync(request, cancellationToken);
 
-        _logger.LogInformation("SignalR push sent to user {UserId}", userId);
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                throw new InvalidOperationException($"SignalR push failed with status {(int)response.StatusCode}: {body}");
+            }
+
+            stopwatch.Stop();
+            _metrics.RecordNotification("push.signalr", "success", stopwatch.Elapsed.TotalMilliseconds);
+            _logger.LogInformation("SignalR push sent to user {UserId}", userId);
+        }
+        catch
+        {
+            stopwatch.Stop();
+            _metrics.RecordNotification("push.signalr", "failed", stopwatch.Elapsed.TotalMilliseconds);
+            throw;
+        }
     }
 
     private async Task SendFirebaseNotificationAsync(
@@ -187,6 +232,8 @@ public class NotificationService : INotificationService
         string topicPrefix,
         CancellationToken cancellationToken)
     {
+        var stopwatch = Stopwatch.StartNew();
+
         var endpoint = string.IsNullOrWhiteSpace(firebaseEndpoint)
             ? "https://fcm.googleapis.com/fcm/send"
             : firebaseEndpoint;
@@ -219,14 +266,25 @@ public class NotificationService : INotificationService
         request.Headers.TryAddWithoutValidation("Authorization", $"key={firebaseServerKey}");
 
         var client = _httpClientFactory.CreateClient(nameof(NotificationService));
-        var response = await client.SendAsync(request, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new InvalidOperationException($"Firebase push failed with status {(int)response.StatusCode}: {body}");
-        }
+            var response = await client.SendAsync(request, cancellationToken);
 
-        _logger.LogInformation("Firebase push sent to user topic {Topic}", topic);
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                throw new InvalidOperationException($"Firebase push failed with status {(int)response.StatusCode}: {body}");
+            }
+
+            stopwatch.Stop();
+            _metrics.RecordNotification("push.firebase", "success", stopwatch.Elapsed.TotalMilliseconds);
+            _logger.LogInformation("Firebase push sent to user topic {Topic}", topic);
+        }
+        catch
+        {
+            stopwatch.Stop();
+            _metrics.RecordNotification("push.firebase", "failed", stopwatch.Elapsed.TotalMilliseconds);
+            throw;
+        }
     }
 }

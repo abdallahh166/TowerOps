@@ -24,6 +24,7 @@ public class NotificationServiceTests
 
         var factory = BuildFactory(handler);
         var settings = BuildSettingsService();
+        var metrics = new Mock<IOperationalMetrics>();
         var service = new NotificationService(
             Mock.Of<IEmailService>(),
             factory,
@@ -34,6 +35,7 @@ public class NotificationServiceTests
             }),
             Options.Create(new TwilioOptions()),
             settings,
+            metrics.Object,
             Mock.Of<ILogger<NotificationService>>());
 
         await service.SendPushNotificationAsync(Guid.NewGuid(), "Title", "Message");
@@ -41,6 +43,8 @@ public class NotificationServiceTests
         handler.Requests.Should().HaveCount(2);
         handler.Requests.Should().Contain(r => r.RequestUri!.Host.Contains("signalr"));
         handler.Requests.Should().Contain(r => r.RequestUri!.Host.Contains("fcm.googleapis.com"));
+        metrics.Verify(m => m.RecordNotification("push.signalr", "success", It.IsAny<double>()), Times.Once);
+        metrics.Verify(m => m.RecordNotification("push.firebase", "success", It.IsAny<double>()), Times.Once);
     }
 
     [Fact]
@@ -49,6 +53,7 @@ public class NotificationServiceTests
         var handler = new QueueHttpMessageHandler(new[] { new HttpResponseMessage(HttpStatusCode.Created) });
         var factory = BuildFactory(handler);
         var settings = BuildSettingsService();
+        var metrics = new Mock<IOperationalMetrics>();
         var service = new NotificationService(
             Mock.Of<IEmailService>(),
             factory,
@@ -60,6 +65,7 @@ public class NotificationServiceTests
                 FromPhoneNumber = "+201000000000"
             }),
             settings,
+            metrics.Object,
             Mock.Of<ILogger<NotificationService>>());
 
         await service.SendSmsAsync("+201111111111", "Hello");
@@ -70,6 +76,7 @@ public class NotificationServiceTests
         request.Headers.Authorization!.Scheme.Should().Be("Basic");
         var body = await request.Content!.ReadAsStringAsync();
         body.Should().Contain("To=%2B201111111111");
+        metrics.Verify(m => m.RecordNotification("sms", "success", It.IsAny<double>()), Times.Once);
     }
 
     private static IHttpClientFactory BuildFactory(HttpMessageHandler handler)

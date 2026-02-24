@@ -1,4 +1,6 @@
 using ClosedXML.Excel;
+using TelecomPM.Application.Common.Interfaces;
+using TelecomPM.Application.Commands.Imports;
 using MediatR;
 using TelecomPM.Application.Commands.Sites.CreateSite;
 using TelecomPM.Application.Common;
@@ -13,11 +15,21 @@ public class ImportSiteDataCommandHandler : IRequestHandler<ImportSiteDataComman
 {
     private readonly IOfficeRepository _officeRepository;
     private readonly ISender _sender;
+    private readonly ISystemSettingsService? _systemSettingsService;
 
     public ImportSiteDataCommandHandler(IOfficeRepository officeRepository, ISender sender)
+        : this(officeRepository, sender, null)
+    {
+    }
+
+    public ImportSiteDataCommandHandler(
+        IOfficeRepository officeRepository,
+        ISender sender,
+        ISystemSettingsService? systemSettingsService)
     {
         _officeRepository = officeRepository;
         _sender = sender;
+        _systemSettingsService = systemSettingsService;
     }
 
     public async Task<Result<ImportSiteDataResult>> Handle(ImportSiteDataCommand request, CancellationToken cancellationToken)
@@ -30,8 +42,19 @@ public class ImportSiteDataCommandHandler : IRequestHandler<ImportSiteDataComman
 
         try
         {
+            var options = await ImportGuardrails.ResolveOptionsAsync(_systemSettingsService, cancellationToken);
+            var fileValidationError = ImportGuardrails.ValidateExcelPayload(request.FileContent, options);
+            if (fileValidationError is not null)
+                return Result.Failure<ImportSiteDataResult>(fileValidationError);
+
             using var stream = new MemoryStream(request.FileContent);
             using var workbook = new XLWorkbook(stream);
+            var rowLimitFailure = ImportGuardrails.ValidateRowLimit(
+                ImportGuardrails.CountNonEmptyDataRows(workbook),
+                options);
+            if (rowLimitFailure is not null)
+                return rowLimitFailure;
+
             var worksheet = workbook.Worksheets.First();
 
             var headerRow = worksheet.Row(1);
@@ -147,12 +170,18 @@ public class ImportSiteDataCommandHandler : IRequestHandler<ImportSiteDataComman
                 }
             }
 
-            return Result.Success(new ImportSiteDataResult
+            var importResult = new ImportSiteDataResult
             {
                 ImportedCount = imported,
                 SkippedCount = skipped,
                 Errors = errors
-            });
+            };
+
+            var strictFailure = ImportGuardrails.EnforceSkipInvalidRows(importResult, options);
+            if (strictFailure is not null)
+                return strictFailure;
+
+            return Result.Success(importResult);
         }
         catch (Exception ex)
         {

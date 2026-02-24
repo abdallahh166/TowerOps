@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -11,6 +12,7 @@ using TelecomPM.Api.Filters;
 using TelecomPm.Api.Localization;
 using TelecomPM.Api.Middleware;
 using TelecomPM.Api.Authorization;
+using TelecomPm.Api.Security;
 using TelecomPm.Api.Services;
 using TelecomPM.Application;
 using TelecomPM.Application.Common.Interfaces;
@@ -82,28 +84,34 @@ builder.Services.AddControllers(options =>
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
+var apiSecurityOptions = ApiSecurityHardeningOptions.FromConfiguration(builder.Configuration);
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
     {
-        var allowedOrigins = (builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>())
-            .Where(origin => !string.IsNullOrWhiteSpace(origin))
-            .Select(origin => origin.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        if (allowedOrigins.Length == 0)
-        {
-            policy.WithOrigins("https://localhost:4200")
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-            return;
-        }
+        var allowedOrigins = ApiSecurityHardening.ResolveAllowedOrigins(
+            builder.Configuration,
+            builder.Environment.IsProduction());
 
         policy.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
+});
+
+builder.Services.AddHsts(options =>
+{
+    var maxAgeDays = builder.Configuration.GetValue<int?>("Hsts:MaxAgeDays") ?? 180;
+    options.MaxAge = TimeSpan.FromDays(maxAgeDays > 0 ? maxAgeDays : 180);
+    options.IncludeSubDomains = builder.Configuration.GetValue<bool?>("Hsts:IncludeSubDomains") ?? true;
+    options.Preload = builder.Configuration.GetValue<bool?>("Hsts:Preload") ?? true;
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.GlobalLimiter = ApiSecurityHardening.CreateGlobalLimiter(apiSecurityOptions);
 });
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -197,8 +205,9 @@ var localizationOptions = app.Services
     .Value;
 app.UseRequestLocalization(localizationOptions);
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -210,8 +219,14 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+if (app.Environment.IsProduction())
+{
+    app.UseHsts();
+}
+
 app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

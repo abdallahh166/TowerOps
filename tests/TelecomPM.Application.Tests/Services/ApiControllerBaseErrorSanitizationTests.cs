@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using TelecomPm.Api.Controllers;
+using TelecomPM.Api.Errors;
 using TelecomPM.Application.Common;
 using Xunit;
 
@@ -19,9 +20,10 @@ public class ApiControllerBaseErrorSanitizationTests
         var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
         objectResult.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
 
-        var details = objectResult.Value.Should().BeOfType<ProblemDetails>().Subject;
-        details.Detail.Should().NotContain("SqlException");
-        details.Detail.Should().NotContain("Microsoft.Data.SqlClient");
+        var payload = objectResult.Value.Should().BeOfType<ApiErrorResponse>().Subject;
+        payload.Code.Should().Be(ApiErrorCodes.InternalError);
+        payload.Message.Should().NotContain("SqlException");
+        payload.Message.Should().NotContain("Microsoft.Data.SqlClient");
     }
 
     [Fact]
@@ -33,8 +35,9 @@ public class ApiControllerBaseErrorSanitizationTests
         var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
         objectResult.StatusCode.Should().Be(StatusCodes.Status404NotFound);
 
-        var details = objectResult.Value.Should().BeOfType<ProblemDetails>().Subject;
-        details.Detail.Should().Contain("Visit not found");
+        var payload = objectResult.Value.Should().BeOfType<ApiErrorResponse>().Subject;
+        payload.Code.Should().Be(ApiErrorCodes.ResourceNotFound);
+        payload.Message.Should().Contain("Visit not found");
     }
 
     private static TestController CreateController()
