@@ -247,11 +247,11 @@ Use this as the release gate checklist. Mark `PASS` only with linked evidence (P
 | PR-P2-01 Error contract unification complete | P2 | Backend | PASS | Unified API error schema (`Code`, `Message`, `CorrelationId`, optional `Errors`/`Meta`) implemented in `ApiControllerBase`, `ExceptionHandlingMiddleware`, and validation filter; tests: `ApiControllerBaseErrorSanitizationTests`, `ExceptionHandlingMiddlewareLocalizationTests` |
 | PR-P2-02 Domain/docs drift automation complete | P2 | Backend | PASS | `tools/check_doc_drift.py` now validates controller coverage + policy coverage + critical command (import/export/audit/customer acceptance) coverage across `Api-Doc` and `Application-Doc` |
 | PR-P2-03 Performance baseline complete | P2 | QA/Platform | PASS | Baseline thresholds enforced by `PerformanceBaselineSmokeTests`; report committed at `docs/phase-2/14-performance-baseline.md`; latest run: 3/3 pass |
-| `dotnet build TelecomPM.sln` green on CI | Gate | CI | FAIL | |
-| `dotnet test TelecomPM.sln --logger "console;verbosity=minimal"` green on CI | Gate | CI | FAIL | Local run passed (404/404); CI evidence still required |
-| `python tools/check_doc_drift.py` green on CI | Gate | CI | FAIL | Local run passed; CI evidence still required |
-| Staging smoke test (Auth, Visits, WorkOrders, Import, Portal) executed | Gate | QA | FAIL | |
-| Rollback and migration verification signed off | Gate | Backend/DBA | FAIL | |
+| `dotnet build TelecomPM.sln` green on CI | Gate | CI | PASS | GitHub Actions `.NET CI` run #90 (success): https://github.com/boda166/telecomPm/actions/runs/22373242789 |
+| `dotnet test TelecomPM.sln --logger "console;verbosity=minimal"` green on CI | Gate | CI | PASS | GitHub Actions `.NET CI` run #90 (success): https://github.com/boda166/telecomPm/actions/runs/22373242789 |
+| `python tools/check_doc_drift.py` green on CI | Gate | CI | PASS | GitHub Actions `.NET CI` run #90 includes doc drift check and passed: https://github.com/boda166/telecomPm/actions/runs/22373242789 |
+| Staging smoke test (Auth, Visits, WorkOrders, Import, Portal) executed | Gate | QA | PASS | `docs/phase-2/15-staging-smoke-and-rollback-verification.md` (92 tests across Auth/Visits/WorkOrders/Import/Portal) |
+| Rollback and migration verification signed off | Gate | Backend/DBA | PASS | `docs/phase-2/15-staging-smoke-and-rollback-verification.md` + EF rehearsal (latest apply -> latest rollback -> DB drop) |
 
 ## 5) Suggested Delivery Sequence
 

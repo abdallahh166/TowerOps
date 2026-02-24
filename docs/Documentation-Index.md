@@ -20,6 +20,7 @@ These documents are intended to match current code behavior:
 - `docs/phase-2/12-production-remediation-plan.md`
 - `docs/phase-2/13-observability-runbook.md`
 - `docs/phase-2/14-performance-baseline.md`
+- `docs/phase-2/15-staging-smoke-and-rollback-verification.md`
 
 ## Historical / Planning Snapshots
 These remain useful for context but can diverge from runtime implementation:
