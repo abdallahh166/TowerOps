@@ -99,12 +99,14 @@ public static class DependencyInjection
         services.AddScoped<ISettingsEncryptionService, SettingsEncryptionService>();
         services.AddScoped<ISystemSettingsService, SystemSettingsService>();
         services.AddScoped<IOtpService, OtpService>();
+        services.AddScoped<SlaEvaluationProcessor>();
 
         // Domain Services with Infrastructure dependencies (Repository-dependent)
         services.AddScoped<IVisitNumberGeneratorService, VisitNumberGeneratorService>();
         services.AddScoped<IMaterialStockService, MaterialStockService>();
         services.AddScoped<ISlaClockService, SlaClockService>();
         services.AddScoped<IGeoCheckInService, GeoCheckInService>();
+        services.AddHostedService<SlaEvaluationHostedService>();
 
         // HttpContextAccessor for CurrentUserService
         services.AddHttpContextAccessor();

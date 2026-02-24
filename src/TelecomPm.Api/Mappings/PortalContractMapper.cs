@@ -1,4 +1,5 @@
 using TelecomPM.Application.Queries.Portal.GetPortalDashboard;
+using TelecomPM.Application.Queries.Portal.GetPortalVisitEvidence;
 using TelecomPM.Application.Queries.Portal.GetPortalSites;
 using TelecomPM.Application.Queries.Portal.GetPortalSlaReport;
 using TelecomPM.Application.Queries.Portal.GetPortalVisits;
@@ -25,4 +26,7 @@ public static class PortalContractMapper
 
     public static GetPortalVisitsQuery ToPortalVisitsQuery(this string siteCode, int pageNumber, int pageSize)
         => new() { SiteCode = siteCode, PageNumber = pageNumber, PageSize = pageSize };
+
+    public static GetPortalVisitEvidenceQuery ToPortalVisitEvidenceQuery(this Guid visitId)
+        => new() { VisitId = visitId };
 }

@@ -16,6 +16,19 @@ public class WorkOrderRepository : Repository<WorkOrder, Guid>, IWorkOrderReposi
         return await _dbSet.FirstOrDefaultAsync(w => w.WoNumber == woNumber, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<WorkOrder>> GetOpenForSlaEvaluationAsync(
+        int take,
+        CancellationToken cancellationToken = default)
+    {
+        var safeTake = Math.Clamp(take, 1, 2_000);
+
+        return await _dbSet
+            .Where(wo => wo.Status != WorkOrderStatus.Closed && wo.Status != WorkOrderStatus.Cancelled)
+            .OrderBy(wo => wo.CreatedAt)
+            .Take(safeTake)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<int> CountClosedAsync(
         string? officeCode,
         SlaClass? slaClass,
@@ -65,7 +78,7 @@ public class WorkOrderRepository : Repository<WorkOrder, Guid>, IWorkOrderReposi
             .AsNoTracking()
             .Where(a =>
                 a.EntityType == "WorkOrder" &&
-                (a.NewState == nameof(WorkOrderStatus.Rework) || a.NewState == "Reopened") &&
+                a.NewState == "Reopened" &&
                 closedFilteredWorkOrders.Contains(a.EntityId))
             .Select(a => a.EntityId)
             .Distinct()

@@ -6,6 +6,9 @@ using TelecomPM.Domain.Enums;
 public interface IWorkOrderRepository : IRepository<WorkOrder, Guid>
 {
     Task<WorkOrder?> GetByWoNumberAsync(string woNumber, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<WorkOrder>> GetOpenForSlaEvaluationAsync(
+        int take,
+        CancellationToken cancellationToken = default);
     Task<int> CountClosedAsync(
         string? officeCode,
         SlaClass? slaClass,

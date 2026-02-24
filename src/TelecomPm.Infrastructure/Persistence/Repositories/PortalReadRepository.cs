@@ -236,6 +236,91 @@ public sealed class PortalReadRepository : IPortalReadRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<PortalVisitEvidenceDto?> GetVisitEvidenceAsync(
+        string clientCode,
+        Guid visitId,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedClientCode = NormalizeClientCode(clientCode);
+
+        var visitProjection = await (
+            from visit in _context.Visits.AsNoTracking()
+            join site in _context.Sites.AsNoTracking() on visit.SiteId equals site.Id
+            where visit.Id == visitId && site.ClientCode == normalizedClientCode
+            select new
+            {
+                visit.Id,
+                visit.VisitNumber,
+                SiteCode = site.SiteCode.Value,
+                visit.Type,
+                visit.Status,
+                visit.ScheduledDate
+            }).FirstOrDefaultAsync(cancellationToken);
+
+        if (visitProjection is null)
+            return null;
+
+        var photos = await _context.VisitPhotos
+            .AsNoTracking()
+            .Where(p => p.VisitId == visitId)
+            .OrderBy(p => p.CapturedAtUtc ?? p.CreatedAt)
+            .Select(p => new PortalVisitPhotoEvidenceDto
+            {
+                PhotoId = p.Id,
+                Type = p.Type,
+                Category = p.Category,
+                ItemName = p.ItemName,
+                FileName = p.FileName,
+                CapturedAtUtc = p.CapturedAtUtc
+            })
+            .ToListAsync(cancellationToken);
+
+        var readings = await _context.VisitReadings
+            .AsNoTracking()
+            .Where(r => r.VisitId == visitId)
+            .OrderBy(r => r.MeasuredAt)
+            .Select(r => new PortalVisitReadingEvidenceDto
+            {
+                ReadingId = r.Id,
+                ReadingType = r.ReadingType,
+                Category = r.Category,
+                Value = r.Value,
+                Unit = r.Unit,
+                IsWithinRange = r.IsWithinRange,
+                MeasuredAtUtc = r.MeasuredAt
+            })
+            .ToListAsync(cancellationToken);
+
+        var checklistItems = await _context.VisitChecklists
+            .AsNoTracking()
+            .Where(c => c.VisitId == visitId)
+            .OrderBy(c => c.Category)
+            .ThenBy(c => c.ItemName)
+            .Select(c => new PortalVisitChecklistEvidenceDto
+            {
+                ChecklistItemId = c.Id,
+                Category = c.Category,
+                ItemName = c.ItemName,
+                Status = c.Status,
+                IsMandatory = c.IsMandatory,
+                CompletedAtUtc = c.CompletedAt
+            })
+            .ToListAsync(cancellationToken);
+
+        return new PortalVisitEvidenceDto
+        {
+            VisitId = visitProjection.Id,
+            VisitNumber = visitProjection.VisitNumber,
+            SiteCode = visitProjection.SiteCode,
+            VisitType = visitProjection.Type,
+            VisitStatus = visitProjection.Status,
+            ScheduledDateUtc = visitProjection.ScheduledDate,
+            Photos = photos,
+            Readings = readings,
+            ChecklistItems = checklistItems
+        };
+    }
+
     public async Task<PortalSlaReportDto> GetSlaReportAsync(string clientCode, CancellationToken cancellationToken = default)
     {
         var normalizedClientCode = NormalizeClientCode(clientCode);

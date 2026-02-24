@@ -6,10 +6,12 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using TelecomPM.Application.Common;
 using TelecomPM.Application.DTOs.Visits;
+using TelecomPM.Domain.Entities.ChecklistTemplates;
 using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Exceptions;
@@ -69,6 +71,11 @@ public class StartVisitCommandHandler : IRequestHandler<StartVisitCommand, Resul
             {
                 foreach (var templateItem in activeTemplate.Items.OrderBy(i => i.OrderIndex))
                 {
+                    if (!IsTemplateItemApplicable(templateItem, visit.Type, site?.SiteType))
+                    {
+                        continue;
+                    }
+
                     if (isEquipmentOnly &&
                         ShouldExcludeForEquipmentOnly(templateItem.Category, templateItem.ItemName))
                     {
@@ -145,5 +152,110 @@ public class StartVisitCommandHandler : IRequestHandler<StartVisitCommand, Resul
             return true;
 
         return false;
+    }
+
+    private static bool IsTemplateItemApplicable(
+        ChecklistTemplateItem templateItem,
+        VisitType visitType,
+        SiteType? siteType)
+    {
+        if (!IsVisitTypeApplicable(templateItem.ApplicableVisitTypes, visitType))
+            return false;
+
+        if (!IsSiteTypeApplicable(templateItem.ApplicableSiteTypes, siteType))
+            return false;
+
+        return true;
+    }
+
+    private static bool IsVisitTypeApplicable(string? applicableVisitTypesRaw, VisitType visitType)
+    {
+        var allowedVisitTypes = ParseApplicabilityList(applicableVisitTypesRaw);
+        if (allowedVisitTypes.Count == 0 || allowedVisitTypes.Contains("ALL"))
+            return true;
+
+        var canonicalVisitType = visitType.ToCanonical();
+        var aliases = GetVisitTypeAliases(canonicalVisitType);
+        return aliases.Any(alias => allowedVisitTypes.Contains(alias));
+    }
+
+    private static bool IsSiteTypeApplicable(string? applicableSiteTypesRaw, SiteType? siteType)
+    {
+        var allowedSiteTypes = ParseApplicabilityList(applicableSiteTypesRaw);
+        if (allowedSiteTypes.Count == 0 || allowedSiteTypes.Contains("ALL"))
+            return true;
+
+        if (!siteType.HasValue)
+            return true;
+
+        var aliases = GetSiteTypeAliases(siteType.Value);
+        return aliases.Any(alias => allowedSiteTypes.Contains(alias));
+    }
+
+    private static HashSet<string> ParseApplicabilityList(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        IEnumerable<string> values;
+        var trimmed = raw.Trim();
+
+        if (trimmed.StartsWith("[", StringComparison.Ordinal))
+        {
+            try
+            {
+                values = JsonSerializer.Deserialize<string[]>(trimmed) ?? Array.Empty<string>();
+            }
+            catch (JsonException)
+            {
+                values = Array.Empty<string>();
+            }
+        }
+        else
+        {
+            values = trimmed.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        return values
+            .Select(NormalizeApplicabilityToken)
+            .Where(token => !string.IsNullOrWhiteSpace(token))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeApplicabilityToken(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        return value
+            .Trim()
+            .ToUpperInvariant()
+            .Replace(" ", string.Empty, StringComparison.Ordinal)
+            .Replace("-", string.Empty, StringComparison.Ordinal)
+            .Replace("_", string.Empty, StringComparison.Ordinal);
+    }
+
+    private static IReadOnlyCollection<string> GetVisitTypeAliases(VisitType visitType)
+    {
+        var canonical = visitType.ToCanonical();
+        return canonical switch
+        {
+            VisitType.BM => new[] { "BM", "PM", "PREVENTIVEMAINTENANCE", "INSPECTION" },
+            VisitType.CM => new[] { "CM", "CORRECTIVEMAINTENANCE", "EMERGENCY" },
+            VisitType.Audit => new[] { "AUDIT" },
+            _ => new[] { NormalizeApplicabilityToken(canonical.ToString()) }
+        };
+    }
+
+    private static IReadOnlyCollection<string> GetSiteTypeAliases(SiteType siteType)
+    {
+        return siteType switch
+        {
+            SiteType.GreenField => new[] { "GF", "GREENFIELD" },
+            SiteType.RoofTop => new[] { "RT", "ROOFTOP" },
+            SiteType.Indoor => new[] { "INDOOR" },
+            SiteType.BTS => new[] { "BTS" },
+            _ => new[] { NormalizeApplicabilityToken(siteType.ToString()) }
+        };
     }
 }

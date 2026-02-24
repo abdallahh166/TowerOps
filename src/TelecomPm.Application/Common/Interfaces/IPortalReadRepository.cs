@@ -27,5 +27,10 @@ public interface IPortalReadRepository
         bool anonymizeEngineers,
         CancellationToken cancellationToken = default);
 
+    Task<PortalVisitEvidenceDto?> GetVisitEvidenceAsync(
+        string clientCode,
+        Guid visitId,
+        CancellationToken cancellationToken = default);
+
     Task<PortalSlaReportDto> GetSlaReportAsync(string clientCode, CancellationToken cancellationToken = default);
 }

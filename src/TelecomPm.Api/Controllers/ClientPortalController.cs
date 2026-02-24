@@ -72,6 +72,13 @@ public sealed class ClientPortalController : ApiControllerBase
         return HandleResult(result);
     }
 
+    [HttpGet("visits/{visitId:guid}/evidence")]
+    public async Task<IActionResult> GetVisitEvidence(Guid visitId, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(visitId.ToPortalVisitEvidenceQuery(), cancellationToken);
+        return HandleResult(result);
+    }
+
     [HttpPatch("workorders/{id:guid}/accept")]
     public async Task<IActionResult> AcceptWorkOrder(Guid id, CancellationToken cancellationToken)
     {
