@@ -2,8 +2,6 @@ namespace TelecomPM.Application.Commands.Users.ChangeUserRole;
 
 using AutoMapper;
 using MediatR;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TelecomPM.Application.Common;
@@ -46,12 +44,7 @@ public class ChangeUserRoleCommandHandler : IRequestHandler<ChangeUserRoleComman
             // Clear engineer-specific data if changing from PMEngineer
             if (oldRole == Domain.Enums.UserRole.PMEngineer && request.NewRole != Domain.Enums.UserRole.PMEngineer)
             {
-                // Clear site assignments and specializations
-                foreach (var siteId in user.AssignedSiteIds.ToList())
-                {
-                    user.UnassignSite(siteId);
-                }
-                user.SetEngineerCapacity(0, new List<string>());
+                user.ClearEngineerProfile();
             }
 
             await _userRepository.UpdateAsync(user, cancellationToken);

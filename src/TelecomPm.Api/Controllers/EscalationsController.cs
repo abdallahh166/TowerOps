@@ -12,7 +12,7 @@ using TelecomPm.Api.Mappings;
 public sealed class EscalationsController : ApiControllerBase
 {
     [HttpPost]
-    [Authorize(Policy = ApiAuthorizationPolicies.CanManageEscalations)]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanCreateEscalations)]
     public async Task<IActionResult> Create([FromBody] CreateEscalationRequest request, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(request.ToCommand(), cancellationToken);
@@ -25,7 +25,7 @@ public sealed class EscalationsController : ApiControllerBase
     }
 
     [HttpGet("{escalationId:guid}")]
-    [Authorize(Policy = ApiAuthorizationPolicies.CanManageEscalations)]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanViewEscalations)]
     public async Task<IActionResult> GetById(Guid escalationId, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(escalationId.ToEscalationByIdQuery(), cancellationToken);

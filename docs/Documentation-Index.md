@@ -17,6 +17,7 @@ These documents are intended to match current code behavior:
 - `docs/phase-2/08-release-readiness-report.md`
 - `docs/phase-2/10-sprint-12-dry-run-reconciliation.md`
 - `docs/phase-2/11-residual-gap-checklist.md`
+- `docs/phase-2/12-production-remediation-plan.md`
 
 ## Historical / Planning Snapshots
 These remain useful for context but can diverge from runtime implementation:

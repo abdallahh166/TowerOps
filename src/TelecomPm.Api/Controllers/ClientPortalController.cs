@@ -80,6 +80,7 @@ public sealed class ClientPortalController : ApiControllerBase
     }
 
     [HttpPatch("workorders/{id:guid}/accept")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManagePortalWorkOrders)]
     public async Task<IActionResult> AcceptWorkOrder(Guid id, CancellationToken cancellationToken)
     {
         var acceptedBy = string.IsNullOrWhiteSpace(_currentUserService.Email)
@@ -96,6 +97,7 @@ public sealed class ClientPortalController : ApiControllerBase
     }
 
     [HttpPatch("workorders/{id:guid}/reject")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManagePortalWorkOrders)]
     public async Task<IActionResult> RejectWorkOrder(Guid id, [FromBody] PortalRejectWorkOrderRequest request, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(new RejectByCustomerCommand

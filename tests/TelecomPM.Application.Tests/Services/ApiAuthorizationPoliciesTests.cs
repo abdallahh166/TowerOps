@@ -26,6 +26,7 @@ public class ApiAuthorizationPoliciesTests
         options.GetPolicy(ApiAuthorizationPolicies.CanManageVisits).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewVisits).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanReviewVisits).Should().NotBeNull();
+        options.GetPolicy(ApiAuthorizationPolicies.CanCreateEscalations).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanManageEscalations).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewEscalations).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewKpis).Should().NotBeNull();
@@ -40,6 +41,7 @@ public class ApiAuthorizationPoliciesTests
         options.GetPolicy(ApiAuthorizationPolicies.CanManageMaterials).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanManageSettings).Should().NotBeNull();
         options.GetPolicy(ApiAuthorizationPolicies.CanViewPortal).Should().NotBeNull();
+        options.GetPolicy(ApiAuthorizationPolicies.CanManagePortalWorkOrders).Should().NotBeNull();
     }
 
     [Fact]
@@ -137,6 +139,37 @@ public class ApiAuthorizationPoliciesTests
     }
 
     [Fact]
+    public async Task CanManagePortalWorkOrdersPolicy_ShouldRequirePortalWorkOrdersPermission()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddAuthorization(ApiAuthorizationPolicies.Configure);
+        var provider = services.BuildServiceProvider();
+
+        var options = provider.GetRequiredService<IOptions<AuthorizationOptions>>().Value;
+        var policy = options.GetPolicy(ApiAuthorizationPolicies.CanManagePortalWorkOrders);
+        policy.Should().NotBeNull();
+
+        var authService = provider.GetRequiredService<IAuthorizationService>();
+
+        var deniedPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(PermissionConstants.ClaimType, PermissionConstants.PortalViewSites)
+        }, "test"));
+
+        var allowedPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(PermissionConstants.ClaimType, PermissionConstants.PortalViewWorkOrders)
+        }, "test"));
+
+        var denied = await authService.AuthorizeAsync(deniedPrincipal, policy!);
+        var allowed = await authService.AuthorizeAsync(allowedPrincipal, policy!);
+
+        denied.Succeeded.Should().BeFalse();
+        allowed.Succeeded.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task CanViewSitesPolicy_ShouldDenyPortalOnlyUser()
     {
         var services = new ServiceCollection();
@@ -164,7 +197,9 @@ public class ApiAuthorizationPoliciesTests
     [InlineData(typeof(VisitsController), ApiAuthorizationPolicies.CanViewVisits)]
     [InlineData(typeof(VisitsController), ApiAuthorizationPolicies.CanReviewVisits)]
     [InlineData(typeof(SyncController), ApiAuthorizationPolicies.CanManageVisits)]
+    [InlineData(typeof(EscalationsController), ApiAuthorizationPolicies.CanCreateEscalations)]
     [InlineData(typeof(EscalationsController), ApiAuthorizationPolicies.CanManageEscalations)]
+    [InlineData(typeof(EscalationsController), ApiAuthorizationPolicies.CanViewEscalations)]
     [InlineData(typeof(KpiController), ApiAuthorizationPolicies.CanViewKpis)]
     [InlineData(typeof(UsersController), ApiAuthorizationPolicies.CanManageUsers)]
     [InlineData(typeof(UsersController), ApiAuthorizationPolicies.CanViewUsers)]
@@ -181,6 +216,7 @@ public class ApiAuthorizationPoliciesTests
     [InlineData(typeof(SettingsController), ApiAuthorizationPolicies.CanManageSettings)]
     [InlineData(typeof(RolesController), ApiAuthorizationPolicies.CanManageSettings)]
     [InlineData(typeof(ClientPortalController), ApiAuthorizationPolicies.CanViewPortal)]
+    [InlineData(typeof(ClientPortalController), ApiAuthorizationPolicies.CanManagePortalWorkOrders)]
     public void Controllers_ShouldReferenceExpectedPolicies(Type controllerType, string policy)
     {
         var methods = controllerType

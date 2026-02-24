@@ -162,6 +162,16 @@ public sealed class User : AggregateRoot<Guid>
         _assignedSiteIds.Remove(siteId);
     }
 
+    public void ClearEngineerProfile()
+    {
+        _assignedSiteIds.Clear();
+        _assignedSites.Clear();
+        _specializations.Clear();
+        MaxAssignedSites = null;
+        PerformanceRating = null;
+        MarkAsUpdated(Email);
+    }
+
     public void UpdatePerformanceRating(decimal rating)
     {
         if (rating < 0 || rating > 5)
