@@ -226,6 +226,52 @@ public class StartVisitCommandHandlerTests
         unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    [Fact]
+    public async Task Handle_ShouldApplyTemplateVisitAndSiteTypeFilters_WhenGeneratingChecklist()
+    {
+        var visit = CreateVisit();
+        var template = ChecklistTemplate.Create(VisitType.BM, "v1.0", DateTime.UtcNow, "seed");
+        template.AddItem("General", "All Item", null, true, 1);
+        template.AddItem("General", "GF Item", null, true, 2, "[\"GF\"]");
+        template.AddItem("General", "RT Item", null, true, 3, "[\"RT\"]");
+        template.AddItem("General", "BM Item", null, true, 4, null, "[\"BM\"]");
+        template.AddItem("General", "CM Item", null, true, 5, null, "[\"CM\"]");
+        template.Activate("manager");
+
+        var visitRepository = new Mock<IVisitRepository>();
+        visitRepository.Setup(r => r.GetByIdAsync(visit.Id, It.IsAny<CancellationToken>())).ReturnsAsync(visit);
+
+        var templateRepository = new Mock<IChecklistTemplateRepository>();
+        templateRepository
+            .Setup(r => r.GetActiveByVisitTypeAsync(VisitType.BM, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(template);
+
+        var gfSite = CreateSiteForVisit(TowerOwnershipType.Host, SiteType.GreenField);
+        var siteRepository = new Mock<ISiteRepository>();
+        siteRepository.Setup(r => r.GetByIdAsync(visit.SiteId, It.IsAny<CancellationToken>())).ReturnsAsync(gfSite);
+
+        var handler = CreateHandler(
+            visitRepository,
+            templateRepository,
+            siteRepository,
+            out _);
+
+        var result = await handler.Handle(new StartVisitCommand
+        {
+            VisitId = visit.Id,
+            Latitude = 30.1234,
+            Longitude = 31.4321
+        }, CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        visit.Checklists.Select(c => c.ItemName).Should().BeEquivalentTo(new[]
+        {
+            "All Item",
+            "GF Item",
+            "BM Item"
+        });
+    }
+
     private static Visit CreateVisit()
         => Visit.Create(
             "V-START-001",
@@ -237,7 +283,7 @@ public class StartVisitCommandHandlerTests
             DateTime.UtcNow.AddHours(1),
             VisitType.PreventiveMaintenance);
 
-    private static Site CreateSiteForVisit(TowerOwnershipType ownershipType)
+    private static Site CreateSiteForVisit(TowerOwnershipType ownershipType, SiteType siteType = SiteType.Macro)
     {
         var site = Site.Create(
             "TNT001",
@@ -248,7 +294,7 @@ public class StartVisitCommandHandlerTests
             "SubRegion",
             Coordinates.Create(30.0, 31.0),
             Address.Create("Street", "City", "Region"),
-            SiteType.Macro);
+            siteType);
 
         site.SetOwnership(
             ownershipType,

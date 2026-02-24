@@ -3,6 +3,7 @@ using Moq;
 using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.DTOs.Portal;
 using TelecomPM.Application.Queries.Portal.GetPortalSites;
+using TelecomPM.Application.Queries.Portal.GetPortalVisitEvidence;
 using TelecomPM.Application.Queries.Portal.GetPortalVisits;
 using TelecomPM.Domain.Entities.Sites;
 using TelecomPM.Domain.Entities.Users;
@@ -132,6 +133,45 @@ public class PortalQueriesTests
         result.IsSuccess.Should().BeTrue();
         portalReadRepository.Verify(
             r => r.GetSitesAsync("ORANGE", null, 1, 200, It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task GetPortalVisitEvidence_ShouldUseClientScopedRepositoryLookup()
+    {
+        var portalUser = User.Create("Portal User", "portal@client.com", "010", UserRole.Manager, Guid.NewGuid());
+        portalUser.EnableClientPortalAccess("ORANGE");
+        var visitId = Guid.NewGuid();
+
+        var currentUser = new Mock<ICurrentUserService>();
+        currentUser.SetupGet(x => x.UserId).Returns(portalUser.Id);
+
+        var users = new Mock<IUserRepository>();
+        users.Setup(r => r.GetByIdAsNoTrackingAsync(portalUser.Id, It.IsAny<CancellationToken>())).ReturnsAsync(portalUser);
+
+        var portalReadRepository = new Mock<IPortalReadRepository>();
+        portalReadRepository
+            .Setup(r => r.GetVisitEvidenceAsync("ORANGE", visitId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PortalVisitEvidenceDto
+            {
+                VisitId = visitId,
+                VisitNumber = "V1001",
+                SiteCode = "CAI001"
+            });
+
+        var sut = new GetPortalVisitEvidenceQueryHandler(
+            currentUser.Object,
+            users.Object,
+            portalReadRepository.Object);
+
+        var result = await sut.Handle(new GetPortalVisitEvidenceQuery { VisitId = visitId }, CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.VisitId.Should().Be(visitId);
+
+        portalReadRepository.Verify(
+            r => r.GetVisitEvidenceAsync("ORANGE", visitId, It.IsAny<CancellationToken>()),
             Times.Once);
     }
 

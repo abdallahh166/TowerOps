@@ -152,6 +152,7 @@ Related: operational process and lifecycle diagrams are documented in `docs/Oper
 - `PATCH /workorders/{id}/reject` (**CanViewPortal**)
 - `GET /sla-report` (**CanViewPortal**)
 - `GET /visits/{siteCode}` (**CanViewPortal**)
+- `GET /visits/{visitId}/evidence` (**CanViewPortal**)
 
 ### `DailyPlansController` (`/api/daily-plans`)
 - `POST /` (**CanManageSites**)

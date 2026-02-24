@@ -436,6 +436,9 @@ public class DatabaseSeeder
             CreateSetting("SLA:P3:ResponseMinutes", "1440", "SLA", "int", "Response deadline for P3 in minutes", false, seededBy),
             CreateSetting("SLA:P4:ResponseMinutes", "2880", "SLA", "int", "Response deadline for P4 in minutes", false, seededBy),
             CreateSetting("SLA:AtRiskThresholdPercent", "70", "SLA", "int", "At-risk threshold as percent of response window elapsed", false, seededBy),
+            CreateSetting("SLA:Evaluation:Enabled", "true", "SLA", "bool", "Enable background SLA status evaluation", false, seededBy),
+            CreateSetting("SLA:Evaluation:IntervalSeconds", "60", "SLA", "int", "SLA evaluation polling interval in seconds", false, seededBy),
+            CreateSetting("SLA:Evaluation:BatchSize", "200", "SLA", "int", "Number of open work orders evaluated per cycle", false, seededBy),
 
             // Evidence
             CreateSetting("Evidence:BM:MinPhotos", "3", "Evidence", "int", "Minimum BM photos", false, seededBy),
