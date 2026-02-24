@@ -46,12 +46,11 @@ public class GetEngineerPerformanceReportQueryHandler
         var fromDate = request.FromDate ?? DateTime.UtcNow.AddMonths(-3);
         var toDate = request.ToDate ?? DateTime.UtcNow;
 
-        // Get all visits for this engineer
-        var visitSpec = new VisitsByEngineerSpecification(request.EngineerId);
-        var allVisits = await _visitRepository.FindAsNoTrackingAsync(visitSpec, cancellationToken);
-        
-        // Filter by date range
-        var visits = allVisits.Where(v => v.ScheduledDate >= fromDate && v.ScheduledDate <= toDate).ToList();
+        var visitSpec = new EngineerVisitsFilteredSpecification(
+            request.EngineerId,
+            fromUtc: fromDate,
+            toUtc: toDate);
+        var visits = await _visitRepository.FindAsNoTrackingAsync(visitSpec, cancellationToken);
 
         // Calculate metrics
         var totalVisits = visits.Count;

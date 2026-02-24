@@ -146,6 +146,17 @@ public class SiteRepository : Repository<Site, Guid>, ISiteRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Guid>> GetSiteIdsByOfficeAsNoTrackingAsync(
+        Guid officeId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Where(s => s.OfficeId == officeId)
+            .Select(s => s.Id)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Site>> GetByEngineerIdAsNoTrackingAsync(
         Guid engineerId,
         CancellationToken cancellationToken = default)

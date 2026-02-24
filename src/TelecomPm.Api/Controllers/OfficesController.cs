@@ -43,9 +43,15 @@ public sealed class OfficesController : ApiControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] bool? onlyActive,
+        [FromQuery] int? pageNumber,
+        [FromQuery] int? pageSize,
+        CancellationToken cancellationToken)
     {
-        var result = await Mediator.Send(OfficesContractMapper.ToGetAllQuery(), cancellationToken);
+        var result = await Mediator.Send(
+            OfficesContractMapper.ToGetAllQuery(onlyActive, pageNumber, pageSize),
+            cancellationToken);
         return HandleResult(result);
     }
 

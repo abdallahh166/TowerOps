@@ -199,7 +199,7 @@ Policies evaluate permission claims (`PermissionConstants.ClaimType`), not hardc
 ### OfficesController (`/api/offices`) class policy: `CanManageOffices`
 - `POST /`
 - `GET /{officeId}`
-- `GET /`
+- `GET /` (supports `onlyActive`, `pageNumber`, `pageSize`; `pageSize` capped at 200)
 - `GET /region/{region}`
 - `GET /{officeId}/statistics`
 - `PUT /{officeId}`
@@ -251,13 +251,13 @@ Policies evaluate permission claims (`PermissionConstants.ClaimType`), not hardc
 - `GET /conflicts/{engineerId}`
 
 ### SettingsController (`/api/settings`) class policy: `CanManageSettings`
-- `GET /`
+- `GET /` (supports `pageNumber`, `pageSize`; `pageSize` capped at 200)
 - `GET /{group}`
 - `PUT /`
 - `POST /test/{service}`
 
 ### RolesController (`/api/roles`) class policy: `CanManageSettings`
-- `GET /`
+- `GET /` (supports `pageNumber`, `pageSize`; `pageSize` capped at 200)
 - `GET /permissions`
 - `GET /{id}`
 - `POST /`

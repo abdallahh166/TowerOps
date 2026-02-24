@@ -51,6 +51,7 @@ public class GetOfficeStatisticsReportQueryHandler
         // Sites
         var siteSpec = new SitesByOfficeSpecification(request.OfficeId);
         var sites = await _siteRepository.FindAsNoTrackingAsync(siteSpec, cancellationToken);
+        var officeSiteIds = sites.Select(s => s.Id).ToList();
         var totalSites = sites.Count;
         var activeSites = sites.Count(s => s.Status == SiteStatus.OnAir);
         var inactiveSites = totalSites - activeSites;
@@ -70,9 +71,8 @@ public class GetOfficeStatisticsReportQueryHandler
         var activeTechnicians = technicians.Count(u => u.IsActive);
 
         // Visits
-        var visitSpec = new VisitsByDateRangeSpecification(fromDate, toDate);
-        var allVisits = await _visitRepository.FindAsNoTrackingAsync(visitSpec, cancellationToken);
-        var officeVisits = allVisits.Where(v => sites.Any(s => s.Id == v.SiteId)).ToList();
+        var visitSpec = new VisitsByDateRangeSpecification(fromDate, toDate, siteIds: officeSiteIds);
+        var officeVisits = await _visitRepository.FindAsNoTrackingAsync(visitSpec, cancellationToken);
         
         var totalVisits = officeVisits.Count;
         var scheduledVisits = officeVisits.Count(v => v.Status == VisitStatus.Scheduled);

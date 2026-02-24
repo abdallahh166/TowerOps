@@ -7,5 +7,7 @@ using TelecomPM.Application.DTOs.Offices;
 public record GetAllOfficesQuery : IQuery<List<OfficeDto>>
 {
     public bool? OnlyActive { get; init; }
+    public int? PageNumber { get; init; }
+    public int? PageSize { get; init; }
 }
 

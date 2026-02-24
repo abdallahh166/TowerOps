@@ -59,8 +59,13 @@ public static class OfficesContractMapper
     public static GetOfficesByRegionQuery ToRegionQuery(this string region)
         => new() { Region = region };
 
-    public static GetAllOfficesQuery ToGetAllQuery()
-        => new();
+    public static GetAllOfficesQuery ToGetAllQuery(bool? onlyActive, int? pageNumber, int? pageSize)
+        => new()
+        {
+            OnlyActive = onlyActive,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
 
     public static DeleteOfficeCommand ToDeleteCommand(this Guid officeId)
         => new() { OfficeId = officeId };

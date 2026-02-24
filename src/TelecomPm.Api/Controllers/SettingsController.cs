@@ -34,9 +34,18 @@ public sealed class SettingsController : ApiControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int? pageNumber,
+        [FromQuery] int? pageSize,
+        CancellationToken cancellationToken)
     {
-        var result = await Mediator.Send(new GetAllSystemSettingsQuery(), cancellationToken);
+        var result = await Mediator.Send(
+            new GetAllSystemSettingsQuery
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            },
+            cancellationToken);
         if (!result.IsSuccess || result.Value is null)
             return HandleResult(result);
 

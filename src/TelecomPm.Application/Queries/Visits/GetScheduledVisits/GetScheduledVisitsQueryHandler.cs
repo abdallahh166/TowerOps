@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using MediatR;
-using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,13 +23,8 @@ public class GetScheduledVisitsQueryHandler : IRequestHandler<GetScheduledVisits
 
     public async Task<Result<List<VisitDto>>> Handle(GetScheduledVisitsQuery request, CancellationToken cancellationToken)
     {
-        var spec = new ScheduledVisitsForDateSpecification(request.Date);
-        var visits = await _visitRepository.FindAsync(spec, cancellationToken);
-
-        if (request.EngineerId.HasValue)
-        {
-            visits = visits.Where(v => v.EngineerId == request.EngineerId.Value).ToList();
-        }
+        var spec = new ScheduledVisitsForDateSpecification(request.Date, request.EngineerId);
+        var visits = await _visitRepository.FindAsNoTrackingAsync(spec, cancellationToken);
 
         var dtos = _mapper.Map<List<VisitDto>>(visits);
         return Result.Success(dtos);

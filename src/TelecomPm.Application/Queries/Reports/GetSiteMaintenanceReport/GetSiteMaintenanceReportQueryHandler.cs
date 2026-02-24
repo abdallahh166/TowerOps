@@ -49,12 +49,8 @@ public class GetSiteMaintenanceReportQueryHandler
         var fromDate = request.FromDate ?? DateTime.UtcNow.AddMonths(-6);
         var toDate = request.ToDate ?? DateTime.UtcNow;
 
-        // Get all visits for this site
-        var visitSpec = new VisitsBySiteSpecification(request.SiteId);
-        var allVisits = await _visitRepository.FindAsNoTrackingAsync(visitSpec, cancellationToken);
-        
-        // Filter by date range
-        var visits = allVisits.Where(v => v.ScheduledDate >= fromDate && v.ScheduledDate <= toDate).ToList();
+        var visitSpec = new VisitsBySiteSpecification(request.SiteId, fromDate, toDate);
+        var visits = await _visitRepository.FindAsNoTrackingAsync(visitSpec, cancellationToken);
 
         var totalVisits = visits.Count;
         var completedVisits = visits.Count(v => v.Status == VisitStatus.Completed);
