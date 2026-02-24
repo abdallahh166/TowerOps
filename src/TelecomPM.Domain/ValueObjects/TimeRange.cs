@@ -19,7 +19,7 @@ public sealed class TimeRange : ValueObject
     public static TimeRange Create(DateTime start, DateTime end)
     {
         if (end <= start)
-            throw new DomainException("End time must be after start time");
+            throw new DomainException("End time must be after start time", "TimeRange.EndAfterStartRequired");
 
         return new TimeRange(start, end);
     }

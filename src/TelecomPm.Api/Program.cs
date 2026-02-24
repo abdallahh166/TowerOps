@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using TelecomPM.Api.Filters;
+using TelecomPm.Api.Localization;
 using TelecomPM.Api.Middleware;
 using TelecomPM.Api.Authorization;
 using TelecomPm.Api.Services;
@@ -31,6 +34,42 @@ builder.Services
     .AddInfrastructure(builder.Configuration);
 
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<ILocalizedTextService, LocalizedTextService>();
+builder.Services.AddScoped<IValidationErrorLocalizer, ValidationErrorLocalizer>();
+builder.Services.AddLocalization();
+
+var supportedCultureCodes = builder.Configuration
+    .GetSection("Localization:SupportedCultures")
+    .Get<string[]>();
+
+if (supportedCultureCodes is null || supportedCultureCodes.Length == 0)
+{
+    supportedCultureCodes = new[] { "en-US", "ar-EG" };
+}
+
+var supportedCultures = supportedCultureCodes
+    .Select(code => new CultureInfo(code))
+    .ToList();
+
+var defaultCultureCode = builder.Configuration["Localization:DefaultCulture"];
+if (string.IsNullOrWhiteSpace(defaultCultureCode) ||
+    supportedCultures.All(c => !string.Equals(c.Name, defaultCultureCode, StringComparison.OrdinalIgnoreCase)))
+{
+    defaultCultureCode = supportedCultures[0].Name;
+}
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture(defaultCultureCode);
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+    options.RequestCultureProviders = new IRequestCultureProvider[]
+    {
+        new QueryStringRequestCultureProvider(),
+        new AcceptLanguageHeaderRequestCultureProvider(),
+        new CookieRequestCultureProvider()
+    };
+});
 
 builder.Services.AddControllers(options =>
 {
@@ -153,6 +192,10 @@ builder.Services.AddHealthChecks()
     .AddDbContextCheck<ApplicationDbContext>();
 
 var app = builder.Build();
+var localizationOptions = app.Services
+    .GetRequiredService<Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions>>()
+    .Value;
+app.UseRequestLocalization(localizationOptions);
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();

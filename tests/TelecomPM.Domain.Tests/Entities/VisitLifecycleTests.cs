@@ -10,7 +10,7 @@ public class VisitLifecycleTests
 {
     private Visit CreateVisit()
     {
-        return Visit.Create("V1", Guid.NewGuid(), "TNT001", "Site1", Guid.NewGuid(), "Eng", DateTime.Today, VisitType.PreventiveMaintenance);
+        return Visit.Create("V1", Guid.NewGuid(), "TNT001", "Site1", Guid.NewGuid(), "Eng", DateTime.Today, VisitType.BM);
     }
 
     [Fact]

@@ -30,10 +30,10 @@ public sealed class DailyPlan : AggregateRoot<Guid>
     public static DailyPlan Create(Guid officeId, DateOnly planDate, Guid officeManagerId)
     {
         if (officeId == Guid.Empty)
-            throw new DomainException("OfficeId is required.");
+            throw new DomainException("OfficeId is required.", "DailyPlan.OfficeId.Required");
 
         if (officeManagerId == Guid.Empty)
-            throw new DomainException("OfficeManagerId is required.");
+            throw new DomainException("OfficeManagerId is required.", "DailyPlan.OfficeManagerId.Required");
 
         return new DailyPlan(officeId, planDate, officeManagerId);
     }
@@ -48,10 +48,10 @@ public sealed class DailyPlan : AggregateRoot<Guid>
         EnsureModifiable();
 
         if (engineerId == Guid.Empty)
-            throw new DomainException("EngineerId is required.");
+            throw new DomainException("EngineerId is required.", "DailyPlan.EngineerId.Required");
 
         if (string.IsNullOrWhiteSpace(siteCode))
-            throw new DomainException("SiteCode is required.");
+            throw new DomainException("SiteCode is required.", "DailyPlan.SiteCode.Required");
 
         // Reassign support: ensure a site is assigned to one engineer only.
         foreach (var plan in _engineerPlans)
@@ -83,7 +83,7 @@ public sealed class DailyPlan : AggregateRoot<Guid>
     public IReadOnlyList<PlannedVisitStop> SuggestOrder(Guid engineerId, decimal averageSpeedKmh)
     {
         if (averageSpeedKmh <= 0)
-            throw new DomainException("Average speed must be greater than zero.");
+            throw new DomainException("Average speed must be greater than zero.", "DailyPlan.AverageSpeed.Positive");
 
         var engineerPlan = _engineerPlans.FirstOrDefault(p => p.EngineerId == engineerId);
         if (engineerPlan is null)
@@ -110,6 +110,6 @@ public sealed class DailyPlan : AggregateRoot<Guid>
     private void EnsureModifiable()
     {
         if (Status == DailyPlanStatus.Published || Status == DailyPlanStatus.InProgress || Status == DailyPlanStatus.Completed)
-            throw new DomainException("Published or completed plans cannot be modified.");
+            throw new DomainException("Published or completed plans cannot be modified.", "DailyPlan.Modification.NotAllowedInCurrentStatus");
     }
 }

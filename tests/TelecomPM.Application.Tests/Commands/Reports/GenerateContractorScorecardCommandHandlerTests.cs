@@ -61,7 +61,7 @@ public class GenerateContractorScorecardCommandHandlerTests
         wo.Complete();
         wo.Close();
 
-        var visit = Visit.Create("V-1", site.Id, site.SiteCode.Value, site.Name, Guid.NewGuid(), "Eng 1", DateTime.UtcNow, VisitType.PreventiveMaintenance);
+        var visit = Visit.Create("V-1", site.Id, site.SiteCode.Value, site.Name, Guid.NewGuid(), "Eng 1", DateTime.UtcNow, VisitType.BM);
         visit.AddPhoto(VisitPhoto.Create(visit.Id, PhotoType.Before, PhotoCategory.ShelterInside, "Item1", "p1.jpg", "/p1.jpg"));
         visit.AddPhoto(VisitPhoto.Create(visit.Id, PhotoType.After, PhotoCategory.ShelterOutside, "Item2", "p2.jpg", "/p2.jpg"));
         visit.AddReading(VisitReading.Create(visit.Id, "Rectifier DC Voltage", "Power", 53m, "V"));

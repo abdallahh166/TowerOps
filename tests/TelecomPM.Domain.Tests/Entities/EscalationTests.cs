@@ -47,6 +47,26 @@ public class EscalationTests
     }
 
     [Fact]
+    public void Create_WithoutEvidencePackage_ShouldSetLocalizationKey()
+    {
+        Action act = () => Escalation.Create(
+            Guid.NewGuid(),
+            "INC-1002K",
+            "S-TNT-002",
+            SlaClass.P2,
+            1000,
+            5,
+            string.Empty,
+            "actions",
+            "decision",
+            EscalationLevel.BMManagement,
+            "dispatcher");
+
+        var ex = act.Should().Throw<DomainException>().Which;
+        ex.MessageKey.Should().Be("Escalation.EvidencePackage.Required");
+    }
+
+    [Fact]
     public void Approve_FromSubmitted_ShouldThrow()
     {
         var escalation = CreateEscalation();

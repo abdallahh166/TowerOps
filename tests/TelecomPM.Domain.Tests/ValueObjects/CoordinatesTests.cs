@@ -27,6 +27,15 @@ public class CoordinatesTests
     }
 
     [Fact]
+    public void Create_WithLatitudeOutOfRange_ShouldSetLocalizationKey()
+    {
+        var act = () => Coordinates.Create(100, 30);
+
+        var ex = act.Should().Throw<DomainException>().Which;
+        ex.MessageKey.Should().Be("Coordinates.Latitude.Range");
+    }
+
+    [Fact]
     public void DistanceTo_ShouldComputePositiveDistance()
     {
         var a = Coordinates.Create(30.0444, 31.2357); // Cairo

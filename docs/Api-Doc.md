@@ -12,6 +12,9 @@ Related: operational process and lifecycle diagrams are documented in `docs/Oper
 - Swagger/OpenAPI
 - Health checks (`/health`)
 - CORS from `Cors:AllowedOrigins`
+- Request localization (`en-US`, `ar-EG`) via `Accept-Language` / `?culture=`
+- Centralized bilingual message translation for API `ProblemDetails` and key auth/system responses
+- Validation error payloads (`Errors` dictionary) are localized for common field names and standard FluentValidation message patterns
 
 ## Authorization Policies
 - `CanManageWorkOrders`: Admin, Manager, Supervisor
@@ -162,6 +165,11 @@ Related: operational process and lifecycle diagrams are documented in `docs/Oper
 - `GET /{planId}/suggest/{engineerId}` (**CanManageSites**)
 - `GET /{officeId}/{date}/unassigned` (**CanManageSites**)
 - `POST /{planId}/publish` (**CanManageSites**)
+
+Daily planning behavior:
+- Base cap is `Route:MaxSitesPerEngineerPerDay`.
+- During Ramadan (Hijri month 9), cap is reduced when `Route:EnableRamadanScheduling=true` and bounded by `Route:RamadanMaxSitesPerEngineerPerDay`.
+- During khamsin window (`Route:KhamsinStartMonthDay`..`Route:KhamsinEndMonthDay`), route speed uses `Route:KhamsinAverageSpeedKmh` when `Route:EnableKhamsinSeasonAdjustment=true`.
 
 ### `SyncController` (`/api/sync`)
 - `POST /`

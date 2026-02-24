@@ -67,5 +67,5 @@ public class CancelVisitCommandHandlerTests
             Guid.NewGuid(),
             "Engineer Z",
             DateTime.UtcNow.AddDays(1),
-            VisitType.PreventiveMaintenance);
+            VisitType.BM);
 }

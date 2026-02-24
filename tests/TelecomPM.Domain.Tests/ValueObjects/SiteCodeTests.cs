@@ -27,6 +27,15 @@ public class SiteCodeTests
     }
 
     [Fact]
+    public void Create_WithInvalidFormat_ShouldSetLocalizationKey()
+    {
+        var act = () => SiteCode.Create("INVALID");
+
+        var ex = act.Should().Throw<DomainException>().Which;
+        ex.MessageKey.Should().Be("SiteCode.InvalidFormat");
+    }
+
+    [Fact]
     public void FromShortCode_WithValidValue_ShouldCreateSiteCode()
     {
         var siteCode = SiteCode.FromShortCode("3564DE");

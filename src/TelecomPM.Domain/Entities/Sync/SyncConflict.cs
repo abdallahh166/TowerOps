@@ -31,13 +31,13 @@ public sealed class SyncConflict : AggregateRoot<Guid>
         string resolution)
     {
         if (syncQueueId == Guid.Empty)
-            throw new DomainException("SyncQueueId is required.");
+            throw new DomainException("SyncQueueId is required.", "SyncConflict.SyncQueueId.Required");
 
         if (string.IsNullOrWhiteSpace(conflictType))
-            throw new DomainException("ConflictType is required.");
+            throw new DomainException("ConflictType is required.", "SyncConflict.ConflictType.Required");
 
         if (string.IsNullOrWhiteSpace(resolution))
-            throw new DomainException("Resolution is required.");
+            throw new DomainException("Resolution is required.", "SyncConflict.Resolution.Required");
 
         return new SyncConflict(syncQueueId, conflictType.Trim(), resolution.Trim());
     }

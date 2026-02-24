@@ -43,10 +43,10 @@ public sealed class ApplicationRole : AggregateRoot<string>
         IReadOnlyCollection<string> permissions)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("Role name is required.");
+            throw new DomainException("Role name is required.", "ApplicationRole.Name.Required");
 
         if (string.IsNullOrWhiteSpace(displayName))
-            throw new DomainException("Display name is required.");
+            throw new DomainException("Display name is required.", "ApplicationRole.DisplayName.Required");
 
         var normalizedName = name.Trim();
         return new ApplicationRole(
@@ -65,7 +65,7 @@ public sealed class ApplicationRole : AggregateRoot<string>
         IReadOnlyCollection<string> permissions)
     {
         if (string.IsNullOrWhiteSpace(displayName))
-            throw new DomainException("Display name is required.");
+            throw new DomainException("Display name is required.", "ApplicationRole.DisplayName.Required");
 
         DisplayName = displayName.Trim();
         Description = description;

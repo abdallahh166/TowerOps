@@ -29,7 +29,7 @@ public sealed class SectorInfo
         string antennaType)
     {
         if (azimuth < 0 || azimuth > 360)
-            throw new DomainException("Azimuth must be between 0 and 360 degrees");
+            throw new DomainException("Azimuth must be between 0 and 360 degrees", "SectorInfo.Azimuth.Range");
 
         return new SectorInfo
         {

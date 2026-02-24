@@ -1,4 +1,5 @@
 using MediatR;
+using System.Globalization;
 using TelecomPM.Application.Commands.DailyPlans;
 using TelecomPM.Application.Common;
 using TelecomPM.Application.Common.Interfaces;
@@ -38,7 +39,7 @@ public sealed class AssignSiteToEngineerCommandHandler : IRequestHandler<AssignS
         if (site is null)
             return Result.Failure<DailyPlanDto>("Site not found.");
 
-        var maxSites = await _settingsService.GetAsync("Route:MaxSitesPerEngineerPerDay", 8, cancellationToken);
+        var maxSites = await ResolveMaxSitesPerEngineerAsync(plan.PlanDate, cancellationToken);
         var assignedForEngineer = plan.EngineerPlans.FirstOrDefault(ep => ep.EngineerId == request.EngineerId)?.Stops.Count ?? 0;
         var alreadyAssignedToEngineer = plan.EngineerPlans
             .FirstOrDefault(ep => ep.EngineerId == request.EngineerId)?
@@ -56,7 +57,7 @@ public sealed class AssignSiteToEngineerCommandHandler : IRequestHandler<AssignS
                 request.VisitType,
                 request.Priority);
 
-            var speed = await _settingsService.GetAsync("Route:AverageSpeedKmh", 40m, cancellationToken);
+            var speed = await ResolveAverageSpeedKmhAsync(plan.PlanDate, cancellationToken);
             plan.SuggestOrder(request.EngineerId, speed);
 
             await _dailyPlanRepository.UpdateAsync(plan, cancellationToken);
@@ -68,5 +69,93 @@ public sealed class AssignSiteToEngineerCommandHandler : IRequestHandler<AssignS
         {
             return Result.Failure<DailyPlanDto>(ex.Message);
         }
+    }
+
+    private async Task<int> ResolveMaxSitesPerEngineerAsync(DateOnly planDate, CancellationToken cancellationToken)
+    {
+        var maxSites = await _settingsService.GetAsync("Route:MaxSitesPerEngineerPerDay", 8, cancellationToken);
+        maxSites = Math.Clamp(maxSites, 1, 100);
+
+        var enableRamadanScheduling = await _settingsService.GetAsync("Route:EnableRamadanScheduling", true, cancellationToken);
+        if (!enableRamadanScheduling || !IsRamadan(planDate))
+            return maxSites;
+
+        var defaultRamadanMax = Math.Max(1, maxSites - 2);
+        var ramadanMaxSites = await _settingsService.GetAsync(
+            "Route:RamadanMaxSitesPerEngineerPerDay",
+            defaultRamadanMax,
+            cancellationToken);
+
+        return Math.Clamp(Math.Min(maxSites, ramadanMaxSites), 1, 100);
+    }
+
+    private async Task<decimal> ResolveAverageSpeedKmhAsync(DateOnly planDate, CancellationToken cancellationToken)
+    {
+        var baseSpeed = await _settingsService.GetAsync("Route:AverageSpeedKmh", 40m, cancellationToken);
+        baseSpeed = Math.Clamp(baseSpeed, 1m, 200m);
+
+        var enableKhamsinAdjustment = await _settingsService.GetAsync("Route:EnableKhamsinSeasonAdjustment", true, cancellationToken);
+        if (!enableKhamsinAdjustment)
+            return baseSpeed;
+
+        var khamsinStart = await _settingsService.GetAsync("Route:KhamsinStartMonthDay", "03-01", cancellationToken);
+        var khamsinEnd = await _settingsService.GetAsync("Route:KhamsinEndMonthDay", "05-15", cancellationToken);
+
+        if (!IsWithinMonthDayRange(planDate, khamsinStart, khamsinEnd))
+            return baseSpeed;
+
+        var defaultKhamsinSpeed = Math.Max(1m, baseSpeed - 10m);
+        var khamsinSpeed = await _settingsService.GetAsync("Route:KhamsinAverageSpeedKmh", defaultKhamsinSpeed, cancellationToken);
+
+        return Math.Clamp(Math.Min(baseSpeed, khamsinSpeed), 1m, 200m);
+    }
+
+    private static bool IsRamadan(DateOnly planDate)
+    {
+        var umAlQura = new UmAlQuraCalendar();
+        var asDateTime = planDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        return umAlQura.GetMonth(asDateTime) == 9;
+    }
+
+    private static bool IsWithinMonthDayRange(DateOnly date, string startMonthDay, string endMonthDay)
+    {
+        if (!TryParseMonthDay(startMonthDay, out var startMonth, out var startDay))
+            return false;
+
+        if (!TryParseMonthDay(endMonthDay, out var endMonth, out var endDay))
+            return false;
+
+        var current = date.Month * 100 + date.Day;
+        var start = startMonth * 100 + startDay;
+        var end = endMonth * 100 + endDay;
+
+        if (start <= end)
+            return current >= start && current <= end;
+
+        return current >= start || current <= end;
+    }
+
+    private static bool TryParseMonthDay(string value, out int month, out int day)
+    {
+        month = 0;
+        day = 0;
+
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        var parts = value.Split('-', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 2)
+            return false;
+
+        if (!int.TryParse(parts[0], out month) || !int.TryParse(parts[1], out day))
+            return false;
+
+        if (month < 1 || month > 12)
+            return false;
+
+        if (day < 1 || day > DateTime.DaysInMonth(2024, month))
+            return false;
+
+        return true;
     }
 }

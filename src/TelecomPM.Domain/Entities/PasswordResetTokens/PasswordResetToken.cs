@@ -31,13 +31,13 @@ public sealed class PasswordResetToken : AggregateRoot<Guid>
         DateTime expiresAtUtc)
     {
         if (string.IsNullOrWhiteSpace(email))
-            throw new DomainException("Email is required.");
+            throw new DomainException("Email is required.", "PasswordResetToken.Email.Required");
 
         if (string.IsNullOrWhiteSpace(hashedOtp))
-            throw new DomainException("Hashed OTP is required.");
+            throw new DomainException("Hashed OTP is required.", "PasswordResetToken.HashedOtp.Required");
 
         if (expiresAtUtc <= DateTime.UtcNow)
-            throw new DomainException("Expiry must be in the future.");
+            throw new DomainException("Expiry must be in the future.", "PasswordResetToken.Expiry.FutureRequired");
 
         return new PasswordResetToken(email.Trim(), hashedOtp.Trim(), expiresAtUtc);
     }

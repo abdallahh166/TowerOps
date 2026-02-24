@@ -66,6 +66,17 @@ public class WorkOrderTests
         act.Should().Throw<DomainException>()
             .WithMessage("*Engineer ID is required*");
     }
+
+    [Fact]
+    public void Assign_WithEmptyEngineerId_ShouldSetLocalizationKey()
+    {
+        var workOrder = WorkOrder.Create("WO-1005-K", "S-TNT-005", "TNT", SlaClass.P3, "Door alarm");
+
+        Action act = () => workOrder.Assign(Guid.Empty, "Engineer A", "Dispatcher");
+
+        var ex = act.Should().Throw<DomainException>().Which;
+        ex.MessageKey.Should().Be("WorkOrder.Assign.EngineerIdRequired");
+    }
     [Fact]
     public void CreateAndAssign_ShouldPersistUtcTimestamps()
     {

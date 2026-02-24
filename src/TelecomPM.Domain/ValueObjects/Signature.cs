@@ -42,13 +42,13 @@ public sealed class Signature : ValueObject
         GeoLocation? signedAtLocation = null)
     {
         if (string.IsNullOrWhiteSpace(signerName))
-            throw new DomainException("Signer name is required.");
+            throw new DomainException("Signer name is required.", "Signature.SignerName.Required");
 
         if (string.IsNullOrWhiteSpace(signerRole))
-            throw new DomainException("Signer role is required.");
+            throw new DomainException("Signer role is required.", "Signature.SignerRole.Required");
 
         if (string.IsNullOrWhiteSpace(signatureDataBase64))
-            throw new DomainException("Signature data is required.");
+            throw new DomainException("Signature data is required.", "Signature.Data.Required");
 
         byte[] bytes;
         try
@@ -57,14 +57,14 @@ public sealed class Signature : ValueObject
         }
         catch (FormatException)
         {
-            throw new DomainException("Signature data must be valid base64.");
+            throw new DomainException("Signature data must be valid base64.", "Signature.Data.Base64Invalid");
         }
 
         if (bytes.Length > MaxBytes)
-            throw new DomainException("Signature image must be 150KB or less.");
+            throw new DomainException("Signature image must be 150KB or less.", "Signature.Data.MaxSize");
 
         if (bytes.Length < PngHeader.Length || !PngHeader.SequenceEqual(bytes.Take(PngHeader.Length)))
-            throw new DomainException("Signature must be a PNG image.");
+            throw new DomainException("Signature must be a PNG image.", "Signature.Data.PngRequired");
 
         return new Signature(
             signerName.Trim(),

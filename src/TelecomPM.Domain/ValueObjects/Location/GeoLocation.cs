@@ -16,10 +16,10 @@ public sealed class GeoLocation : ValueObject
     public static GeoLocation Create(decimal latitude, decimal longitude)
     {
         if (latitude < -90m || latitude > 90m)
-            throw new DomainException("Latitude must be between -90 and 90");
+            throw new DomainException("Latitude must be between -90 and 90", "GeoLocation.Latitude.Range");
 
         if (longitude < -180m || longitude > 180m)
-            throw new DomainException("Longitude must be between -180 and 180");
+            throw new DomainException("Longitude must be between -180 and 180", "GeoLocation.Longitude.Range");
 
         return new GeoLocation(latitude, longitude);
     }

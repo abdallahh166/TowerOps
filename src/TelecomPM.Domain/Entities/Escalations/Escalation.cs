@@ -64,25 +64,25 @@ public sealed class Escalation : AggregateRoot<Guid>
         string submittedBy)
     {
         if (workOrderId == Guid.Empty)
-            throw new DomainException("WorkOrderId is required");
+            throw new DomainException("WorkOrderId is required", "Escalation.WorkOrderId.Required");
         if (string.IsNullOrWhiteSpace(incidentId))
-            throw new DomainException("Incident ID is required");
+            throw new DomainException("Incident ID is required", "Escalation.IncidentId.Required");
         if (string.IsNullOrWhiteSpace(siteCode))
-            throw new DomainException("Site code is required");
+            throw new DomainException("Site code is required", "Escalation.SiteCode.Required");
         if (string.IsNullOrWhiteSpace(evidencePackage))
-            throw new DomainException("Evidence package is required");
+            throw new DomainException("Evidence package is required", "Escalation.EvidencePackage.Required");
         if (string.IsNullOrWhiteSpace(previousActions))
-            throw new DomainException("Previous actions are required");
+            throw new DomainException("Previous actions are required", "Escalation.PreviousActions.Required");
         if (string.IsNullOrWhiteSpace(recommendedDecision))
-            throw new DomainException("Recommended decision is required");
+            throw new DomainException("Recommended decision is required", "Escalation.RecommendedDecision.Required");
         if (string.IsNullOrWhiteSpace(submittedBy))
-            throw new DomainException("Submitted by is required");
+            throw new DomainException("Submitted by is required", "Escalation.SubmittedBy.Required");
 
         if (financialImpactEgp < 0)
-            throw new DomainException("Financial impact cannot be negative");
+            throw new DomainException("Financial impact cannot be negative", "Escalation.FinancialImpact.NonNegative");
 
         if (slaImpactPercentage < 0 || slaImpactPercentage > 100)
-            throw new DomainException("SLA impact percentage must be between 0 and 100");
+            throw new DomainException("SLA impact percentage must be between 0 and 100", "Escalation.SlaImpact.PercentageRange");
 
         return new Escalation(
             workOrderId,
@@ -101,7 +101,7 @@ public sealed class Escalation : AggregateRoot<Guid>
     public void MarkUnderReview()
     {
         if (Status != EscalationStatus.Submitted)
-            throw new DomainException("Only submitted escalation can be moved to review");
+            throw new DomainException("Only submitted escalation can be moved to review", "Escalation.MarkUnderReview.RequiresSubmitted");
 
         Status = EscalationStatus.UnderReview;
     }
@@ -109,7 +109,7 @@ public sealed class Escalation : AggregateRoot<Guid>
     public void Approve()
     {
         if (Status != EscalationStatus.UnderReview)
-            throw new DomainException("Only under-review escalation can be approved");
+            throw new DomainException("Only under-review escalation can be approved", "Escalation.Approve.RequiresUnderReview");
 
         Status = EscalationStatus.Approved;
     }
@@ -117,7 +117,7 @@ public sealed class Escalation : AggregateRoot<Guid>
     public void Reject()
     {
         if (Status != EscalationStatus.UnderReview)
-            throw new DomainException("Only under-review escalation can be rejected");
+            throw new DomainException("Only under-review escalation can be rejected", "Escalation.Reject.RequiresUnderReview");
 
         Status = EscalationStatus.Rejected;
     }
@@ -125,7 +125,7 @@ public sealed class Escalation : AggregateRoot<Guid>
     public void Close()
     {
         if (Status != EscalationStatus.Approved && Status != EscalationStatus.Rejected)
-            throw new DomainException("Only approved or rejected escalation can be closed");
+            throw new DomainException("Only approved or rejected escalation can be closed", "Escalation.Close.RequiresApprovedOrRejected");
 
         Status = EscalationStatus.Closed;
     }

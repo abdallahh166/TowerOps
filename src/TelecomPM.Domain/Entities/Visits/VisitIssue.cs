@@ -47,10 +47,10 @@ public sealed class VisitIssue : Entity<Guid>
         string description)
     {
         if (string.IsNullOrWhiteSpace(title))
-            throw new DomainException("Issue title is required");
+            throw new DomainException("Issue title is required", "VisitIssue.Title.Required");
 
         if (string.IsNullOrWhiteSpace(description))
-            throw new DomainException("Issue description is required");
+            throw new DomainException("Issue description is required", "VisitIssue.Description.Required");
 
         return new VisitIssue(visitId, category, severity, title, description);
     }
@@ -66,7 +66,7 @@ public sealed class VisitIssue : Entity<Guid>
     public void Resolve(string resolution)
     {
         if (string.IsNullOrWhiteSpace(resolution))
-            throw new DomainException("Resolution description is required");
+            throw new DomainException("Resolution description is required", "VisitIssue.Resolution.Required");
 
         Status = IssueStatus.Resolved;
         Resolution = resolution;
@@ -97,7 +97,7 @@ public sealed class VisitIssue : Entity<Guid>
     public void Close()
     {
         if (Status != IssueStatus.Resolved)
-            throw new DomainException("Issue must be resolved before closing");
+            throw new DomainException("Issue must be resolved before closing", "VisitIssue.Close.RequiresResolved");
 
         Status = IssueStatus.Closed;
     }

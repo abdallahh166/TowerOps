@@ -50,13 +50,13 @@ public sealed class ChecklistTemplateItem
         string? applicableVisitTypes = null)
     {
         if (checklistTemplateId == Guid.Empty)
-            throw new DomainException("Checklist template ID is required");
+            throw new DomainException("Checklist template ID is required", "ChecklistTemplateItem.TemplateId.Required");
 
         if (string.IsNullOrWhiteSpace(category))
-            throw new DomainException("Checklist item category is required");
+            throw new DomainException("Checklist item category is required", "ChecklistTemplateItem.Category.Required");
 
         if (string.IsNullOrWhiteSpace(itemName))
-            throw new DomainException("Checklist item name is required");
+            throw new DomainException("Checklist item name is required", "ChecklistTemplateItem.ItemName.Required");
 
         return new ChecklistTemplateItem(
             checklistTemplateId,

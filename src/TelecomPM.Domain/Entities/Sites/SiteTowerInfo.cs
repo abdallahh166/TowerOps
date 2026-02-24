@@ -37,7 +37,7 @@ public sealed class SiteTowerInfo : Entity<Guid>
         string owner)
     {
         if (height <= 0)
-            throw new DomainException("Tower height must be greater than zero");
+            throw new DomainException("Tower height must be greater than zero", "SiteTowerInfo.Height.Positive");
 
         return new SiteTowerInfo(siteId, type, height, owner);
     }

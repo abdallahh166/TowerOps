@@ -49,19 +49,19 @@ public sealed class AuditLog : AggregateRoot<Guid>
         string? notes)
     {
         if (string.IsNullOrWhiteSpace(entityType))
-            throw new DomainException("Entity type is required");
+            throw new DomainException("Entity type is required", "AuditLog.EntityType.Required");
 
         if (entityId == Guid.Empty)
-            throw new DomainException("Entity ID is required");
+            throw new DomainException("Entity ID is required", "AuditLog.EntityId.Required");
 
         if (string.IsNullOrWhiteSpace(action))
-            throw new DomainException("Action is required");
+            throw new DomainException("Action is required", "AuditLog.Action.Required");
 
         if (actorId == Guid.Empty)
-            throw new DomainException("Actor ID is required");
+            throw new DomainException("Actor ID is required", "AuditLog.ActorId.Required");
 
         if (string.IsNullOrWhiteSpace(actorRole))
-            throw new DomainException("Actor role is required");
+            throw new DomainException("Actor role is required", "AuditLog.ActorRole.Required");
 
         return new AuditLog(
             entityType.Trim(),

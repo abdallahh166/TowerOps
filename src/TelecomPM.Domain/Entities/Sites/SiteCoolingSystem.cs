@@ -23,7 +23,7 @@ public sealed class SiteCoolingSystem : Entity<Guid>
     public static SiteCoolingSystem Create(Guid siteId, int acUnitsCount)
     {
         if (acUnitsCount <= 0)
-            throw new DomainException("AC units count must be greater than zero");
+            throw new DomainException("AC units count must be greater than zero", "SiteCoolingSystem.AcUnitsCount.Positive");
 
         return new SiteCoolingSystem(siteId, acUnitsCount);
     }

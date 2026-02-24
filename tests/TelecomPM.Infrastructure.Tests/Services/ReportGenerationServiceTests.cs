@@ -112,7 +112,7 @@ public class ReportGenerationServiceTests
             Guid.NewGuid(),
             "Eng 1",
             DateTime.UtcNow,
-            VisitType.PreventiveMaintenance);
+            VisitType.BM);
     }
 
     private static Site CreateSite()

@@ -38,16 +38,16 @@ public sealed class SharedAntennaPosition
         decimal hbaMeters)
     {
         if (siteSharingId == Guid.Empty)
-            throw new DomainException("SiteSharingId is required");
+            throw new DomainException("SiteSharingId is required", "SharedAntennaPosition.SiteSharingId.Required");
 
         if (index <= 0)
-            throw new DomainException("Index must be greater than zero");
+            throw new DomainException("Index must be greater than zero", "SharedAntennaPosition.Index.Positive");
 
         if (azimuth < 0 || azimuth > 360)
-            throw new DomainException("Azimuth must be between 0 and 360 degrees");
+            throw new DomainException("Azimuth must be between 0 and 360 degrees", "SharedAntennaPosition.Azimuth.Range");
 
         if (hbaMeters <= 0)
-            throw new DomainException("HBA meters must be greater than zero");
+            throw new DomainException("HBA meters must be greater than zero", "SharedAntennaPosition.HbaMeters.Positive");
 
         return new SharedAntennaPosition(siteSharingId, category, index, azimuth, hbaMeters);
     }
@@ -55,14 +55,14 @@ public sealed class SharedAntennaPosition
     private static string NormalizeCategory(string category)
     {
         if (string.IsNullOrWhiteSpace(category))
-            throw new DomainException("Category is required");
+            throw new DomainException("Category is required", "SharedAntennaPosition.Category.Required");
 
         var normalized = category.Trim().ToUpperInvariant();
         return normalized switch
         {
             "RADIO" => "Radio",
             "TX" => "TX",
-            _ => throw new DomainException("Category must be either 'Radio' or 'TX'")
+            _ => throw new DomainException("Category must be either 'Radio' or 'TX'", "SharedAntennaPosition.Category.Invalid")
         };
     }
 }

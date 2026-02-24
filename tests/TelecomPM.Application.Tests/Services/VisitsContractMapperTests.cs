@@ -17,7 +17,7 @@ public class VisitsContractMapperTests
             SiteId = Guid.NewGuid(),
             EngineerId = Guid.NewGuid(),
             ScheduledDate = DateTime.UtcNow,
-            Type = VisitType.CorrectiveMaintenance,
+            Type = VisitType.CM,
             SupervisorId = Guid.NewGuid(),
             TechnicianNames = new List<string> { "Tech 1" }
         };

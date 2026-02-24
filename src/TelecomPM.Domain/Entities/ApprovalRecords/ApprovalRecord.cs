@@ -46,16 +46,16 @@ public sealed class ApprovalRecord : AggregateRoot<Guid>
         string? reason)
     {
         if (workOrderId == Guid.Empty)
-            throw new DomainException("WorkOrderId is required");
+            throw new DomainException("WorkOrderId is required", "ApprovalRecord.WorkOrderId.Required");
 
         if (string.IsNullOrWhiteSpace(stageName))
-            throw new DomainException("Stage name is required");
+            throw new DomainException("Stage name is required", "ApprovalRecord.StageName.Required");
 
         if (string.IsNullOrWhiteSpace(reviewerRole))
-            throw new DomainException("Reviewer role is required");
+            throw new DomainException("Reviewer role is required", "ApprovalRecord.ReviewerRole.Required");
 
         if (reviewerId == Guid.Empty)
-            throw new DomainException("ReviewerId is required");
+            throw new DomainException("ReviewerId is required", "ApprovalRecord.ReviewerId.Required");
 
         return new ApprovalRecord(
             workOrderId,

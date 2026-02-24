@@ -16,7 +16,7 @@ public sealed class AuthController : ApiControllerBase
         var result = await Mediator.Send(request.ToCommand(), cancellationToken);
         if (!result.IsSuccess || result.Value is null)
         {
-            return Unauthorized("Invalid credentials.");
+            return Unauthorized(LocalizedText.Get("InvalidCredentials", "Invalid credentials."));
         }
 
         return Ok(result.Value.ToResponse());
@@ -32,7 +32,7 @@ public sealed class AuthController : ApiControllerBase
         if (result.IsFailure)
             return HandleResult(result);
 
-        return Ok(new { message = "If the account exists, an OTP was sent to the registered email." });
+        return Ok(new { message = LocalizedText.Get("ForgotPasswordGenericSuccess", "If the account exists, an OTP was sent to the registered email.") });
     }
 
     [HttpPost("reset-password")]
@@ -45,7 +45,7 @@ public sealed class AuthController : ApiControllerBase
         if (result.IsFailure)
             return HandleResult(result);
 
-        return Ok(new { message = "Password has been reset successfully." });
+        return Ok(new { message = LocalizedText.Get("ResetPasswordSuccess", "Password has been reset successfully.") });
     }
 
     [HttpPost("change-password")]
@@ -58,6 +58,6 @@ public sealed class AuthController : ApiControllerBase
         if (result.IsFailure)
             return HandleResult(result);
 
-        return Ok(new { message = "Password changed successfully." });
+        return Ok(new { message = LocalizedText.Get("ChangePasswordSuccess", "Password changed successfully.") });
     }
 }

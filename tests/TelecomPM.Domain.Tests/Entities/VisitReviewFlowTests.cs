@@ -9,7 +9,7 @@ public class VisitReviewFlowTests
 {
     private Visit PrepareCompletedVisit()
     {
-        var v = Visit.Create("V1", Guid.NewGuid(), "TNT001", "Site1", Guid.NewGuid(), "Eng", DateTime.Today, VisitType.PreventiveMaintenance);
+        var v = Visit.Create("V1", Guid.NewGuid(), "TNT001", "Site1", Guid.NewGuid(), "Eng", DateTime.Today, VisitType.BM);
         v.StartVisit(Coordinates.Create(30, 30));
         typeof(Visit).GetProperty("ActualStartTime")!.SetValue(v, DateTime.UtcNow - TimeSpan.FromMinutes(60));
 

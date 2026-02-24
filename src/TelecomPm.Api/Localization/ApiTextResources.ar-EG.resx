@@ -1,0 +1,732 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value>
+  </resheader>
+  <data name="RequestFailed" xml:space="preserve">
+    <value>ÙØ´Ù„ ØªÙ†ÙÙŠØ° Ø§Ù„Ø·Ù„Ø¨</value>
+  </data>
+  <data name="ValidationFailed" xml:space="preserve">
+    <value>ÙØ´Ù„ Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† ØµØ­Ø© Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª</value>
+  </data>
+  <data name="InternalServerError" xml:space="preserve">
+    <value>Ø­Ø¯Ø« Ø®Ø·Ø£ Ø¯Ø§Ø®Ù„ÙŠ ÙÙŠ Ø§Ù„Ø®Ø§Ø¯Ù…</value>
+  </data>
+  <data name="ForbiddenAction" xml:space="preserve">
+    <value>Ù„ÙŠØ³ Ù„Ø¯ÙŠÙƒ ØµÙ„Ø§Ø­ÙŠØ© Ù„ØªÙ†ÙÙŠØ° Ù‡Ø°Ø§ Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡</value>
+  </data>
+  <data name="InvalidCredentials" xml:space="preserve">
+    <value>Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø¯Ø®ÙˆÙ„ ØºÙŠØ± ØµØ­ÙŠØ­Ø©.</value>
+  </data>
+  <data name="ForgotPasswordGenericSuccess" xml:space="preserve">
+    <value>Ø¥Ø°Ø§ ÙƒØ§Ù† Ø§Ù„Ø­Ø³Ø§Ø¨ Ù…ÙˆØ¬ÙˆØ¯Ù‹Ø§ØŒ ØªÙ… Ø¥Ø±Ø³Ø§Ù„ Ø±Ù…Ø² ØªØ­Ù‚Ù‚ Ø¥Ù„Ù‰ Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ Ø§Ù„Ù…Ø³Ø¬Ù„.</value>
+  </data>
+  <data name="ResetPasswordSuccess" xml:space="preserve">
+    <value>ØªÙ…Øª Ø¥Ø¹Ø§Ø¯Ø© ØªØ¹ÙŠÙŠÙ† ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± Ø¨Ù†Ø¬Ø§Ø­.</value>
+  </data>
+  <data name="ChangePasswordSuccess" xml:space="preserve">
+    <value>ØªÙ… ØªØºÙŠÙŠØ± ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± Ø¨Ù†Ø¬Ø§Ø­.</value>
+  </data>
+  <data name="Unauthorized" xml:space="preserve">
+    <value>ØºÙŠØ± Ù…ØµØ±Ø­.</value>
+  </data>
+  <data name="VisitNotFound" xml:space="preserve">
+    <value>Ø§Ù„Ø²ÙŠØ§Ø±Ø© ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯Ø©.</value>
+  </data>
+  <data name="SiteNotFound" xml:space="preserve">
+    <value>Ø§Ù„Ù…ÙˆÙ‚Ø¹ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯.</value>
+  </data>
+  <data name="WorkOrderNotFound" xml:space="preserve">
+    <value>Ø£Ù…Ø± Ø§Ù„Ø¹Ù…Ù„ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯.</value>
+  </data>
+  <data name="OfficeNotFound" xml:space="preserve">
+    <value>Ø§Ù„Ù…ÙƒØªØ¨ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯.</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯.</value>
+  </data>
+  <data name="MaterialNotFound" xml:space="preserve">
+    <value>Ø§Ù„Ù…Ø§Ø¯Ø© ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯Ø©.</value>
+  </data>
+  <data name="RoleNotFound" xml:space="preserve">
+    <value>Ø§Ù„Ø¯ÙˆØ± ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯.</value>
+  </data>
+  <data name="SettingsUnsupportedService" xml:space="preserve">
+    <value>Ø§Ù„Ø®Ø¯Ù…Ø© ØºÙŠØ± Ù…Ø¯Ø¹ÙˆÙ…Ø©. Ø§Ø³ØªØ®Ø¯Ù… twilio Ø£Ùˆ email Ø£Ùˆ firebase.</value>
+  </data>
+  <data name="PortalAccessNotEnabled" xml:space="preserve">
+    <value>ØµÙ„Ø§Ø­ÙŠØ© Ø§Ù„Ø¨ÙˆØ§Ø¨Ø© ØºÙŠØ± Ù…ÙØ¹Ù„Ø© Ù„Ù‡Ø°Ø§ Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù….</value>
+  </data>
+  <data name="OnlyAssignedEngineerCheckIn" xml:space="preserve">
+    <value>ÙÙ‚Ø· Ø§Ù„Ù…Ù‡Ù†Ø¯Ø³ Ø§Ù„Ù…ÙƒÙ„Ù‘Ù ÙŠÙ…ÙƒÙ†Ù‡ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„ÙˆØµÙˆÙ„.</value>
+  </data>
+  <data name="OnlyAssignedEngineerCheckOut" xml:space="preserve">
+    <value>ÙÙ‚Ø· Ø§Ù„Ù…Ù‡Ù†Ø¯Ø³ Ø§Ù„Ù…ÙƒÙ„Ù‘Ù ÙŠÙ…ÙƒÙ†Ù‡ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ù…ØºØ§Ø¯Ø±Ø©.</value>
+  </data>
+  <data name="AuthenticatedUserRequired" xml:space="preserve">
+    <value>Ù…Ø·Ù„ÙˆØ¨ Ù…Ø³ØªØ®Ø¯Ù… Ù…ØµØ§Ø¯Ù‚ Ø¹Ù„ÙŠÙ‡.</value>
+  </data>
+  <data name="AuthenticatedReviewerRequired" xml:space="preserve">
+    <value>Ù…Ø·Ù„ÙˆØ¨ Ù…Ø±Ø§Ø¬Ø¹ Ù…ØµØ§Ø¯Ù‚ Ø¹Ù„ÙŠÙ‡.</value>
+  </data>
+  <data name="FailedToOperationPrefix" xml:space="preserve">
+    <value>ÙØ´Ù„ ØªÙ†ÙÙŠØ° Ø§Ù„Ø¹Ù…Ù„ÙŠØ©: {0}</value>
+  </data>
+  <data name="EvidencePolicyValidationFailed" xml:space="preserve">
+    <value>ÙØ´Ù„ Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø£Ø¯Ù„Ø©: {0}</value>
+  </data>
+  <data name="VisitValidationFailed" xml:space="preserve">
+    <value>ÙØ´Ù„ Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø§Ù„Ø²ÙŠØ§Ø±Ø©: {0}</value>
+  </data>
+  <data name="Validation.Required" xml:space="preserve">
+    <value>{0} Ù…Ø·Ù„ÙˆØ¨.</value>
+  </data>
+  <data name="Validation.InvalidFormat" xml:space="preserve">
+    <value>ØªÙ†Ø³ÙŠÙ‚ {0} ØºÙŠØ± ØµØ­ÙŠØ­.</value>
+  </data>
+  <data name="Validation.MinLength" xml:space="preserve">
+    <value>ÙŠØ¬Ø¨ Ø£Ù† ÙŠÙƒÙˆÙ† {0} Ø¹Ù„Ù‰ Ø§Ù„Ø£Ù‚Ù„ {1} Ø£Ø­Ø±Ù.</value>
+  </data>
+  <data name="Validation.MaxLength" xml:space="preserve">
+    <value>ÙŠØ¬Ø¨ Ø£Ù„Ø§ ÙŠØªØ¬Ø§ÙˆØ² {0} Ø¹Ø¯Ø¯ {1} Ø£Ø­Ø±Ù.</value>
+  </data>
+  <data name="Field.Email" xml:space="preserve">
+    <value>Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ</value>
+  </data>
+  <data name="Field.Password" xml:space="preserve">
+    <value>ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±</value>
+  </data>
+  <data name="Field.CurrentPassword" xml:space="preserve">
+    <value>ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± Ø§Ù„Ø­Ø§Ù„ÙŠØ©</value>
+  </data>
+  <data name="Field.NewPassword" xml:space="preserve">
+    <value>ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± Ø§Ù„Ø¬Ø¯ÙŠØ¯Ø©</value>
+  </data>
+  <data name="Field.ConfirmPassword" xml:space="preserve">
+    <value>ØªØ£ÙƒÙŠØ¯ ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±</value>
+  </data>
+  <data name="Field.PhoneNumber" xml:space="preserve">
+    <value>Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ</value>
+  </data>
+  <data name="Field.VisitId" xml:space="preserve">
+    <value>Ù…Ø¹Ø±Ù Ø§Ù„Ø²ÙŠØ§Ø±Ø©</value>
+  </data>
+  <data name="Field.SiteId" xml:space="preserve">
+    <value>Ù…Ø¹Ø±Ù Ø§Ù„Ù…ÙˆÙ‚Ø¹</value>
+  </data>
+  <data name="Field.SiteCode" xml:space="preserve">
+    <value>ÙƒÙˆØ¯ Ø§Ù„Ù…ÙˆÙ‚Ø¹</value>
+  </data>
+  <data name="Field.OfficeId" xml:space="preserve">
+    <value>Ù…Ø¹Ø±Ù Ø§Ù„Ù…ÙƒØªØ¨</value>
+  </data>
+  <data name="Field.EngineerId" xml:space="preserve">
+    <value>Ù…Ø¹Ø±Ù Ø§Ù„Ù…Ù‡Ù†Ø¯Ø³</value>
+  </data>
+  <data name="Field.WorkOrderId" xml:space="preserve">
+    <value>Ù…Ø¹Ø±Ù Ø£Ù…Ø± Ø§Ù„Ø¹Ù…Ù„</value>
+  </data>
+  <data name="Field.Id" xml:space="preserve">
+    <value>Ø§Ù„Ù…Ø¹Ø±Ù</value>
+  </data>
+  <data name="Field.Name" xml:space="preserve">
+    <value>Ø§Ù„Ø§Ø³Ù…</value>
+  </data>
+  <data name="Field.Role" xml:space="preserve">
+    <value>Ø§Ù„Ø¯ÙˆØ±</value>
+  </data>
+  <data name="Error.EntityNotFound" xml:space="preserve">
+    <value>{0} Ø¨Ø§Ù„Ù…Ø¹Ø±Ù '{1}' ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯</value>
+  </data>
+  <data name="Error.BusinessRuleViolation" xml:space="preserve">
+    <value>ØªÙ… Ø®Ø±Ù‚ Ù‚Ø§Ø¹Ø¯Ø© Ø§Ù„Ø¹Ù…Ù„ '{0}': {1}</value>
+  </data>
+  <data name="Error.ConcurrencyConflict" xml:space="preserve">
+    <value>Ø­Ø¯Ø« ØªØ¹Ø§Ø±Ø¶ ØªÙˆØ§Ø²ÙŠ Ù„Ù€ {0}</value>
+  </data>
+  <data name="Error.UnauthorizedResourceAccess" xml:space="preserve">
+    <value>ØºÙŠØ± Ù…ØµØ±Ø­ Ù„Ùƒ Ø¨ØªÙ†ÙÙŠØ° '{0}' Ø¹Ù„Ù‰ '{1}'</value>
+  </data>
+  <data name="Error.InvalidStateTransition" xml:space="preserve">
+    <value>Ù„Ø§ ÙŠÙ…ÙƒÙ† Ø§Ù„Ø§Ù†ØªÙ‚Ø§Ù„ Ù…Ù† '{0}' Ø¥Ù„Ù‰ '{1}'</value>
+  </data>
+  <data name="Error.UnauthorizedGeneric" xml:space="preserve">
+    <value>Ù„ÙŠØ³ Ù„Ø¯ÙŠÙƒ ØµÙ„Ø§Ø­ÙŠØ© Ù„ØªÙ†ÙÙŠØ° Ù‡Ø°Ø§ Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡</value>
+  </data>
+  <data name="Error.ConflictGeneric" xml:space="preserve">
+    <value>Ø§Ù„Ø·Ù„Ø¨ ÙŠØªØ¹Ø§Ø±Ø¶ Ù…Ø¹ Ø§Ù„Ø­Ø§Ù„Ø© Ø§Ù„Ø­Ø§Ù„ÙŠØ©</value>
+  </data>
+  <data name="Address.City.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Address.Region.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ApplicationRole.DisplayName.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ApplicationRole.Name.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ApprovalRecord.ReviewerId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ApprovalRecord.ReviewerRole.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ApprovalRecord.StageName.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ApprovalRecord.WorkOrderId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Asset.Replace.NewAssetId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Asset.ServiceType.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Asset.SiteCode.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="AssetServiceRecord.ServiceType.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="AuditLog.Action.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="AuditLog.ActorId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="AuditLog.ActorRole.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="AuditLog.EntityId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="AuditLog.EntityType.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="BatteryDischargeTest.SiteCode.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="BatteryDischargeTest.SiteId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ChecklistTemplate.ApprovedBy.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ChecklistTemplate.ChangeNotes.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ChecklistTemplate.CreatedBy.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ChecklistTemplate.Previous.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ChecklistTemplate.Version.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ChecklistTemplateItem.Category.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ChecklistTemplateItem.ItemName.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ChecklistTemplateItem.TemplateId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Client.Code.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Client.Name.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Coordinates.Latitude.Range" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Coordinates.Longitude.Range" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="DailyPlan.AverageSpeed.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="DailyPlan.EngineerId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="DailyPlan.Modification.NotAllowedInCurrentStatus" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="DailyPlan.OfficeId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="DailyPlan.OfficeManagerId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="DailyPlan.SiteCode.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Email.InvalidFormat" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Email.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="EngineerDayPlan.EngineerId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.Approve.RequiresUnderReview" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.Close.RequiresApprovedOrRejected" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.EvidencePackage.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.FinancialImpact.NonNegative" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.IncidentId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.MarkUnderReview.RequiresSubmitted" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.PreviousActions.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.RecommendedDecision.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.Reject.RequiresUnderReview" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.SiteCode.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.SlaImpact.PercentageRange" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.SubmittedBy.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Escalation.WorkOrderId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="EvidencePolicy.MinChecklistCompletionPercent.Range" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="EvidencePolicy.MinPhotos.NonNegative" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="GeoLocation.Latitude.Range" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="GeoLocation.Longitude.Range" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Material.Code.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Material.Name.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="MaterialCode.InvalidFormat" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="MaterialCode.LengthRange" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="MaterialCode.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="MaterialQuantity.Add.UnitMismatch" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="MaterialQuantity.Compare.UnitMismatch" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="MaterialQuantity.Subtract.Insufficient" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="MaterialQuantity.Subtract.UnitMismatch" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="MaterialQuantity.Value.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Money.Amount.NonNegative" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Money.Compare.CurrencyMismatch" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Money.Currency.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Money.Multiply.FactorNonNegative" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Money.Subtract.WouldBeNegative" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Office.Code.Length" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Office.Code.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Office.Name.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="PasswordResetToken.Email.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="PasswordResetToken.Expiry.FutureRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="PasswordResetToken.HashedOtp.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="PhoneNumber.InvalidFormat" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="PhoneNumber.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="PlannedVisitStop.SiteCode.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SectorInfo.Azimuth.Range" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SharedAntennaPosition.Azimuth.Range" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SharedAntennaPosition.Category.Invalid" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SharedAntennaPosition.Category.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SharedAntennaPosition.HbaMeters.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SharedAntennaPosition.Index.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SharedAntennaPosition.SiteSharingId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Signature.Data.Base64Invalid" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Signature.Data.MaxSize" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Signature.Data.PngRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Signature.Data.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Signature.SignerName.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Signature.SignerRole.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Site.AssignEngineer.AlreadyAssigned" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Site.CheckInRadius.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Site.UnassignEngineer.NotAssigned" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SiteCode.InvalidFormat" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SiteCode.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SiteCode.ShortCode.InvalidFormat" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SiteCode.ShortCode.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SiteCoolingSystem.AcUnitsCount.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SitePowerSystem.BatteryStrings.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SitePowerSystem.ChargingCurrentLimit.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SitePowerSystem.RectifierModulesCount.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SiteSharing.AntennaPositionIndex.Duplicate" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SiteSharing.RadioAntennaCount.Max" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SiteSharing.TxAntennaCount.Max" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SiteTowerInfo.Height.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SyncConflict.ConflictType.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SyncConflict.Resolution.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SyncConflict.SyncQueueId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SyncQueue.DeviceId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SyncQueue.EngineerId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SyncQueue.OperationType.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SystemSetting.DataType.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SystemSetting.Group.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SystemSetting.Key.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="SystemSetting.UpdatedBy.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="TimeRange.EndAfterStartRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="UnusedAsset.AssetName.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="UnusedAsset.Quantity.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="UnusedAsset.SiteId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="User.AssignSite.RequiresPmEngineer" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="User.ClientPortal.ClientCodeRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="User.Email.InvalidFormat" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="User.Email.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="User.EngineerCapacity.MaxAssignedSitesPositive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="User.EngineerCapacity.RequiresPmEngineer" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="User.Name.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="User.Password.HasherRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="User.Password.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="User.PerformanceRating.Range" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Approve.RequiresUnderReview" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Cancel.NotAllowedFinalState" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.CheckIn.InvalidStatus" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.CheckOut.RequiresCheckIn" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Complete.InvalidDuration" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Complete.MissingStartTime" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Complete.RequiresInProgress" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.EvidencePolicy.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Materials.AddNotAllowedFinalState" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Photos.AddNotAllowedFinalState" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.PlannedOrder.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Readings.AddNotAllowedFinalState" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Reject.ReasonRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Reject.RequiresUnderReview" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.RequestCorrection.NotesRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.RequestCorrection.RequiresUnderReview" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Reschedule.FutureDateRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Reschedule.RequiresScheduled" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Review.StartRequiresSubmitted" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Signature.SiteContactAlreadyCaptured" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Start.RequiresScheduled" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Submit.RequiresCompletedOrNeedsCorrection" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Submit.RequiresEvidenceComplete" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Visit.Supervisor.RequiredForNotes" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VisitApproval.ReviewerId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VisitApproval.ReviewerName.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VisitApproval.VisitId.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VisitIssue.Close.RequiresResolved" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VisitIssue.Description.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VisitIssue.Resolution.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VisitIssue.Title.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VisitMaterialUsage.Reason.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VisitNumber.InvalidFormat" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VisitNumber.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VisitNumber.Sequence.Numeric" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VisitNumber.Sequence.Positive" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.AcceptByCustomer.AcceptedByRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.AcceptByCustomer.RequiresPendingCustomerAcceptance" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.Assign.AssignedByRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.Assign.EngineerIdRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.Assign.EngineerNameRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.Assign.RequiresCreatedOrRework" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.Cancel.NotAllowedWhenClosedOrCancelled" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.Close.RequiresPendingReviewOrCustomerAcceptance" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.Complete.RequiresInProgress" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.IssueDescription.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.OfficeCode.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.RejectByCustomer.ReasonRequired" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.RejectByCustomer.RequiresPendingCustomerAcceptance" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.Signature.ClientAlreadyCaptured" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.Signature.EngineerAlreadyCaptured" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.SiteCode.Required" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.Start.RequiresAssigned" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.SubmitForCustomerAcceptance.RequiresPendingInternalReview" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="WorkOrder.WoNumber.Required" xml:space="preserve">
+    <value></value>
+  </data>
+</root>

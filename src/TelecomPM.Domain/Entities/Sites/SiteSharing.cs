@@ -61,13 +61,13 @@ public sealed class SiteSharing : Entity<Guid>
         var positions = EnsureMutablePositions();
 
         if (position.Category == "Radio" && SharingRadioAntennaCount >= 8)
-            throw new DomainException("Maximum 8 radio antenna positions are allowed");
+            throw new DomainException("Maximum 8 radio antenna positions are allowed", "SiteSharing.RadioAntennaCount.Max");
 
         if (position.Category == "TX" && SharingTxAntennaCount >= 9)
-            throw new DomainException("Maximum 9 TX antenna positions are allowed");
+            throw new DomainException("Maximum 9 TX antenna positions are allowed", "SiteSharing.TxAntennaCount.Max");
 
         if (positions.Any(p => p.Category == position.Category && p.Index == position.Index))
-            throw new DomainException("Antenna position index already exists for this category");
+            throw new DomainException("Antenna position index already exists for this category", "SiteSharing.AntennaPositionIndex.Duplicate");
 
         positions.Add(position);
         RecalculateAntennaCounts(positions);
@@ -81,10 +81,10 @@ public sealed class SiteSharing : Entity<Guid>
         var txCount = newPositions.Count(p => p.Category == "TX");
 
         if (radioCount > 8)
-            throw new DomainException("Maximum 8 radio antenna positions are allowed");
+            throw new DomainException("Maximum 8 radio antenna positions are allowed", "SiteSharing.RadioAntennaCount.Max");
 
         if (txCount > 9)
-            throw new DomainException("Maximum 9 TX antenna positions are allowed");
+            throw new DomainException("Maximum 9 TX antenna positions are allowed", "SiteSharing.TxAntennaCount.Max");
 
         AntennaPositions = newPositions;
         SharingRadioAntennaCount = radioCount;

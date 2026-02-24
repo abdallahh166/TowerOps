@@ -180,7 +180,7 @@ public sealed class Site : AggregateRoot<Guid>
     public void SetAllowedCheckInRadius(decimal? allowedRadiusMeters)
     {
         if (allowedRadiusMeters.HasValue && allowedRadiusMeters <= 0)
-            throw new DomainException("Allowed check-in radius must be greater than zero.");
+            throw new DomainException("Allowed check-in radius must be greater than zero.", "Site.CheckInRadius.Positive");
 
         AllowedCheckInRadiusMeters = allowedRadiusMeters;
     }
@@ -385,7 +385,7 @@ public sealed class Site : AggregateRoot<Guid>
     public void AssignToEngineer(Guid engineerId, Guid? assignedBy = null)
     {
         if (AssignedEngineerId.HasValue)
-            throw new DomainException("Site is already assigned to an engineer.");
+            throw new DomainException("Site is already assigned to an engineer.", "Site.AssignEngineer.AlreadyAssigned");
 
         AssignedEngineerId = engineerId;
         MarkAsUpdated("System");
@@ -396,7 +396,7 @@ public sealed class Site : AggregateRoot<Guid>
     public void UnassignEngineer()
     {
         if (!AssignedEngineerId.HasValue)
-            throw new DomainException("Site is not assigned to any engineer.");
+            throw new DomainException("Site is not assigned to any engineer.", "Site.UnassignEngineer.NotAssigned");
 
         AssignedEngineerId = null;
         MarkAsUpdated("System");

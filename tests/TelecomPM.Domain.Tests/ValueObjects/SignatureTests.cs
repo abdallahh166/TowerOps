@@ -15,6 +15,15 @@ public class SignatureTests
     }
 
     [Fact]
+    public void Create_WithInvalidBase64_ShouldSetLocalizationKey()
+    {
+        var act = () => Signature.Create("Signer", "ClientRep", "not-base64");
+
+        var ex = act.Should().Throw<DomainException>().Which;
+        ex.MessageKey.Should().Be("Signature.Data.Base64Invalid");
+    }
+
+    [Fact]
     public void Create_WithOversizedPayload_ShouldThrow()
     {
         var bytes = new byte[151 * 1024];

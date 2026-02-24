@@ -40,7 +40,7 @@ public sealed class PlannedVisitStop
         string priority)
     {
         if (string.IsNullOrWhiteSpace(siteCode))
-            throw new DomainException("SiteCode is required.");
+            throw new DomainException("SiteCode is required.", "PlannedVisitStop.SiteCode.Required");
 
         return new PlannedVisitStop(siteCode.Trim().ToUpperInvariant(), siteLocation, visitType, priority);
     }

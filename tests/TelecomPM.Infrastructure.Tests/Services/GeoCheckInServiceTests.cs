@@ -73,5 +73,5 @@ public class GeoCheckInServiceTests
             Guid.NewGuid(),
             "Engineer A",
             DateTime.UtcNow.AddMinutes(30),
-            VisitType.PreventiveMaintenance);
+            VisitType.BM);
 }

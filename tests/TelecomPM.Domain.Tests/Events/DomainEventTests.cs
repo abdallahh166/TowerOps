@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.ValueObjects;
@@ -19,7 +19,7 @@ public class DomainEventTests
             engineerId: Guid.NewGuid(),
             engineerName: "Ahmed Hassan",
             scheduledDate: DateTime.Today.AddDays(1),
-            type: VisitType.PreventiveMaintenance
+            type: VisitType.BM
         );
 
         visit.StartVisit(Coordinates.Create(30, 30));

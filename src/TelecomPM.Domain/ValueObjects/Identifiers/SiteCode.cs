@@ -22,7 +22,7 @@ public sealed class SiteCode : ValueObject
     public static SiteCode Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new DomainException("Site code cannot be empty");
+            throw new DomainException("Site code cannot be empty", "SiteCode.Required");
 
         var normalized = value.Trim().ToUpperInvariant();
 
@@ -37,17 +37,17 @@ public sealed class SiteCode : ValueObject
             return new SiteCode(normalized, officeCode, sequenceNumber, normalized);
         }
 
-        throw new DomainException("Site code format is invalid");
+        throw new DomainException("Site code format is invalid", "SiteCode.InvalidFormat");
     }
 
     public static SiteCode FromShortCode(string shortCode)
     {
         if (string.IsNullOrWhiteSpace(shortCode))
-            throw new DomainException("Short code cannot be empty");
+            throw new DomainException("Short code cannot be empty", "SiteCode.ShortCode.Required");
 
         var normalized = shortCode.Trim().ToUpperInvariant();
         if (!TryParseShortCodeFormat(normalized, out var officeCode, out var sequenceNumber))
-            throw new DomainException("Short code must follow pattern digits + office letters (for example: 3564DE)");
+            throw new DomainException("Short code must follow pattern digits + office letters (for example: 3564DE)", "SiteCode.ShortCode.InvalidFormat");
 
         return new SiteCode(normalized, officeCode, sequenceNumber, normalized);
     }

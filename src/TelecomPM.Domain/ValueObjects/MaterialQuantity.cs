@@ -22,7 +22,7 @@ public sealed class MaterialQuantity : ValueObject
     public static MaterialQuantity Create(decimal value, MaterialUnit unit)
     {
         if (value <= 0)
-            throw new DomainException("Material quantity must be greater than zero");
+            throw new DomainException("Material quantity must be greater than zero", "MaterialQuantity.Value.Positive");
 
         return new MaterialQuantity(value, unit);
     }
@@ -30,7 +30,7 @@ public sealed class MaterialQuantity : ValueObject
     public MaterialQuantity Add(MaterialQuantity other)
     {
         if (Unit != other.Unit)
-            throw new DomainException("Cannot add quantities with different units");
+            throw new DomainException("Cannot add quantities with different units", "MaterialQuantity.Add.UnitMismatch");
 
         return new MaterialQuantity(Value + other.Value, Unit);
     }
@@ -38,10 +38,10 @@ public sealed class MaterialQuantity : ValueObject
     public MaterialQuantity Subtract(MaterialQuantity other)
     {
         if (Unit != other.Unit)
-            throw new DomainException("Cannot subtract quantities with different units");
+            throw new DomainException("Cannot subtract quantities with different units", "MaterialQuantity.Subtract.UnitMismatch");
 
         if (Value < other.Value)
-            throw new DomainException("Insufficient quantity");
+            throw new DomainException("Insufficient quantity", "MaterialQuantity.Subtract.Insufficient");
 
         return new MaterialQuantity(Value - other.Value, Unit);
     }
@@ -57,28 +57,28 @@ public sealed class MaterialQuantity : ValueObject
     public static bool operator <=(MaterialQuantity left, MaterialQuantity right)
     {
         if (left.Unit != right.Unit)
-            throw new DomainException("Cannot compare quantities with different units");
+            throw new DomainException("Cannot compare quantities with different units", "MaterialQuantity.Compare.UnitMismatch");
         return left.Value <= right.Value;
     }
 
     public static bool operator >=(MaterialQuantity left, MaterialQuantity right)
     {
         if (left.Unit != right.Unit)
-            throw new DomainException("Cannot compare quantities with different units");
+            throw new DomainException("Cannot compare quantities with different units", "MaterialQuantity.Compare.UnitMismatch");
         return left.Value >= right.Value;
     }
 
     public static bool operator <(MaterialQuantity left, MaterialQuantity right)
     {
         if (left.Unit != right.Unit)
-            throw new DomainException("Cannot compare quantities with different units");
+            throw new DomainException("Cannot compare quantities with different units", "MaterialQuantity.Compare.UnitMismatch");
         return left.Value < right.Value;
     }
 
     public static bool operator >(MaterialQuantity left, MaterialQuantity right)
     {
         if (left.Unit != right.Unit)
-            throw new DomainException("Cannot compare quantities with different units");
+            throw new DomainException("Cannot compare quantities with different units", "MaterialQuantity.Compare.UnitMismatch");
         return left.Value > right.Value;
     }
 }

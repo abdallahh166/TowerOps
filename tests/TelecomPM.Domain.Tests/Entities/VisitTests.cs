@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Exceptions;
@@ -21,7 +21,7 @@ public class VisitTests
             engineerId: Guid.NewGuid(),
             engineerName: "Ahmed Hassan",
             scheduledDate: DateTime.Today.AddDays(1),
-            type: VisitType.PreventiveMaintenance
+            type: VisitType.BM
         );
 
         // Assert
@@ -63,6 +63,18 @@ public class VisitTests
         // Assert
         act.Should().Throw<DomainException>()
             .WithMessage("*Scheduled*");
+    }
+
+    [Fact]
+    public void StartVisit_WhenNotScheduled_ShouldSetLocalizationKey()
+    {
+        var visit = CreateTestVisit();
+        visit.StartVisit(Coordinates.Create(30.0, 30.0));
+
+        Action act = () => visit.StartVisit(Coordinates.Create(30.7865, 30.9925));
+
+        var ex = act.Should().Throw<DomainException>().Which;
+        ex.MessageKey.Should().Be("Visit.Start.RequiresScheduled");
     }
 
     [Fact]
@@ -136,7 +148,7 @@ public class VisitTests
             Guid.NewGuid(),
             "Test Engineer",
             DateTime.Today,
-            VisitType.PreventiveMaintenance
+            VisitType.BM
         );
     }
 

@@ -58,7 +58,7 @@ public sealed class VisitMaterialUsage : Entity<Guid>
         string reason)
     {
         if (string.IsNullOrWhiteSpace(reason))
-            throw new DomainException("Material usage reason is required");
+            throw new DomainException("Material usage reason is required", "VisitMaterialUsage.Reason.Required");
 
         return new VisitMaterialUsage(
             visitId, materialId, materialCode, materialName, 

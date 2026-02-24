@@ -71,10 +71,10 @@ public sealed class Material : AggregateRoot<Guid>
         Money unitCost)
     {
         if (string.IsNullOrWhiteSpace(code))
-            throw new DomainException("Material code is required");
+            throw new DomainException("Material code is required", "Material.Code.Required");
 
         if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("Material name is required");
+            throw new DomainException("Material name is required", "Material.Name.Required");
 
         return new Material(
             code.ToUpper(), 
@@ -233,7 +233,10 @@ public sealed class Material : AggregateRoot<Guid>
     public void ReserveStock(MaterialQuantity quantity, Guid visitId)
     {
         if (!IsStockAvailable(quantity))
-            throw new DomainException($"Insufficient stock for material {Name}");
+            throw new DomainException(
+                $"Insufficient stock for material {Name}",
+                "Material.Stock.Insufficient",
+                Name);
 
         _reservations.Add(new MaterialReservation(Id, visitId, quantity));
     }

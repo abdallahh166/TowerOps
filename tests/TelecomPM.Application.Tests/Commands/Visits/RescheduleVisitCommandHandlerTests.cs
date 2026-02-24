@@ -78,5 +78,5 @@ public class RescheduleVisitCommandHandlerTests
             Guid.NewGuid(),
             "Engineer Y",
             DateTime.Today.AddDays(1),
-            VisitType.PreventiveMaintenance);
+            VisitType.BM);
 }

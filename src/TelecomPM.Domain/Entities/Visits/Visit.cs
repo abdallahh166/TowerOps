@@ -140,7 +140,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void SetPlannedOrder(int? plannedOrder)
     {
         if (plannedOrder.HasValue && plannedOrder <= 0)
-            throw new DomainException("Planned order must be greater than zero.");
+            throw new DomainException("Planned order must be greater than zero.", "Visit.PlannedOrder.Positive");
 
         PlannedOrder = plannedOrder;
     }
@@ -148,7 +148,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void StartVisit(Coordinates location)
     {
         if (Status != VisitStatus.Scheduled)
-            throw new DomainException("Visit must be in Scheduled status to start");
+            throw new DomainException("Visit must be in Scheduled status to start", "Visit.Start.RequiresScheduled");
 
         CheckInLocation = location;
         CheckInTime = DateTime.UtcNow;
@@ -163,7 +163,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void RecordCheckIn(GeoLocation location, decimal distanceFromSiteMeters, bool isWithinSiteRadius)
     {
         if (Status == VisitStatus.Approved || Status == VisitStatus.Rejected || Status == VisitStatus.Cancelled)
-            throw new DomainException("Cannot check in for this visit status");
+            throw new DomainException("Cannot check in for this visit status", "Visit.CheckIn.InvalidStatus");
 
         CheckInGeoLocation = location;
         CheckInTimeUtc = DateTime.UtcNow;
@@ -185,7 +185,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void RecordCheckOut(GeoLocation location)
     {
         if (!CheckInTimeUtc.HasValue && !CheckInTime.HasValue)
-            throw new DomainException("Visit must be checked in before checkout");
+            throw new DomainException("Visit must be checked in before checkout", "Visit.CheckOut.RequiresCheckIn");
 
         CheckOutLocation = location;
         CheckOutTimeUtc = DateTime.UtcNow;
@@ -196,7 +196,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void CaptureSiteContactSignature(Signature signature)
     {
         if (SiteContactSignature is not null)
-            throw new DomainException("Site contact signature already captured.");
+            throw new DomainException("Site contact signature already captured.", "Visit.Signature.SiteContactAlreadyCaptured");
 
         SiteContactSignature = signature;
     }
@@ -204,16 +204,16 @@ public sealed class Visit : AggregateRoot<Guid>
     public void CompleteVisit()
     {
         if (Status != VisitStatus.InProgress)
-            throw new DomainException("Visit must be in progress to complete");
+            throw new DomainException("Visit must be in progress to complete", "Visit.Complete.RequiresInProgress");
 
         if (!ActualStartTime.HasValue)
-            throw new DomainException("Visit start time is not recorded");
+            throw new DomainException("Visit start time is not recorded", "Visit.Complete.MissingStartTime");
 
         ActualEndTime = DateTime.UtcNow;
         ActualDuration = TimeRange.Create(ActualStartTime.Value, ActualEndTime.Value);
 
         if (!ActualDuration.IsValid())
-            throw new DomainException("Visit duration is invalid");
+            throw new DomainException("Visit duration is invalid", "Visit.Complete.InvalidDuration");
 
         ValidateCompletion();
 
@@ -225,10 +225,10 @@ public sealed class Visit : AggregateRoot<Guid>
     public void Submit()
     {
         if (Status != VisitStatus.Completed && Status != VisitStatus.NeedsCorrection)
-            throw new DomainException("Visit must be completed or in correction state before submission");
+            throw new DomainException("Visit must be completed or in correction state before submission", "Visit.Submit.RequiresCompletedOrNeedsCorrection");
 
         if (!IsReadingsComplete || !IsPhotosComplete || !IsChecklistComplete)
-            throw new DomainException("All required items must be completed before submission");
+            throw new DomainException("All required items must be completed before submission", "Visit.Submit.RequiresEvidenceComplete");
 
         Status = VisitStatus.Submitted;
 
@@ -238,7 +238,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void StartReview()
     {
         if (Status != VisitStatus.Submitted)
-            throw new DomainException("Visit must be submitted for review");
+            throw new DomainException("Visit must be submitted for review", "Visit.Review.StartRequiresSubmitted");
 
         Status = VisitStatus.UnderReview;
     }
@@ -246,7 +246,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void Approve(Guid reviewerId, string reviewerName, string? notes = null)
     {
         if (Status != VisitStatus.UnderReview)
-            throw new DomainException("Visit must be under review to approve");
+            throw new DomainException("Visit must be under review to approve", "Visit.Approve.RequiresUnderReview");
 
         var approval = VisitApproval.Create(
             Id,
@@ -265,10 +265,10 @@ public sealed class Visit : AggregateRoot<Guid>
     public void RequestCorrection(Guid reviewerId, string reviewerName, string correctionNotes)
     {
         if (Status != VisitStatus.UnderReview)
-            throw new DomainException("Visit must be under review to request corrections");
+            throw new DomainException("Visit must be under review to request corrections", "Visit.RequestCorrection.RequiresUnderReview");
 
         if (string.IsNullOrWhiteSpace(correctionNotes))
-            throw new DomainException("Correction notes are required");
+            throw new DomainException("Correction notes are required", "Visit.RequestCorrection.NotesRequired");
 
         var approval = VisitApproval.Create(
             Id,
@@ -287,10 +287,10 @@ public sealed class Visit : AggregateRoot<Guid>
     public void Reject(Guid reviewerId, string reviewerName, string rejectionReason)
     {
         if (Status != VisitStatus.UnderReview)
-            throw new DomainException("Visit must be under review to reject");
+            throw new DomainException("Visit must be under review to reject", "Visit.Reject.RequiresUnderReview");
 
         if (string.IsNullOrWhiteSpace(rejectionReason))
-            throw new DomainException("Rejection reason is required");
+            throw new DomainException("Rejection reason is required", "Visit.Reject.ReasonRequired");
 
         var approval = VisitApproval.Create(
             Id,
@@ -309,7 +309,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void Cancel(string reason)
     {
         if (Status == VisitStatus.Approved || Status == VisitStatus.Rejected)
-            throw new DomainException("Cannot cancel an approved or rejected visit");
+            throw new DomainException("Cannot cancel an approved or rejected visit", "Visit.Cancel.NotAllowedFinalState");
 
         Status = VisitStatus.Cancelled;
         EngineerNotes = reason;
@@ -318,10 +318,10 @@ public sealed class Visit : AggregateRoot<Guid>
     public void Reschedule(DateTime newScheduledDate, string? reason = null)
     {
         if (Status != VisitStatus.Scheduled)
-            throw new DomainException("Only scheduled visits can be rescheduled");
+            throw new DomainException("Only scheduled visits can be rescheduled", "Visit.Reschedule.RequiresScheduled");
 
         if (newScheduledDate < DateTime.Today)
-            throw new DomainException("New scheduled date must be today or in the future");
+            throw new DomainException("New scheduled date must be today or in the future", "Visit.Reschedule.FutureDateRequired");
 
         var oldDate = ScheduledDate;
         ScheduledDate = newScheduledDate;
@@ -343,7 +343,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void AddPhoto(VisitPhoto photo)
     {
         if (Status == VisitStatus.Approved || Status == VisitStatus.Rejected)
-            throw new DomainException("Cannot add photos to an approved or rejected visit");
+            throw new DomainException("Cannot add photos to an approved or rejected visit", "Visit.Photos.AddNotAllowedFinalState");
 
         Photos.Add(photo);
         CalculateCompletionPercentage();
@@ -374,7 +374,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void AddReading(VisitReading reading)
     {
         if (Status == VisitStatus.Approved || Status == VisitStatus.Rejected)
-            throw new DomainException("Cannot add readings to an approved or rejected visit");
+            throw new DomainException("Cannot add readings to an approved or rejected visit", "Visit.Readings.AddNotAllowedFinalState");
 
         Readings.Add(reading);
         CalculateCompletionPercentage();
@@ -418,7 +418,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void LogMaterialUsage(VisitMaterialUsage materialUsage)
     {
         if (Status == VisitStatus.Approved || Status == VisitStatus.Rejected)
-            throw new DomainException("Cannot add materials to an approved or rejected visit");
+            throw new DomainException("Cannot add materials to an approved or rejected visit", "Visit.Materials.AddNotAllowedFinalState");
 
         MaterialsUsed.Add(materialUsage);
     }
@@ -464,7 +464,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void AddSupervisorNotes(string notes)
     {
         if (!SupervisorId.HasValue)
-            throw new DomainException("No supervisor assigned to this visit");
+            throw new DomainException("No supervisor assigned to this visit", "Visit.Supervisor.RequiredForNotes");
 
         SupervisorNotes = notes;
     }
@@ -479,7 +479,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public void ApplyEvidencePolicy(EvidencePolicy policy)
     {
         if (policy is null)
-            throw new DomainException("Evidence policy is required.");
+            throw new DomainException("Evidence policy is required.", "Visit.EvidencePolicy.Required");
 
         IsPhotosComplete = Photos.Count >= policy.MinPhotosRequired;
         IsReadingsComplete = !policy.ReadingsRequired || Readings.Any();

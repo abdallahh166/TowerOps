@@ -79,5 +79,5 @@ public class EditableVisitMutationServiceTests
             Guid.NewGuid(),
             "Engineer",
             DateTime.UtcNow.AddDays(1),
-            VisitType.PreventiveMaintenance);
+            VisitType.BM);
 }
