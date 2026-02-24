@@ -10,6 +10,7 @@ public static class ApiAuthorizationPolicies
     public const string CanManageVisits = "CanManageVisits";
     public const string CanViewVisits = "CanViewVisits";
     public const string CanReviewVisits = "CanReviewVisits";
+    public const string CanCreateEscalations = "CanCreateEscalations";
     public const string CanManageEscalations = "CanManageEscalations";
     public const string CanViewEscalations = "CanViewEscalations";
     public const string CanViewKpis = "CanViewKpis";
@@ -24,6 +25,7 @@ public static class ApiAuthorizationPolicies
     public const string CanManageMaterials = "CanManageMaterials";
     public const string CanManageSettings = "CanManageSettings";
     public const string CanViewPortal = "CanViewPortal";
+    public const string CanManagePortalWorkOrders = "CanManagePortalWorkOrders";
 
     public static void Configure(AuthorizationOptions options)
     {
@@ -51,6 +53,9 @@ public static class ApiAuthorizationPolicies
             RequireAnyPermission(policy,
                 PermissionConstants.VisitsReview,
                 PermissionConstants.VisitsApprove));
+
+        options.AddPolicy(CanCreateEscalations, policy =>
+            RequireAnyPermission(policy, PermissionConstants.EscalationsCreate));
 
         options.AddPolicy(CanManageEscalations, policy =>
             RequireAnyPermission(policy, PermissionConstants.EscalationsApprove));
@@ -102,6 +107,9 @@ public static class ApiAuthorizationPolicies
                 PermissionConstants.PortalViewKpis,
                 PermissionConstants.PortalViewWorkOrders,
                 PermissionConstants.PortalViewSla));
+
+        options.AddPolicy(CanManagePortalWorkOrders, policy =>
+            RequireAnyPermission(policy, PermissionConstants.PortalViewWorkOrders));
     }
 
     private static void RequireAnyPermission(AuthorizationPolicyBuilder policy, params string[] requiredPermissions)

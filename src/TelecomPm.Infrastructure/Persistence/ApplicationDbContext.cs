@@ -94,16 +94,24 @@ public class ApplicationDbContext : DbContext
         // Global query filters (soft delete)
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(Entity<Guid>).IsAssignableFrom(entityType.ClrType))
-            {
-                var parameter = Expression.Parameter(entityType.ClrType, "e");
-                var body = Expression.Equal(
-                    Expression.Property(parameter, nameof(Entity<Guid>.IsDeleted)),
-                    Expression.Constant(false));
-                var lambda = Expression.Lambda(body, parameter);
+            var isDeletedProperty = entityType.ClrType.GetProperty(
+                nameof(Entity<Guid>.IsDeleted),
+                BindingFlags.Public | BindingFlags.Instance);
 
-                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
-            }
+            if (isDeletedProperty is null || isDeletedProperty.PropertyType != typeof(bool))
+                continue;
+
+            var parameter = Expression.Parameter(entityType.ClrType, "e");
+            var isDeletedExpression = Expression.Call(
+                typeof(EF),
+                nameof(EF.Property),
+                new[] { typeof(bool) },
+                parameter,
+                Expression.Constant(nameof(Entity<Guid>.IsDeleted)));
+            var body = Expression.Equal(isDeletedExpression, Expression.Constant(false));
+            var lambda = Expression.Lambda(body, parameter);
+
+            modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
         }
     }
 

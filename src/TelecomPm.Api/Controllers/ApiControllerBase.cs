@@ -3,6 +3,7 @@ namespace TelecomPm.Api.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
 using TelecomPm.Api.Localization;
 using TelecomPM.Application.Common;
 
@@ -47,6 +48,14 @@ public abstract class ApiControllerBase : ControllerBase
                 statusCode: StatusCodes.Status500InternalServerError);
         }
 
+        if (LooksSensitiveError(normalizedError))
+        {
+            return Problem(
+                title: LocalizedText.Get("RequestFailed", "Request failed"),
+                detail: LocalizedText.Get("UnexpectedError", "An unexpected error occurred."),
+                statusCode: (int)HttpStatusCode.InternalServerError);
+        }
+
         var statusCode = normalizedError.Contains("not found", StringComparison.OrdinalIgnoreCase)
             ? StatusCodes.Status404NotFound
             : normalizedError.Contains("unauthorized", StringComparison.OrdinalIgnoreCase)
@@ -59,6 +68,29 @@ public abstract class ApiControllerBase : ControllerBase
             title: LocalizedText.Get("RequestFailed", "Request failed"),
             detail: LocalizedText.TranslateMessage(normalizedError),
             statusCode: statusCode);
+    }
+
+    private static bool LooksSensitiveError(string error)
+    {
+        if (string.IsNullOrWhiteSpace(error))
+            return false;
+
+        var sensitiveMarkers = new[]
+        {
+            "exception",
+            "stack trace",
+            " at ",
+            "system.",
+            "microsoft.",
+            "sql",
+            "connection string",
+            "accountkey=",
+            "inner exception",
+            "timeout expired"
+        };
+
+        return sensitiveMarkers.Any(marker =>
+            error.Contains(marker, StringComparison.OrdinalIgnoreCase));
     }
 }
 

@@ -12,7 +12,20 @@ public class BlobStorageService : IFileStorageService
 
     public BlobStorageService(IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("AzureBlobStorage");
+        var connectionString = configuration["AzureBlobStorage:ConnectionString"];
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+            connectionString = configuration.GetConnectionString("AzureBlobStorage");
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+            connectionString = configuration.GetConnectionString("AzureStorage");
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException(
+                "Azure Blob Storage is not configured. Set AzureBlobStorage:ConnectionString or ConnectionStrings:AzureBlobStorage/AzureStorage.");
+        }
+
         _blobServiceClient = new BlobServiceClient(connectionString);
         _containerName = configuration["AzureBlobStorage:ContainerName"] ?? "telecompm";
     }
