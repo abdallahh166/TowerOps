@@ -6,6 +6,11 @@ public interface IPortalReadRepository
 {
     Task<PortalDashboardDto> GetDashboardAsync(string clientCode, CancellationToken cancellationToken = default);
 
+    Task<bool> SiteExistsForClientAsync(
+        string clientCode,
+        string siteCode,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<PortalSiteDto>> GetSitesAsync(
         string clientCode,
         string? siteCode,

@@ -92,6 +92,32 @@ public class SlaClockServiceTests
     }
 
     [Fact]
+    public async Task EvaluateStatus_ShouldUseStoredDeadline_NotResponseSettingsLookup()
+    {
+        var strictSettingsMock = new Mock<ISystemSettingsService>(MockBehavior.Strict);
+        strictSettingsMock
+            .Setup(s => s.GetAsync("SLA:AtRiskThresholdPercent", 70, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(70);
+
+        var service = new SlaClockService(
+            strictSettingsMock.Object,
+            new MemoryCache(new MemoryCacheOptions()));
+
+        var workOrder = WorkOrder.Create("WO-SLA-IMM-1", "S-IMM-1", "CAI", SlaClass.P1, "Issue");
+        SetResponseDeadline(workOrder, DateTime.UtcNow.AddMinutes(-1));
+
+        var status = await service.EvaluateStatusAsync(workOrder);
+
+        status.Should().Be(SlaStatus.Breached);
+        strictSettingsMock.Verify(
+            s => s.GetAsync(
+                It.Is<string>(key => key.StartsWith("SLA:P", StringComparison.OrdinalIgnoreCase)),
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
     public async Task CalculateDeadline_ShouldUseSettingsValue_NotHardcoded()
     {
         _settingsServiceMock
