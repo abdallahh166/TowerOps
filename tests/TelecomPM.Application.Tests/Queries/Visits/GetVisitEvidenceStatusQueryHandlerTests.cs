@@ -24,7 +24,7 @@ public class GetVisitEvidenceStatusQueryHandlerTests
             Guid.NewGuid(),
             "Engineer A",
             DateTime.UtcNow,
-            VisitType.PreventiveMaintenance);
+            VisitType.BM);
 
         for (var i = 0; i < 30; i++)
         {

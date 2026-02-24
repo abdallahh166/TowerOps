@@ -281,7 +281,7 @@ public class StartVisitCommandHandlerTests
             Guid.NewGuid(),
             "Engineer A",
             DateTime.UtcNow.AddHours(1),
-            VisitType.PreventiveMaintenance);
+            VisitType.BM);
 
     private static Site CreateSiteForVisit(TowerOwnershipType ownershipType, SiteType siteType = SiteType.Macro)
     {

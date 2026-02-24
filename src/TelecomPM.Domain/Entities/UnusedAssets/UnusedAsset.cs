@@ -45,13 +45,13 @@ public sealed class UnusedAsset : AggregateRoot<Guid>
         string? notes = null)
     {
         if (siteId == Guid.Empty)
-            throw new DomainException("SiteId is required.");
+            throw new DomainException("SiteId is required.", "UnusedAsset.SiteId.Required");
 
         if (string.IsNullOrWhiteSpace(assetName))
-            throw new DomainException("Asset name is required.");
+            throw new DomainException("Asset name is required.", "UnusedAsset.AssetName.Required");
 
         if (quantity <= 0)
-            throw new DomainException("Quantity must be greater than zero.");
+            throw new DomainException("Quantity must be greater than zero.", "UnusedAsset.Quantity.Positive");
 
         return new UnusedAsset(
             siteId,
@@ -66,7 +66,7 @@ public sealed class UnusedAsset : AggregateRoot<Guid>
     public void UpdateQuantity(decimal quantity)
     {
         if (quantity <= 0)
-            throw new DomainException("Quantity must be greater than zero.");
+            throw new DomainException("Quantity must be greater than zero.", "UnusedAsset.Quantity.Positive");
 
         Quantity = quantity;
     }

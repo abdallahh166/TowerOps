@@ -104,7 +104,7 @@ public sealed class SettingsController : ApiControllerBase
             "twilio" => await TestTwilioAsync(cancellationToken),
             "email" => await TestEmailAsync(cancellationToken),
             "firebase" => await TestFirebaseAsync(cancellationToken),
-            _ => BadRequest("Unsupported service. Use twilio, email, or firebase.")
+            _ => BadRequest(LocalizedText.Get("SettingsUnsupportedService", "Unsupported service. Use twilio, email, or firebase."))
         };
     }
 

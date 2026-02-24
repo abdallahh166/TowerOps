@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using System.Globalization;
 using TelecomPm.Api.Contracts.Auth;
 using TelecomPm.Api.Controllers;
 using TelecomPM.Application.Commands.Auth.Login;
+using TelecomPM.Application.Commands.Auth.ForgotPassword;
 using TelecomPM.Application.Common;
 using TelecomPM.Application.DTOs.Auth;
 using Xunit;
@@ -58,6 +60,40 @@ public class AuthControllerTests
         }, CancellationToken.None);
 
         response.Should().BeOfType<UnauthorizedObjectResult>();
+    }
+
+    [Fact]
+    public async Task ForgotPassword_ShouldReturnLocalizedMessage_WhenCultureIsArabic()
+    {
+        var originalCulture = CultureInfo.CurrentCulture;
+        var originalUiCulture = CultureInfo.CurrentUICulture;
+
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("ar-EG");
+            CultureInfo.CurrentUICulture = new CultureInfo("ar-EG");
+
+            var sender = new Mock<ISender>();
+            sender.Setup(s => s.Send(It.IsAny<ForgotPasswordCommand>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Result.Success());
+
+            var controller = BuildController(sender.Object);
+
+            var response = await controller.ForgotPassword(new ForgotPasswordRequest
+            {
+                Email = "user@example.com"
+            }, CancellationToken.None);
+
+            var ok = response.Should().BeOfType<OkObjectResult>().Subject;
+            ok.Value.Should().NotBeNull();
+            var message = ok.Value!.GetType().GetProperty("message")?.GetValue(ok.Value) as string;
+            message.Should().Contain("تم إرسال رمز تحقق");
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+            CultureInfo.CurrentUICulture = originalUiCulture;
+        }
     }
 
     private static AuthController BuildController(ISender sender)

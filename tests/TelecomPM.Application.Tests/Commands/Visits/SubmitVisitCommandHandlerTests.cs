@@ -103,7 +103,7 @@ public class SubmitVisitCommandHandlerTests
             Guid.NewGuid(),
             "Engineer Submit",
             DateTime.UtcNow.AddDays(1),
-            VisitType.PreventiveMaintenance);
+            VisitType.BM);
 
         var site = Site.Create(
             "TNT777",

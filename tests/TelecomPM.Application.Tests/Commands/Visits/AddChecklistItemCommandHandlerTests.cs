@@ -25,7 +25,7 @@ public class AddChecklistItemCommandHandlerTests
             Guid.NewGuid(),
             "Engineer X",
             DateTime.UtcNow,
-            VisitType.PreventiveMaintenance);
+            VisitType.BM);
 
         var visitRepo = new Mock<IVisitRepository>();
         visitRepo.Setup(r => r.GetByIdAsync(visit.Id, It.IsAny<CancellationToken>())).ReturnsAsync(visit);

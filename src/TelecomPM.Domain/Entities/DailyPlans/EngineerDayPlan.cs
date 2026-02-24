@@ -25,7 +25,7 @@ public sealed class EngineerDayPlan
     public static EngineerDayPlan Create(Guid engineerId)
     {
         if (engineerId == Guid.Empty)
-            throw new DomainException("EngineerId is required.");
+            throw new DomainException("EngineerId is required.", "EngineerDayPlan.EngineerId.Required");
 
         return new EngineerDayPlan(engineerId);
     }

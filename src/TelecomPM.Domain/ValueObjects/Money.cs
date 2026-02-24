@@ -15,10 +15,10 @@ public sealed class Money : ValueObject
     public static Money Create(decimal amount, string currency)
     {
         if (amount < 0)
-            throw new DomainException("Amount cannot be negative");
+            throw new DomainException("Amount cannot be negative", "Money.Amount.NonNegative");
 
         if (string.IsNullOrWhiteSpace(currency))
-            throw new DomainException("Currency is required");
+            throw new DomainException("Currency is required", "Money.Currency.Required");
 
         return new Money(amount, currency);
     }
@@ -27,7 +27,11 @@ public sealed class Money : ValueObject
     public Money Add(Money other)
     {
         if (Currency != other.Currency)
-            throw new DomainException($"Cannot add different currencies: {Currency} and {other.Currency}");
+            throw new DomainException(
+                $"Cannot add different currencies: {Currency} and {other.Currency}",
+                "Money.Add.CurrencyMismatch",
+                Currency,
+                other.Currency);
 
         return new Money(Amount + other.Amount, Currency);
     }
@@ -36,12 +40,16 @@ public sealed class Money : ValueObject
     public Money Subtract(Money other)
     {
         if (Currency != other.Currency)
-            throw new DomainException($"Cannot subtract different currencies: {Currency} and {other.Currency}");
+            throw new DomainException(
+                $"Cannot subtract different currencies: {Currency} and {other.Currency}",
+                "Money.Subtract.CurrencyMismatch",
+                Currency,
+                other.Currency);
 
         var result = Amount - other.Amount;
 
         if (result < 0)
-            throw new DomainException("Subtraction would result in negative amount");
+            throw new DomainException("Subtraction would result in negative amount", "Money.Subtract.WouldBeNegative");
 
         return new Money(result, Currency);
     }
@@ -50,7 +58,7 @@ public sealed class Money : ValueObject
     public Money Multiply(decimal factor)
     {
         if (factor < 0)
-            throw new DomainException("Factor cannot be negative");
+            throw new DomainException("Factor cannot be negative", "Money.Multiply.FactorNonNegative");
 
         return new Money(Amount * factor, Currency);
     }
@@ -58,7 +66,7 @@ public sealed class Money : ValueObject
     public bool IsGreaterThan(Money other)
     {
         if (Currency != other.Currency)
-            throw new DomainException("Cannot compare different currencies");
+            throw new DomainException("Cannot compare different currencies", "Money.Compare.CurrencyMismatch");
 
         return Amount > other.Amount;
     }

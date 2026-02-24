@@ -26,11 +26,11 @@ public class EvidencePolicyServiceTests
     [Fact]
     public async Task Validate_ShouldFail_WhenPhotosAreInsufficient()
     {
-        var visit = CreateVisit(VisitType.PreventiveMaintenance);
+        var visit = CreateVisit(VisitType.BM);
         visit.AddPhoto(CreatePhoto(visit.Id, "before-1.jpg"));
 
         var policy = EvidencePolicy.Create(
-            VisitType.PreventiveMaintenance,
+            VisitType.BM,
             minPhotosRequired: 3,
             readingsRequired: false,
             checklistRequired: false,
@@ -45,7 +45,7 @@ public class EvidencePolicyServiceTests
     [Fact]
     public async Task Validate_ShouldPass_WhenPolicyIsMet()
     {
-        var visit = CreateVisit(VisitType.PreventiveMaintenance);
+        var visit = CreateVisit(VisitType.BM);
 
         visit.AddPhoto(CreatePhoto(visit.Id, "before-1.jpg"));
         visit.AddPhoto(CreatePhoto(visit.Id, "before-2.jpg"));
@@ -62,7 +62,7 @@ public class EvidencePolicyServiceTests
         visit.AddChecklistItem(checklist2);
 
         var policy = EvidencePolicy.Create(
-            VisitType.PreventiveMaintenance,
+            VisitType.BM,
             minPhotosRequired: 3,
             readingsRequired: true,
             checklistRequired: true,

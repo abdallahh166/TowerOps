@@ -14,10 +14,10 @@ public sealed class Email : ValueObject
     public static Email Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new DomainException("Email is required");
+            throw new DomainException("Email is required", "Email.Required");
 
         if (!IsValidEmail(value))
-            throw new DomainException("Invalid email format");
+            throw new DomainException("Invalid email format", "Email.InvalidFormat");
 
         return new Email(value.ToLowerInvariant());
     }

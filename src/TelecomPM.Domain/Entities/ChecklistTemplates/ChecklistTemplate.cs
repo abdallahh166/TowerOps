@@ -45,10 +45,10 @@ public sealed class ChecklistTemplate : AggregateRoot<Guid>
         string? changeNotes = null)
     {
         if (string.IsNullOrWhiteSpace(version))
-            throw new DomainException("Checklist template version is required");
+            throw new DomainException("Checklist template version is required", "ChecklistTemplate.Version.Required");
 
         if (string.IsNullOrWhiteSpace(createdBy))
-            throw new DomainException("CreatedBy is required");
+            throw new DomainException("CreatedBy is required", "ChecklistTemplate.CreatedBy.Required");
 
         return new ChecklistTemplate(visitType, version, effectiveFromUtc, createdBy, changeNotes);
     }
@@ -78,7 +78,7 @@ public sealed class ChecklistTemplate : AggregateRoot<Guid>
     public void Activate(string approvedBy)
     {
         if (string.IsNullOrWhiteSpace(approvedBy))
-            throw new DomainException("ApprovedBy is required");
+            throw new DomainException("ApprovedBy is required", "ChecklistTemplate.ApprovedBy.Required");
 
         IsActive = true;
         ApprovedBy = approvedBy.Trim();
@@ -100,13 +100,13 @@ public sealed class ChecklistTemplate : AggregateRoot<Guid>
         string createdBy)
     {
         if (previous is null)
-            throw new DomainException("Previous template is required");
+            throw new DomainException("Previous template is required", "ChecklistTemplate.Previous.Required");
 
         if (string.IsNullOrWhiteSpace(changeNotes))
-            throw new DomainException("Change notes are required");
+            throw new DomainException("Change notes are required", "ChecklistTemplate.ChangeNotes.Required");
 
         if (string.IsNullOrWhiteSpace(createdBy))
-            throw new DomainException("CreatedBy is required");
+            throw new DomainException("CreatedBy is required", "ChecklistTemplate.CreatedBy.Required");
 
         var nextVersion = IncrementVersion(previous.Version);
         var next = Create(

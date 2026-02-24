@@ -69,16 +69,16 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         int? resolutionMinutes = null)
     {
         if (string.IsNullOrWhiteSpace(woNumber))
-            throw new DomainException("WO number is required");
+            throw new DomainException("WO number is required", "WorkOrder.WoNumber.Required");
 
         if (string.IsNullOrWhiteSpace(siteCode))
-            throw new DomainException("Site code is required");
+            throw new DomainException("Site code is required", "WorkOrder.SiteCode.Required");
 
         if (string.IsNullOrWhiteSpace(officeCode))
-            throw new DomainException("Office code is required");
+            throw new DomainException("Office code is required", "WorkOrder.OfficeCode.Required");
 
         if (string.IsNullOrWhiteSpace(issueDescription))
-            throw new DomainException("Issue description is required");
+            throw new DomainException("Issue description is required", "WorkOrder.IssueDescription.Required");
 
         return new WorkOrder(
             woNumber,
@@ -94,16 +94,16 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public void Assign(Guid engineerId, string engineerName, string assignedBy)
     {
         if (Status != WorkOrderStatus.Created && Status != WorkOrderStatus.Rework)
-            throw new DomainException("Work order can only be assigned from Created or Rework state");
+            throw new DomainException("Work order can only be assigned from Created or Rework state", "WorkOrder.Assign.RequiresCreatedOrRework");
 
         if (engineerId == Guid.Empty)
-            throw new DomainException("Engineer ID is required");
+            throw new DomainException("Engineer ID is required", "WorkOrder.Assign.EngineerIdRequired");
 
         if (string.IsNullOrWhiteSpace(engineerName))
-            throw new DomainException("Engineer name is required");
+            throw new DomainException("Engineer name is required", "WorkOrder.Assign.EngineerNameRequired");
 
         if (string.IsNullOrWhiteSpace(assignedBy))
-            throw new DomainException("Assigned by is required");
+            throw new DomainException("Assigned by is required", "WorkOrder.Assign.AssignedByRequired");
 
         AssignedEngineerId = engineerId;
         AssignedEngineerName = engineerName;
@@ -115,7 +115,7 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public void Start()
     {
         if (Status != WorkOrderStatus.Assigned)
-            throw new DomainException("Work order can only be started from Assigned state");
+            throw new DomainException("Work order can only be started from Assigned state", "WorkOrder.Start.RequiresAssigned");
 
         Status = WorkOrderStatus.InProgress;
     }
@@ -123,7 +123,7 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public void Complete()
     {
         if (Status != WorkOrderStatus.InProgress)
-            throw new DomainException("Work order can only be completed from InProgress state");
+            throw new DomainException("Work order can only be completed from InProgress state", "WorkOrder.Complete.RequiresInProgress");
 
         Status = WorkOrderStatus.PendingInternalReview;
     }
@@ -131,7 +131,7 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public void Close()
     {
         if (Status != WorkOrderStatus.PendingInternalReview && Status != WorkOrderStatus.PendingCustomerAcceptance)
-            throw new DomainException("Work order can only be closed from PendingInternalReview or PendingCustomerAcceptance state");
+            throw new DomainException("Work order can only be closed from PendingInternalReview or PendingCustomerAcceptance state", "WorkOrder.Close.RequiresPendingReviewOrCustomerAcceptance");
 
         Status = WorkOrderStatus.Closed;
     }
@@ -139,7 +139,7 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public void SubmitForCustomerAcceptance()
     {
         if (Status != WorkOrderStatus.PendingInternalReview)
-            throw new DomainException("Work order can only be submitted for customer acceptance from PendingInternalReview state");
+            throw new DomainException("Work order can only be submitted for customer acceptance from PendingInternalReview state", "WorkOrder.SubmitForCustomerAcceptance.RequiresPendingInternalReview");
 
         Status = WorkOrderStatus.PendingCustomerAcceptance;
         AddDomainEvent(new WorkOrderSubmittedForCustomerAcceptanceEvent(Id, WoNumber));
@@ -148,10 +148,10 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public void AcceptByCustomer(string acceptedBy)
     {
         if (Status != WorkOrderStatus.PendingCustomerAcceptance)
-            throw new DomainException("Work order can only be accepted by customer from PendingCustomerAcceptance state");
+            throw new DomainException("Work order can only be accepted by customer from PendingCustomerAcceptance state", "WorkOrder.AcceptByCustomer.RequiresPendingCustomerAcceptance");
 
         if (string.IsNullOrWhiteSpace(acceptedBy))
-            throw new DomainException("Accepted by is required");
+            throw new DomainException("Accepted by is required", "WorkOrder.AcceptByCustomer.AcceptedByRequired");
 
         Status = WorkOrderStatus.Closed;
         AddDomainEvent(new WorkOrderAcceptedByCustomerEvent(Id, WoNumber, acceptedBy.Trim()));
@@ -160,10 +160,10 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public void RejectByCustomer(string reason)
     {
         if (Status != WorkOrderStatus.PendingCustomerAcceptance)
-            throw new DomainException("Work order can only be rejected by customer from PendingCustomerAcceptance state");
+            throw new DomainException("Work order can only be rejected by customer from PendingCustomerAcceptance state", "WorkOrder.RejectByCustomer.RequiresPendingCustomerAcceptance");
 
         if (string.IsNullOrWhiteSpace(reason))
-            throw new DomainException("Rejection reason is required");
+            throw new DomainException("Rejection reason is required", "WorkOrder.RejectByCustomer.ReasonRequired");
 
         Status = WorkOrderStatus.Rework;
         AddDomainEvent(new WorkOrderRejectedByCustomerEvent(Id, WoNumber, reason.Trim()));
@@ -172,7 +172,7 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public void Cancel()
     {
         if (Status == WorkOrderStatus.Closed || Status == WorkOrderStatus.Cancelled)
-            throw new DomainException("Closed or cancelled work order cannot be cancelled");
+            throw new DomainException("Closed or cancelled work order cannot be cancelled", "WorkOrder.Cancel.NotAllowedWhenClosedOrCancelled");
 
         Status = WorkOrderStatus.Cancelled;
     }
@@ -195,7 +195,7 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public void CaptureClientSignature(Signature signature)
     {
         if (ClientSignature is not null)
-            throw new DomainException("Client signature already captured.");
+            throw new DomainException("Client signature already captured.", "WorkOrder.Signature.ClientAlreadyCaptured");
 
         ClientSignature = signature;
         AddDomainEvent(new WorkOrderClientSignedEvent(Id, WoNumber, signature.SignerName, signature.SignedAtUtc));
@@ -204,7 +204,7 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public void CaptureEngineerSignature(Signature signature)
     {
         if (EngineerSignature is not null)
-            throw new DomainException("Engineer signature already captured.");
+            throw new DomainException("Engineer signature already captured.", "WorkOrder.Signature.EngineerAlreadyCaptured");
 
         EngineerSignature = signature;
     }

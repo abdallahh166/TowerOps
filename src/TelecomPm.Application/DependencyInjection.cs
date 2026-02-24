@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using TelecomPM.Application.Common.Behaviors;
+using TelecomPM.Application.Common.Validation;
 using TelecomPM.Application.Services;
 using TelecomPM.Domain.Entities.Users;
 using TelecomPM.Domain.Services;
@@ -26,6 +27,9 @@ public static class DependencyInjection
         services.AddAutoMapper(assembly);
 
         // FluentValidation
+        if (ValidatorOptions.Global.LanguageManager is not TelecomPmLanguageManager)
+            ValidatorOptions.Global.LanguageManager = new TelecomPmLanguageManager();
+
         services.AddValidatorsFromAssembly(assembly);
 
         // Pipeline Behaviors (Order matters!)

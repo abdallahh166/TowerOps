@@ -14,11 +14,11 @@ public sealed class PhoneNumber : ValueObject
     public static PhoneNumber Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new DomainException("Phone number is required");
+            throw new DomainException("Phone number is required", "PhoneNumber.Required");
 
         // Validate format - Egyptian phone format: +20 10/11/12/15 XXXXXXXX
         if (!IsValidPhoneNumber(value))
-            throw new DomainException("Invalid phone number format. Expected format: +20 10/11/12/15 XXXXXXXX");
+            throw new DomainException("Invalid phone number format. Expected format: +20 10/11/12/15 XXXXXXXX", "PhoneNumber.InvalidFormat");
 
         return new PhoneNumber(value);
     }

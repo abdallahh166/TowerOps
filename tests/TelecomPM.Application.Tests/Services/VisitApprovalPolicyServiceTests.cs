@@ -28,7 +28,7 @@ public class VisitApprovalPolicyServiceTests
     [Fact]
     public void CanReviewVisit_ShouldTreatPreventiveAliasAsBm()
     {
-        var result = _service.CanReviewVisit(UserRole.Supervisor, VisitType.PreventiveMaintenance, ApprovalAction.Approved);
+        var result = _service.CanReviewVisit(UserRole.Supervisor, VisitType.BM, ApprovalAction.Approved);
 
         result.IsAllowed.Should().BeFalse();
     }

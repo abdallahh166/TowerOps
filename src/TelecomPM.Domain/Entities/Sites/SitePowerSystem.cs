@@ -75,7 +75,7 @@ public sealed class SitePowerSystem : Entity<Guid>
     public void SetRectifierDetails(int modulesCount, string? controllerType = null)
     {
         if (modulesCount <= 0)
-            throw new DomainException("Rectifier modules count must be greater than zero");
+            throw new DomainException("Rectifier modules count must be greater than zero", "SitePowerSystem.RectifierModulesCount.Positive");
 
         RectifierModulesCount = modulesCount;
         RectifierControllerType = controllerType;
@@ -84,7 +84,7 @@ public sealed class SitePowerSystem : Entity<Guid>
     public void SetBatteryDetails(int strings, int batteriesPerString, int ampereHour, int voltage)
     {
         if (strings <= 0)
-            throw new DomainException("Battery strings must be greater than zero");
+            throw new DomainException("Battery strings must be greater than zero", "SitePowerSystem.BatteryStrings.Positive");
 
         BatteryStrings = strings;
         BatteriesPerString = batteriesPerString;
@@ -131,7 +131,7 @@ public sealed class SitePowerSystem : Entity<Guid>
     public void SetChargingCurrentLimit(decimal? chargingCurrentLimit)
     {
         if (chargingCurrentLimit.HasValue && chargingCurrentLimit <= 0)
-            throw new DomainException("Charging current limit must be greater than zero.");
+            throw new DomainException("Charging current limit must be greater than zero.", "SitePowerSystem.ChargingCurrentLimit.Positive");
 
         ChargingCurrentLimit = chargingCurrentLimit;
     }

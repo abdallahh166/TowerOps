@@ -3,6 +3,7 @@ namespace TelecomPm.Api.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using TelecomPm.Api.Localization;
 using TelecomPM.Application.Common;
 
 [ApiController]
@@ -11,8 +12,10 @@ using TelecomPM.Application.Common;
 public abstract class ApiControllerBase : ControllerBase
 {
     private ISender? _mediator;
+    private ILocalizedTextService? _localizedTextService;
 
     protected ISender Mediator => _mediator ??= HttpContext.RequestServices.GetRequiredService<ISender>();
+    protected ILocalizedTextService LocalizedText => _localizedTextService ??= HttpContext.RequestServices.GetService<ILocalizedTextService>() ?? new LocalizedTextService();
 
     protected IActionResult HandleResult(Result result)
     {
@@ -36,24 +39,25 @@ public abstract class ApiControllerBase : ControllerBase
 
     private IActionResult HandleFailure(string error)
     {
+        var normalizedError = error ?? string.Empty;
         if (string.IsNullOrWhiteSpace(error))
         {
             return Problem(
-                title: "Request failed",
+                title: LocalizedText.Get("RequestFailed", "Request failed"),
                 statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        var statusCode = error.Contains("not found", StringComparison.OrdinalIgnoreCase)
+        var statusCode = normalizedError.Contains("not found", StringComparison.OrdinalIgnoreCase)
             ? StatusCodes.Status404NotFound
-            : error.Contains("unauthorized", StringComparison.OrdinalIgnoreCase)
+            : normalizedError.Contains("unauthorized", StringComparison.OrdinalIgnoreCase)
                 ? StatusCodes.Status401Unauthorized
-                : error.Contains("forbidden", StringComparison.OrdinalIgnoreCase)
+                : normalizedError.Contains("forbidden", StringComparison.OrdinalIgnoreCase)
                     ? StatusCodes.Status403Forbidden
                     : StatusCodes.Status400BadRequest;
 
         return Problem(
-            title: "Request failed",
-            detail: error,
+            title: LocalizedText.Get("RequestFailed", "Request failed"),
+            detail: LocalizedText.TranslateMessage(normalizedError),
             statusCode: statusCode);
     }
 }

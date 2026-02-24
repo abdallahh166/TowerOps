@@ -34,10 +34,10 @@ public sealed class EvidencePolicy : ValueObject
         int minChecklistCompletionPercent)
     {
         if (minPhotosRequired < 0)
-            throw new DomainException("Minimum photos required must be greater than or equal to zero");
+            throw new DomainException("Minimum photos required must be greater than or equal to zero", "EvidencePolicy.MinPhotos.NonNegative");
 
         if (minChecklistCompletionPercent is < 0 or > 100)
-            throw new DomainException("Minimum checklist completion percent must be between 0 and 100");
+            throw new DomainException("Minimum checklist completion percent must be between 0 and 100", "EvidencePolicy.MinChecklistCompletionPercent.Range");
 
         return new EvidencePolicy(
             visitType,

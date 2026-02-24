@@ -45,6 +45,19 @@ public class UserEncapsulationTests
         assignAgain.Should().Throw<DomainException>();
     }
 
+    [Fact]
+    public void AssignSite_ShouldSetCapacityLocalizationKey_WhenCapacityReached()
+    {
+        var user = CreateUser();
+        user.SetEngineerCapacity(1, new List<string>());
+        user.AssignSite(Guid.NewGuid());
+
+        Action assignAgain = () => user.AssignSite(Guid.NewGuid());
+
+        var ex = assignAgain.Should().Throw<DomainException>().Which;
+        ex.MessageKey.Should().Be("User.AssignSite.CapacityReached");
+    }
+
     private static User CreateUser()
     {
         var user = User.Create("A", "a@a.com", "010", UserRole.PMEngineer, Guid.NewGuid());

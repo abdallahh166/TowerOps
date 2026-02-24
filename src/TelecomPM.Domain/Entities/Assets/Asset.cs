@@ -59,7 +59,7 @@ public sealed class Asset : AggregateRoot<Guid>
         DateTime? warrantyExpiresAtUtc)
     {
         if (string.IsNullOrWhiteSpace(siteCode))
-            throw new DomainException("SiteCode is required.");
+            throw new DomainException("SiteCode is required.", "Asset.SiteCode.Required");
 
         return new Asset(
             siteCode.Trim().ToUpperInvariant(),
@@ -74,7 +74,7 @@ public sealed class Asset : AggregateRoot<Guid>
     public void RecordService(string serviceType, string? engineerId, Guid? visitId, string? notes)
     {
         if (string.IsNullOrWhiteSpace(serviceType))
-            throw new DomainException("Service type is required.");
+            throw new DomainException("Service type is required.", "Asset.ServiceType.Required");
 
         var record = AssetServiceRecord.Create(serviceType, engineerId, visitId, notes);
         _serviceHistory.Add(record);
@@ -92,7 +92,7 @@ public sealed class Asset : AggregateRoot<Guid>
     public void Replace(Guid newAssetId)
     {
         if (newAssetId == Guid.Empty)
-            throw new DomainException("New asset id is required.");
+            throw new DomainException("New asset id is required.", "Asset.Replace.NewAssetId.Required");
 
         Status = AssetStatus.Replaced;
         ReplacedAtUtc = DateTime.UtcNow;
@@ -147,7 +147,7 @@ public sealed class AssetServiceRecord
         string? notes)
     {
         if (string.IsNullOrWhiteSpace(serviceType))
-            throw new DomainException("Service type is required.");
+            throw new DomainException("Service type is required.", "AssetServiceRecord.ServiceType.Required");
 
         return new AssetServiceRecord(serviceType.Trim(), engineerId, visitId, notes);
     }

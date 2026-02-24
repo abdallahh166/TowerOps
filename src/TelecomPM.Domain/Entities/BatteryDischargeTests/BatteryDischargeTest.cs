@@ -45,10 +45,10 @@ public sealed class BatteryDischargeTest : AggregateRoot<Guid>
     public static BatteryDischargeTest Create(Guid siteId, string siteCode, DateTime testDateUtc)
     {
         if (siteId == Guid.Empty)
-            throw new DomainException("SiteId is required");
+            throw new DomainException("SiteId is required", "BatteryDischargeTest.SiteId.Required");
 
         if (string.IsNullOrWhiteSpace(siteCode))
-            throw new DomainException("SiteCode is required");
+            throw new DomainException("SiteCode is required", "BatteryDischargeTest.SiteCode.Required");
 
         return new BatteryDischargeTest(siteId, siteCode.Trim(), testDateUtc);
     }

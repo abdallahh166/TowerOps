@@ -47,16 +47,16 @@ public sealed class SystemSetting : AggregateRoot<Guid>
         string updatedBy)
     {
         if (string.IsNullOrWhiteSpace(key))
-            throw new DomainException("Setting key is required.");
+            throw new DomainException("Setting key is required.", "SystemSetting.Key.Required");
 
         if (string.IsNullOrWhiteSpace(group))
-            throw new DomainException("Setting group is required.");
+            throw new DomainException("Setting group is required.", "SystemSetting.Group.Required");
 
         if (string.IsNullOrWhiteSpace(dataType))
-            throw new DomainException("Setting data type is required.");
+            throw new DomainException("Setting data type is required.", "SystemSetting.DataType.Required");
 
         if (string.IsNullOrWhiteSpace(updatedBy))
-            throw new DomainException("UpdatedBy is required.");
+            throw new DomainException("UpdatedBy is required.", "SystemSetting.UpdatedBy.Required");
 
         return new SystemSetting(
             key.Trim(),
@@ -77,13 +77,13 @@ public sealed class SystemSetting : AggregateRoot<Guid>
         string updatedBy)
     {
         if (string.IsNullOrWhiteSpace(group))
-            throw new DomainException("Setting group is required.");
+            throw new DomainException("Setting group is required.", "SystemSetting.Group.Required");
 
         if (string.IsNullOrWhiteSpace(dataType))
-            throw new DomainException("Setting data type is required.");
+            throw new DomainException("Setting data type is required.", "SystemSetting.DataType.Required");
 
         if (string.IsNullOrWhiteSpace(updatedBy))
-            throw new DomainException("UpdatedBy is required.");
+            throw new DomainException("UpdatedBy is required.", "SystemSetting.UpdatedBy.Required");
 
         Value = value ?? string.Empty;
         Group = group.Trim();

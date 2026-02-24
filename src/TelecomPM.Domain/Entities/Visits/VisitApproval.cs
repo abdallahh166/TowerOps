@@ -23,11 +23,11 @@ public sealed class VisitApproval : Entity<Guid>
         string? comments) : base(Guid.NewGuid())
     {
         if (visitId == Guid.Empty)
-            throw new DomainException("VisitId cannot be empty.");
+            throw new DomainException("VisitId cannot be empty.", "VisitApproval.VisitId.Required");
         if (reviewerId == Guid.Empty)
-            throw new DomainException("ReviewerId cannot be empty.");
+            throw new DomainException("ReviewerId cannot be empty.", "VisitApproval.ReviewerId.Required");
         if (string.IsNullOrWhiteSpace(reviewerName))
-            throw new DomainException("Reviewer name is required.");
+            throw new DomainException("Reviewer name is required.", "VisitApproval.ReviewerName.Required");
 
         VisitId = visitId;
         ReviewerId = reviewerId;

@@ -64,13 +64,13 @@ public sealed class User : AggregateRoot<Guid>
         Guid officeId)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("User name is required");
+            throw new DomainException("User name is required", "User.Name.Required");
 
         if (string.IsNullOrWhiteSpace(email))
-            throw new DomainException("Email is required");
+            throw new DomainException("Email is required", "User.Email.Required");
 
         if (!IsValidEmail(email))
-            throw new DomainException("Invalid email format");
+            throw new DomainException("Invalid email format", "User.Email.InvalidFormat");
 
         var user = new User(name, email, phoneNumber, role, officeId);
         user.AddDomainEvent(new UserCreatedEvent(user.Id, name, email, role, officeId));
@@ -80,10 +80,10 @@ public sealed class User : AggregateRoot<Guid>
     public void SetPassword(string plainPassword, IPasswordHasher<User> hasher)
     {
         if (string.IsNullOrWhiteSpace(plainPassword))
-            throw new DomainException("Password is required");
+            throw new DomainException("Password is required", "User.Password.Required");
 
         if (hasher is null)
-            throw new DomainException("Password hasher is required");
+            throw new DomainException("Password hasher is required", "User.Password.HasherRequired");
 
         PasswordHash = hasher.HashPassword(this, plainPassword);
     }
@@ -100,7 +100,7 @@ public sealed class User : AggregateRoot<Guid>
     public void UpdateProfile(string name, string phoneNumber)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("User name is required");
+            throw new DomainException("User name is required", "User.Name.Required");
 
         Name = name;
         PhoneNumber = phoneNumber;
@@ -129,10 +129,10 @@ public sealed class User : AggregateRoot<Guid>
     public void SetEngineerCapacity(int maxSites, List<string> specializations)
     {
         if (Role != UserRole.PMEngineer)
-            throw new DomainException("Only PM Engineers can have site capacity");
+            throw new DomainException("Only PM Engineers can have site capacity", "User.EngineerCapacity.RequiresPmEngineer");
 
         if (maxSites <= 0)
-            throw new DomainException("Max assigned sites must be greater than zero");
+            throw new DomainException("Max assigned sites must be greater than zero", "User.EngineerCapacity.MaxAssignedSitesPositive");
 
         MaxAssignedSites = maxSites;
         _specializations.Clear();
@@ -143,10 +143,13 @@ public sealed class User : AggregateRoot<Guid>
     public void AssignSite(Guid siteId)
     {
         if (Role != UserRole.PMEngineer)
-            throw new DomainException("Only PM Engineers can be assigned sites");
+            throw new DomainException("Only PM Engineers can be assigned sites", "User.AssignSite.RequiresPmEngineer");
 
         if (MaxAssignedSites.HasValue && _assignedSiteIds.Count >= MaxAssignedSites.Value)
-            throw new DomainException($"Engineer has reached maximum capacity of {MaxAssignedSites.Value} sites");
+            throw new DomainException(
+                $"Engineer has reached maximum capacity of {MaxAssignedSites.Value} sites",
+                "User.AssignSite.CapacityReached",
+                MaxAssignedSites.Value);
 
         if (!_assignedSiteIds.Contains(siteId))
         {
@@ -162,7 +165,7 @@ public sealed class User : AggregateRoot<Guid>
     public void UpdatePerformanceRating(decimal rating)
     {
         if (rating < 0 || rating > 5)
-            throw new DomainException("Performance rating must be between 0 and 5");
+            throw new DomainException("Performance rating must be between 0 and 5", "User.PerformanceRating.Range");
 
         PerformanceRating = rating;
     }
@@ -187,7 +190,7 @@ public sealed class User : AggregateRoot<Guid>
     public void EnableClientPortalAccess(string clientCode)
     {
         if (string.IsNullOrWhiteSpace(clientCode))
-            throw new DomainException("Client code is required for portal access.");
+            throw new DomainException("Client code is required for portal access.", "User.ClientPortal.ClientCodeRequired");
 
         ClientCode = clientCode.Trim().ToUpperInvariant();
         IsClientPortalUser = true;

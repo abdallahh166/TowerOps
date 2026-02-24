@@ -22,10 +22,10 @@ public sealed class Address : ValueObject
     public static Address Create(string street, string city, string region, string details = "")
     {
         if (string.IsNullOrWhiteSpace(city))
-            throw new DomainException("City is required");
+            throw new DomainException("City is required", "Address.City.Required");
 
         if (string.IsNullOrWhiteSpace(region))
-            throw new DomainException("Region is required");
+            throw new DomainException("Region is required", "Address.Region.Required");
 
         return new Address(street ?? "", city, region, details ?? "");
     }

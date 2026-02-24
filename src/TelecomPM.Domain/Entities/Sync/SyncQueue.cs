@@ -45,13 +45,13 @@ public sealed class SyncQueue : AggregateRoot<Guid>
         DateTime createdOnDeviceUtc)
     {
         if (string.IsNullOrWhiteSpace(deviceId))
-            throw new DomainException("DeviceId is required.");
+            throw new DomainException("DeviceId is required.", "SyncQueue.DeviceId.Required");
 
         if (string.IsNullOrWhiteSpace(engineerId))
-            throw new DomainException("EngineerId is required.");
+            throw new DomainException("EngineerId is required.", "SyncQueue.EngineerId.Required");
 
         if (string.IsNullOrWhiteSpace(operationType))
-            throw new DomainException("OperationType is required.");
+            throw new DomainException("OperationType is required.", "SyncQueue.OperationType.Required");
 
         return new SyncQueue(deviceId.Trim(), engineerId.Trim(), operationType.Trim(), payload ?? string.Empty, createdOnDeviceUtc);
     }

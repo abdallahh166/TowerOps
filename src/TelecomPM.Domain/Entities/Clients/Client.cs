@@ -41,10 +41,10 @@ public sealed class Client : AggregateRoot<Guid>
         string? contactPhone = null)
     {
         if (string.IsNullOrWhiteSpace(clientCode))
-            throw new DomainException("Client code is required.");
+            throw new DomainException("Client code is required.", "Client.Code.Required");
 
         if (string.IsNullOrWhiteSpace(clientName))
-            throw new DomainException("Client name is required.");
+            throw new DomainException("Client name is required.", "Client.Name.Required");
 
         return new Client(
             clientCode.Trim().ToUpperInvariant(),
@@ -63,7 +63,7 @@ public sealed class Client : AggregateRoot<Guid>
         string? contactPhone)
     {
         if (string.IsNullOrWhiteSpace(clientName))
-            throw new DomainException("Client name is required.");
+            throw new DomainException("Client name is required.", "Client.Name.Required");
 
         ClientName = clientName.Trim();
         LogoUrl = logoUrl;

@@ -45,13 +45,13 @@ public sealed class Office : AggregateRoot<Guid>
         Address address)
     {
         if (string.IsNullOrWhiteSpace(code))
-            throw new DomainException("Office code is required");
+            throw new DomainException("Office code is required", "Office.Code.Required");
 
         if (code.Length != 3)
-            throw new DomainException("Office code must be exactly 3 characters");
+            throw new DomainException("Office code must be exactly 3 characters", "Office.Code.Length");
 
         if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("Office name is required");
+            throw new DomainException("Office name is required", "Office.Name.Required");
 
         var office = new Office(code.ToUpper(), name, region, address);
         office.AddDomainEvent(new OfficeCreatedEvent(office.Id, office.Code, office.Name, office.Region));

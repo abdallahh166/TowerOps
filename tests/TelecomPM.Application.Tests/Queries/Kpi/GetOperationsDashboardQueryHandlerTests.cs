@@ -255,6 +255,6 @@ public class GetOperationsDashboardQueryHandlerTests
             Guid.NewGuid(),
             "Engineer KPI",
             DateTime.UtcNow.AddDays(1),
-            VisitType.PreventiveMaintenance);
+            VisitType.BM);
     }
 }

@@ -480,6 +480,12 @@ public class DatabaseSeeder
             // Route
             CreateSetting("Route:AverageSpeedKmh", "40", "Route", "int", "Average travel speed for route estimation", false, seededBy),
             CreateSetting("Route:MaxSitesPerEngineerPerDay", "8", "Route", "int", "Maximum planned sites per engineer per day", false, seededBy),
+            CreateSetting("Route:EnableRamadanScheduling", "true", "Route", "bool", "Enable Ramadan reduced daily assignment capacity", false, seededBy),
+            CreateSetting("Route:RamadanMaxSitesPerEngineerPerDay", "6", "Route", "int", "Maximum planned sites per engineer per day during Ramadan", false, seededBy),
+            CreateSetting("Route:EnableKhamsinSeasonAdjustment", "true", "Route", "bool", "Enable khamsin route speed adjustment window", false, seededBy),
+            CreateSetting("Route:KhamsinStartMonthDay", "03-01", "Route", "string", "Khamsin season start month-day (MM-dd)", false, seededBy),
+            CreateSetting("Route:KhamsinEndMonthDay", "05-15", "Route", "string", "Khamsin season end month-day (MM-dd)", false, seededBy),
+            CreateSetting("Route:KhamsinAverageSpeedKmh", "30", "Route", "int", "Average travel speed during khamsin season", false, seededBy),
 
             // Asset
             CreateSetting("Asset:WarrantyAlertDaysBeforeExpiry", "30", "Asset", "int", "Days before warranty expiry alert", false, seededBy),

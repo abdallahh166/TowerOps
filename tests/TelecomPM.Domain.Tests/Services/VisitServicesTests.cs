@@ -23,7 +23,7 @@ public class VisitServicesTests
     [Fact]
     public void VisitValidationService_ShouldReportMaterialPhotoErrors()
     {
-        var visit = Visit.Create("V1", Guid.NewGuid(), "TNT001", "Site1", Guid.NewGuid(), "Eng", DateTime.Today, VisitType.PreventiveMaintenance);
+        var visit = Visit.Create("V1", Guid.NewGuid(), "TNT001", "Site1", Guid.NewGuid(), "Eng", DateTime.Today, VisitType.BM);
         var site = CreateSite();
         visit.LogMaterialUsage(VisitMaterialUsage.Create(
             visit.Id,

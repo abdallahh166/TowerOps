@@ -10,7 +10,7 @@ public class AggregateRootDomainEventsTests
     [Fact]
     public void Aggregate_ShouldCollectAndClearDomainEvents()
     {
-        var visit = Visit.Create("V1", Guid.NewGuid(), "TNT001", "S1", Guid.NewGuid(), "Eng", DateTime.Today, VisitType.PreventiveMaintenance);
+        var visit = Visit.Create("V1", Guid.NewGuid(), "TNT001", "S1", Guid.NewGuid(), "Eng", DateTime.Today, VisitType.BM);
 
         visit.StartVisit(Coordinates.Create(30, 30));
         typeof(Visit).GetProperty("ActualStartTime")!.SetValue(visit, DateTime.UtcNow - TimeSpan.FromMinutes(60));

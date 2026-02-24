@@ -48,7 +48,7 @@ public class SignatureWorkflowTests
             Guid.NewGuid(),
             "Engineer",
             DateTime.UtcNow,
-            VisitType.PreventiveMaintenance);
+            VisitType.BM);
 
         var location = GeoLocation.Create(30.1234m, 31.5678m);
         var signature = Signature.Create("Site Contact", "SiteContact", ValidPngBase64, signedAtLocation: location);
