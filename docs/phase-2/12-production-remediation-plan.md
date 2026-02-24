@@ -240,7 +240,7 @@ Use this as the release gate checklist. Mark `PASS` only with linked evidence (P
 | PR-P0-03 User role change safety fix complete | P0 | Backend | PASS | `ChangeUserRoleCommandHandlerTests` |
 | PR-P0-04 Blob storage config fail-safe complete | P0 | Backend | PASS | `BlobStorageServiceTests` |
 | PR-P0-05 Exception sanitization complete | P0 | Backend | PASS | `ApiControllerBaseErrorSanitizationTests` |
-| PR-P1-01 Query efficiency/pagination sweep complete | P1 | Backend | FAIL | |
+| PR-P1-01 Query efficiency/pagination sweep complete | P1 | Backend | PASS | Visit/site/report/admin query handlers now use spec-based DB filtering and bounded pagination; coverage in `VisitQueryEfficiencyTests`, `ReportQueryEfficiencyTests`, and `AdminListQueryEfficiencyTests` |
 | PR-P1-02 Import guardrails complete | P1 | Backend | FAIL | |
 | PR-P1-03 HTTP security controls complete | P1 | Platform | FAIL | |
 | PR-P1-04 Observability completion complete | P1 | Platform | FAIL | |

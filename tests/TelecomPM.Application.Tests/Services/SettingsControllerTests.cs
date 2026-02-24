@@ -49,7 +49,7 @@ public class SettingsControllerTests
 
         var controller = BuildController(sender.Object);
 
-        var result = await controller.GetAll(CancellationToken.None);
+        var result = await controller.GetAll(null, null, CancellationToken.None);
 
         var ok = result.Should().BeOfType<OkObjectResult>().Subject;
         var grouped = ok.Value.Should().BeAssignableTo<Dictionary<string, List<SystemSettingResponse>>>().Subject;

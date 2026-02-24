@@ -18,9 +18,18 @@ using TelecomPM.Application.Security;
 public sealed class RolesController : ApiControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int? pageNumber,
+        [FromQuery] int? pageSize,
+        CancellationToken cancellationToken)
     {
-        var result = await Mediator.Send(new GetAllApplicationRolesQuery(), cancellationToken);
+        var result = await Mediator.Send(
+            new GetAllApplicationRolesQuery
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            },
+            cancellationToken);
         if (!result.IsSuccess || result.Value is null)
             return HandleResult(result);
 

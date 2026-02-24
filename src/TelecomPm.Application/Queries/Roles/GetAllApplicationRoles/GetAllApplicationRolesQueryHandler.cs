@@ -2,6 +2,7 @@ using MediatR;
 using TelecomPM.Application.Common;
 using TelecomPM.Application.DTOs.Roles;
 using TelecomPM.Domain.Interfaces.Repositories;
+using TelecomPM.Domain.Specifications.RoleSpecifications;
 
 namespace TelecomPM.Application.Queries.Roles.GetAllApplicationRoles;
 
@@ -16,9 +17,28 @@ public sealed class GetAllApplicationRolesQueryHandler : IRequestHandler<GetAllA
 
     public async Task<Result<IReadOnlyList<ApplicationRoleDto>>> Handle(GetAllApplicationRolesQuery request, CancellationToken cancellationToken)
     {
-        var roles = await _roleRepository.GetAllAsNoTrackingAsync(cancellationToken);
+        var pageNumber = request.PageNumber.GetValueOrDefault(1);
+        if (pageNumber < 1)
+        {
+            pageNumber = 1;
+        }
+
+        var pageSize = request.PageSize.GetValueOrDefault(100);
+        if (pageSize < 1)
+        {
+            pageSize = 1;
+        }
+
+        if (pageSize > 200)
+        {
+            pageSize = 200;
+        }
+
+        var specification = new AllApplicationRolesSpecification(
+            (pageNumber - 1) * pageSize,
+            pageSize);
+        var roles = await _roleRepository.FindAsNoTrackingAsync(specification, cancellationToken);
         var result = roles
-            .OrderBy(r => r.Name)
             .Select(MapToDto)
             .ToList();
 

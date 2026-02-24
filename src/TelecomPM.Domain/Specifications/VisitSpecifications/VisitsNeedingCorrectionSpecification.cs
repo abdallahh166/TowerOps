@@ -6,8 +6,8 @@ namespace TelecomPM.Domain.Specifications.VisitSpecifications;
 
 public sealed class VisitsNeedingCorrectionSpecification : BaseSpecification<Visit>
 {
-    public VisitsNeedingCorrectionSpecification(Guid engineerId)
-        : base(v => v.EngineerId == engineerId && 
+    public VisitsNeedingCorrectionSpecification(Guid? engineerId = null)
+        : base(v => (!engineerId.HasValue || v.EngineerId == engineerId.Value) &&
                     v.Status == VisitStatus.NeedsCorrection && 
                     !v.IsDeleted)
     {

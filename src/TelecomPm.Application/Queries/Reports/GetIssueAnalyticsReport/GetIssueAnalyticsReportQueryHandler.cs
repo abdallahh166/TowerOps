@@ -11,7 +11,6 @@ using TelecomPM.Application.DTOs.Reports;
 using TelecomPM.Domain.Enums;
 using TelecomPM.Domain.Interfaces.Repositories;
 using TelecomPM.Domain.Specifications.VisitSpecifications;
-using TelecomPM.Domain.Specifications.SiteSpecifications;
 
 public class GetIssueAnalyticsReportQueryHandler 
     : IRequestHandler<GetIssueAnalyticsReportQuery, Result<IssueAnalyticsReportDto>>
@@ -34,25 +33,18 @@ public class GetIssueAnalyticsReportQueryHandler
         var fromDate = request.FromDate ?? DateTime.UtcNow.AddMonths(-3);
         var toDate = request.ToDate ?? DateTime.UtcNow;
 
-        // Get visits
-        var visitSpec = new VisitsByDateRangeSpecification(fromDate, toDate);
-        var allVisits = await _visitRepository.FindAsNoTrackingAsync(visitSpec, cancellationToken);
-
-        // Filter by site if specified
-        if (request.SiteId.HasValue)
-        {
-            allVisits = allVisits.Where(v => v.SiteId == request.SiteId.Value).ToList();
-        }
-
-        // Filter by office if specified
+        IReadOnlyCollection<Guid>? officeSiteIds = null;
         if (request.OfficeId.HasValue)
         {
-            var sites = await _siteRepository.FindAsNoTrackingAsync(
-                new SitesByOfficeSpecification(request.OfficeId.Value),
-                cancellationToken);
-            var siteIds = sites.Select(s => s.Id).ToList();
-            allVisits = allVisits.Where(v => siteIds.Contains(v.SiteId)).ToList();
+            officeSiteIds = await _siteRepository.GetSiteIdsByOfficeAsNoTrackingAsync(request.OfficeId.Value, cancellationToken);
         }
+
+        var visitSpec = new VisitsByDateRangeSpecification(
+            fromDate,
+            toDate,
+            siteId: request.SiteId,
+            siteIds: officeSiteIds);
+        var allVisits = await _visitRepository.FindAsNoTrackingAsync(visitSpec, cancellationToken);
 
         // Get all issues
         var allIssues = allVisits.SelectMany(v => v.IssuesFound).ToList();
@@ -111,13 +103,15 @@ public class GetIssueAnalyticsReportQueryHandler
             .Select(g => new
             {
                 SiteId = g.Key,
+                SiteCode = g.First().SiteCode,
+                SiteName = g.First().SiteName,
                 Issues = g.SelectMany(v => v.IssuesFound).ToList()
             })
             .Select(x => new IssueBySiteDto
             {
                 SiteId = x.SiteId,
-                SiteCode = allVisits.First(v => v.SiteId == x.SiteId).SiteCode,
-                SiteName = allVisits.First(v => v.SiteId == x.SiteId).SiteName,
+                SiteCode = x.SiteCode,
+                SiteName = x.SiteName,
                 TotalIssues = x.Issues.Count,
                 OpenIssues = x.Issues.Count(i => i.Status != IssueStatus.Resolved && i.Status != IssueStatus.Closed),
                 CriticalIssues = x.Issues.Count(i => i.Severity == IssueSeverity.Critical)

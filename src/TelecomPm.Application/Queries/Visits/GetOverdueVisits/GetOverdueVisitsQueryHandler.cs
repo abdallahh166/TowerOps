@@ -3,7 +3,6 @@ namespace TelecomPM.Application.Queries.Visits.GetOverdueVisits;
 using AutoMapper;
 using MediatR;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TelecomPM.Application.Common;
@@ -26,17 +25,10 @@ public class GetOverdueVisitsQueryHandler : IRequestHandler<GetOverdueVisitsQuer
 
     public async Task<Result<List<VisitDto>>> Handle(GetOverdueVisitsQuery request, CancellationToken cancellationToken)
     {
-        var spec = new OverdueVisitsSpecification();
-        var visits = await _visitRepository.FindAsync(spec, cancellationToken);
+        var spec = new OverdueVisitsSpecification(request.EngineerId);
+        var visits = await _visitRepository.FindAsNoTrackingAsync(spec, cancellationToken);
 
-        var filtered = visits.AsQueryable();
-
-        if (request.EngineerId.HasValue)
-        {
-            filtered = filtered.Where(v => v.EngineerId == request.EngineerId.Value);
-        }
-
-        var dtos = _mapper.Map<List<VisitDto>>(filtered.ToList());
+        var dtos = _mapper.Map<List<VisitDto>>(visits);
         return Result.Success(dtos);
     }
 }

@@ -30,24 +30,18 @@ public class GetVisitCompletionTrendsQueryHandler
         GetVisitCompletionTrendsQuery request,
         CancellationToken cancellationToken)
     {
-        var visitSpec = new VisitsByDateRangeSpecification(request.FromDate, request.ToDate);
-        var allVisits = await _visitRepository.FindAsNoTrackingAsync(visitSpec, cancellationToken);
-
-        // Filter by office if specified
+        IReadOnlyCollection<Guid>? officeSiteIds = null;
         if (request.OfficeId.HasValue)
         {
-            var sites = await _siteRepository.FindAsNoTrackingAsync(
-                new Domain.Specifications.SiteSpecifications.SitesByOfficeSpecification(request.OfficeId.Value),
-                cancellationToken);
-            var siteIds = sites.Select(s => s.Id).ToList();
-            allVisits = allVisits.Where(v => siteIds.Contains(v.SiteId)).ToList();
+            officeSiteIds = await _siteRepository.GetSiteIdsByOfficeAsNoTrackingAsync(request.OfficeId.Value, cancellationToken);
         }
 
-        // Filter by engineer if specified
-        if (request.EngineerId.HasValue)
-        {
-            allVisits = allVisits.Where(v => v.EngineerId == request.EngineerId.Value).ToList();
-        }
+        var visitSpec = new VisitsByDateRangeSpecification(
+            request.FromDate,
+            request.ToDate,
+            request.EngineerId,
+            siteIds: officeSiteIds);
+        var allVisits = await _visitRepository.FindAsNoTrackingAsync(visitSpec, cancellationToken);
 
         var trends = new List<VisitCompletionTrendDto>();
 

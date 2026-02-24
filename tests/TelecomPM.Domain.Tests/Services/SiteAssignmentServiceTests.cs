@@ -183,6 +183,9 @@ public class SiteAssignmentServiceTests
         public Task<IReadOnlyList<Site>> GetSitesNeedingMaintenanceAsNoTrackingAsync(int daysThreshold, CancellationToken cancellationToken = default)
             => Task.FromResult<IReadOnlyList<Site>>(new List<Site>());
 
+        public Task<IReadOnlyList<Guid>> GetSiteIdsByOfficeAsNoTrackingAsync(Guid officeId, CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<Guid>>(new List<Guid>());
+
         // ==================== QUERY OPERATIONS ====================
         public Task<int> CountAsync(TelecomPM.Domain.Specifications.ISpecification<Site> specification, CancellationToken cancellationToken = default)
             => Task.FromResult(0);

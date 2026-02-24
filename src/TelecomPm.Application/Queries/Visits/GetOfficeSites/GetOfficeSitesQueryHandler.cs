@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using MediatR;
-using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,24 +23,26 @@ public class GetOfficeSitesQueryHandler : IRequestHandler<GetOfficeSitesQuery, R
 
     public async Task<Result<PaginatedList<SiteDto>>> Handle(GetOfficeSitesQuery request, CancellationToken cancellationToken)
     {
-        var spec = new SitesByOfficeSpecification(request.OfficeId);
-        var sites = await _siteRepository.FindAsync(spec, cancellationToken);
+        var safePageNumber = request.PageNumber < 1 ? 1 : request.PageNumber;
+        var safePageSize = Math.Clamp(request.PageSize, 1, 200);
+        var skip = (safePageNumber - 1) * safePageSize;
 
-        // Apply filters
-        var filtered = sites.AsQueryable();
+        var countSpec = new OfficeSitesFilteredSpecification(
+            request.OfficeId,
+            request.Complexity,
+            request.Status);
+        var pagedSpec = new OfficeSitesFilteredSpecification(
+            request.OfficeId,
+            request.Complexity,
+            request.Status,
+            skip,
+            safePageSize);
 
-        if (request.Complexity.HasValue)
-        {
-            filtered = filtered.Where(s => s.Complexity == request.Complexity.Value);
-        }
+        var totalCount = await _siteRepository.CountAsync(countSpec, cancellationToken);
+        var sites = await _siteRepository.FindAsNoTrackingAsync(pagedSpec, cancellationToken);
 
-        if (request.Status.HasValue)
-        {
-            filtered = filtered.Where(s => s.Status == request.Status.Value);
-        }
-
-        var dtos = _mapper.Map<List<SiteDto>>(filtered.ToList());
-        var paginatedList = PaginatedList<SiteDto>.Create(dtos, request.PageNumber, request.PageSize);
+        var dtos = _mapper.Map<List<SiteDto>>(sites);
+        var paginatedList = new PaginatedList<SiteDto>(dtos, totalCount, safePageNumber, safePageSize);
 
         return Result.Success(paginatedList);
     }

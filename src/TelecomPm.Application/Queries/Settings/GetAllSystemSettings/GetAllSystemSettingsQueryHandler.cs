@@ -2,6 +2,7 @@ using TelecomPM.Application.Common;
 using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.DTOs.Settings;
 using TelecomPM.Domain.Interfaces.Repositories;
+using TelecomPM.Domain.Specifications.SystemSettingSpecifications;
 using MediatR;
 
 namespace TelecomPM.Application.Queries.Settings.GetAllSystemSettings;
@@ -21,11 +22,29 @@ public sealed class GetAllSystemSettingsQueryHandler : IRequestHandler<GetAllSys
 
     public async Task<Result<IReadOnlyList<SystemSettingDto>>> Handle(GetAllSystemSettingsQuery request, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAllAsNoTrackingAsync(cancellationToken);
+        var pageNumber = request.PageNumber.GetValueOrDefault(1);
+        if (pageNumber < 1)
+        {
+            pageNumber = 1;
+        }
+
+        var pageSize = request.PageSize.GetValueOrDefault(100);
+        if (pageSize < 1)
+        {
+            pageSize = 1;
+        }
+
+        if (pageSize > 200)
+        {
+            pageSize = 200;
+        }
+
+        var specification = new AllSystemSettingsSpecification(
+            (pageNumber - 1) * pageSize,
+            pageSize);
+        var settings = await _settingsRepository.FindAsNoTrackingAsync(specification, cancellationToken);
 
         var result = settings
-            .OrderBy(s => s.Group)
-            .ThenBy(s => s.Key)
             .Select(s => MapToDto(s, request.MaskEncryptedValues))
             .ToList();
 

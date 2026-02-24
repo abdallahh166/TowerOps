@@ -26,6 +26,7 @@ public interface ISiteRepository : IRepository<Site, Guid>
     Task<IReadOnlyList<Site>> GetByRegionAsNoTrackingAsync(string region, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Site>> GetBySubRegionAsNoTrackingAsync(string subRegion, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Site>> GetUnassignedSitesAsNoTrackingAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Guid>> GetSiteIdsByOfficeAsNoTrackingAsync(Guid officeId, CancellationToken cancellationToken = default);
 
     // ✅ QUERY METHODS - Always optimized
     Task<bool> IsSiteCodeUniqueAsync(string siteCode, Guid? excludeSiteId = null, CancellationToken cancellationToken = default);

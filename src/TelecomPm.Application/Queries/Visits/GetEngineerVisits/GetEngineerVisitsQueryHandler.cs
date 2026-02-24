@@ -1,7 +1,6 @@
 ﻿
 using AutoMapper;
 using MediatR;
-using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,29 +24,28 @@ public class GetEngineerVisitsQueryHandler : IRequestHandler<GetEngineerVisitsQu
 
     public async Task<Result<PaginatedList<VisitDto>>> Handle(GetEngineerVisitsQuery request, CancellationToken cancellationToken)
     {
-        var spec = new VisitsByEngineerSpecification(request.EngineerId);
-        var visits = await _visitRepository.FindAsync(spec, cancellationToken);
+        var safePageNumber = request.PageNumber < 1 ? 1 : request.PageNumber;
+        var safePageSize = Math.Clamp(request.PageSize, 1, 200);
+        var skip = (safePageNumber - 1) * safePageSize;
 
-        // Apply filters
-        var filtered = visits.AsQueryable();
+        var countSpec = new EngineerVisitsFilteredSpecification(
+            request.EngineerId,
+            request.Status,
+            request.From,
+            request.To);
+        var pagedSpec = new EngineerVisitsFilteredSpecification(
+            request.EngineerId,
+            request.Status,
+            request.From,
+            request.To,
+            skip,
+            safePageSize);
 
-        if (request.Status.HasValue)
-        {
-            filtered = filtered.Where(v => v.Status == request.Status.Value);
-        }
+        var totalCount = await _visitRepository.CountAsync(countSpec, cancellationToken);
+        var visits = await _visitRepository.FindAsNoTrackingAsync(pagedSpec, cancellationToken);
 
-        if (request.From.HasValue)
-        {
-            filtered = filtered.Where(v => v.ScheduledDate >= request.From.Value);
-        }
-
-        if (request.To.HasValue)
-        {
-            filtered = filtered.Where(v => v.ScheduledDate <= request.To.Value);
-        }
-
-        var dtos = _mapper.Map<List<VisitDto>>(filtered.ToList());
-        var paginatedList = PaginatedList<VisitDto>.Create(dtos, request.PageNumber, request.PageSize);
+        var dtos = _mapper.Map<List<VisitDto>>(visits);
+        var paginatedList = new PaginatedList<VisitDto>(dtos, totalCount, safePageNumber, safePageSize);
 
         return Result.Success(paginatedList);
     }

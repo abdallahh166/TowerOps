@@ -3,7 +3,6 @@ namespace TelecomPM.Application.Queries.Visits.GetVisitsByStatus;
 using AutoMapper;
 using MediatR;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TelecomPM.Application.Common;
@@ -27,9 +26,9 @@ public class GetVisitsByStatusQueryHandler : IRequestHandler<GetVisitsByStatusQu
     public async Task<Result<List<VisitDto>>> Handle(GetVisitsByStatusQuery request, CancellationToken cancellationToken)
     {
         var spec = new VisitsByApprovalStatusSpecification(request.Status, request.EngineerId);
-        var visits = await _visitRepository.FindAsync(spec, cancellationToken);
+        var visits = await _visitRepository.FindAsNoTrackingAsync(spec, cancellationToken);
 
-        var dtos = _mapper.Map<List<VisitDto>>(visits.ToList());
+        var dtos = _mapper.Map<List<VisitDto>>(visits);
         return Result.Success(dtos);
     }
 }
