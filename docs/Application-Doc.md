@@ -48,6 +48,32 @@ Configured in `DependencyInjection.cs`:
 - `Reports`: scorecard/checklist/bdt/data-collection exports
 - `AuditLogs` and `ApprovalRecords`: explicit audit/approval persistence commands
 
+### Critical commands (drift-gated)
+The following command contracts are checked by `tools/check_doc_drift.py` and must remain documented:
+- `LogAuditEntryCommand`
+- `CreateApprovalRecordCommand`
+- `SubmitForCustomerAcceptanceCommand`
+- `AcceptByCustomerCommand`
+- `RejectByCustomerCommand`
+- `ImportSiteDataCommand`
+- `ImportSiteAssetsCommand`
+- `ImportPowerDataCommand`
+- `ImportSiteRadioDataCommand`
+- `ImportSiteTxDataCommand`
+- `ImportSiteSharingDataCommand`
+- `ImportRFStatusCommand`
+- `ImportBatteryDischargeTestCommand`
+- `ImportDeltaSitesCommand`
+- `ImportChecklistTemplateCommand`
+- `ImportPanoramaEvidenceCommand`
+- `ImportAlarmCaptureCommand`
+- `ImportUnusedAssetsCommand`
+- `GenerateContractorScorecardCommand`
+- `ExportChecklistCommand`
+- `ExportBDTCommand`
+- `ExportDataCollectionCommand`
+- `ExportScorecardCommand`
+
 ### Query modules
 - `Portal`: client-scoped dashboard/sites/workorders/visits/SLA/evidence
 - `Kpi`: operations dashboard metrics

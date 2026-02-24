@@ -214,8 +214,8 @@ Scope:
 - Add CI gate for documentation consistency.
 
 Acceptance criteria:
-- [ ] CI fails when critical runtime surfaces are undocumented.
-- [ ] `docs/Api-Doc.md` and phase docs stay aligned with code changes.
+- [x] CI fails when critical runtime surfaces are undocumented.
+- [x] `docs/Api-Doc.md` and phase docs stay aligned with code changes.
 
 ---
 
@@ -226,8 +226,8 @@ Scope:
 - Define SLO targets and regression thresholds.
 
 Acceptance criteria:
-- [ ] Baseline reports committed for key flows.
-- [ ] Threshold breach fails pipeline or marks release as blocked.
+- [x] Baseline reports committed for key flows.
+- [x] Threshold breach fails pipeline or marks release as blocked.
 
 ## 4) Production Readiness Checklist (Pass/Fail)
 
@@ -241,15 +241,15 @@ Use this as the release gate checklist. Mark `PASS` only with linked evidence (P
 | PR-P0-04 Blob storage config fail-safe complete | P0 | Backend | PASS | `BlobStorageServiceTests` |
 | PR-P0-05 Exception sanitization complete | P0 | Backend | PASS | `ApiControllerBaseErrorSanitizationTests` |
 | PR-P1-01 Query efficiency/pagination sweep complete | P1 | Backend | PASS | Visit/site/report/admin query handlers now use spec-based DB filtering and bounded pagination; coverage in `VisitQueryEfficiencyTests`, `ReportQueryEfficiencyTests`, and `AdminListQueryEfficiencyTests` |
-| PR-P1-02 Import guardrails complete | P1 | Backend | FAIL | |
-| PR-P1-03 HTTP security controls complete | P1 | Platform | FAIL | |
-| PR-P1-04 Observability completion complete | P1 | Platform | FAIL | |
-| PR-P2-01 Error contract unification complete | P2 | Backend | FAIL | |
-| PR-P2-02 Domain/docs drift automation complete | P2 | Backend | FAIL | |
-| PR-P2-03 Performance baseline complete | P2 | QA/Platform | FAIL | |
+| PR-P1-02 Import guardrails complete | P1 | Backend | PASS | `ImportGuardrails` + handler enforcement (`Import:MaxRows`, `Import:SkipInvalidRows`, file type/size); tests: `ImportSiteDataCommandHandlerTests`, `ImportCommandsRealFilesIntegrationTests`, `Sprint12DryRunReconciliationTests` |
+| PR-P1-03 HTTP security controls complete | P1 | Platform | PASS | Path-scoped rate limiting (`/api/auth/*`, `/api/sync*`, `*/import*`), production HSTS enabled, strict production CORS validation; tests: `ApiSecurityHardeningTests` |
+| PR-P1-04 Observability completion complete | P1 | Platform | PASS | Correlation ID middleware (`X-Correlation-ID`) + scoped request logs; `IOperationalMetrics` instrumentation for import/sync/notification flows; runbook: `docs/phase-2/13-observability-runbook.md`; tests: `CorrelationIdMiddlewareTests`, `OperationalMetricsBehaviorTests`, `NotificationServiceTests` |
+| PR-P2-01 Error contract unification complete | P2 | Backend | PASS | Unified API error schema (`Code`, `Message`, `CorrelationId`, optional `Errors`/`Meta`) implemented in `ApiControllerBase`, `ExceptionHandlingMiddleware`, and validation filter; tests: `ApiControllerBaseErrorSanitizationTests`, `ExceptionHandlingMiddlewareLocalizationTests` |
+| PR-P2-02 Domain/docs drift automation complete | P2 | Backend | PASS | `tools/check_doc_drift.py` now validates controller coverage + policy coverage + critical command (import/export/audit/customer acceptance) coverage across `Api-Doc` and `Application-Doc` |
+| PR-P2-03 Performance baseline complete | P2 | QA/Platform | PASS | Baseline thresholds enforced by `PerformanceBaselineSmokeTests`; report committed at `docs/phase-2/14-performance-baseline.md`; latest run: 3/3 pass |
 | `dotnet build TelecomPM.sln` green on CI | Gate | CI | FAIL | |
-| `dotnet test TelecomPM.sln --logger "console;verbosity=minimal"` green on CI | Gate | CI | FAIL | Local run passed (365/365); CI evidence still required |
-| `python tools/check_doc_drift.py` green on CI | Gate | CI | FAIL | |
+| `dotnet test TelecomPM.sln --logger "console;verbosity=minimal"` green on CI | Gate | CI | FAIL | Local run passed (404/404); CI evidence still required |
+| `python tools/check_doc_drift.py` green on CI | Gate | CI | FAIL | Local run passed; CI evidence still required |
 | Staging smoke test (Auth, Visits, WorkOrders, Import, Portal) executed | Gate | QA | FAIL | |
 | Rollback and migration verification signed off | Gate | Backend/DBA | FAIL | |
 

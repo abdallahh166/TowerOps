@@ -11,7 +11,10 @@ This document describes the current ASP.NET Core API surface in `src/TelecomPm.A
 - Validation: FluentValidation through MediatR pipeline and model-state filter
 - Error handling: centralized `ExceptionHandlingMiddleware` with localized messages
 - Logging: Serilog + request logging middleware
+- Correlation: `X-Correlation-ID` request/response propagation with scoped logging
 - Localization: `en-US`, `ar-EG` via query string, `Accept-Language`, or cookie
+- Abuse controls: global path-scoped rate limiting for `/api/auth/*`, `/api/sync*`, and `*/import*`
+- Transport security: HSTS enabled in Production
 - Health checks: `GET /health`
 - Swagger/OpenAPI: enabled in Development
 
@@ -23,6 +26,9 @@ Critical settings:
 - `JwtSettings:Issuer`
 - `JwtSettings:Audience`
 - `Localization:*`
+- `Cors:AllowedOrigins` (required and explicit in Production)
+- `RateLimiting:*`
+- `Hsts:*`
 - `Settings:EncryptionKey`
 
 Environment variables:
@@ -42,6 +48,7 @@ Defined in `src/TelecomPm.Api/Authorization/ApiAuthorizationPolicies.cs`:
 - `CanManageVisits`
 - `CanViewVisits`
 - `CanReviewVisits`
+- `CanCreateEscalations`
 - `CanManageEscalations`
 - `CanViewEscalations`
 - `CanViewKpis`
@@ -56,6 +63,7 @@ Defined in `src/TelecomPm.Api/Authorization/ApiAuthorizationPolicies.cs`:
 - `CanManageMaterials`
 - `CanManageSettings`
 - `CanViewPortal`
+- `CanManagePortalWorkOrders`
 
 Policies evaluate permission claims (`PermissionConstants.ClaimType`), not hardcoded roles.
 
@@ -127,8 +135,8 @@ Policies evaluate permission claims (`PermissionConstants.ClaimType`), not hardc
 - `GET /{id}/signature` (`CanViewWorkOrders`)
 
 ### EscalationsController (`/api/escalations`) class policy: `Authorize`
-- `POST /` (`CanManageEscalations`)
-- `GET /{escalationId}` (`CanManageEscalations`)
+- `POST /` (`CanCreateEscalations`)
+- `GET /{escalationId}` (`CanViewEscalations`)
 - `PATCH /{id}/review` (`CanManageEscalations`)
 - `PATCH /{id}/approve` (`CanManageEscalations`)
 - `PATCH /{id}/reject` (`CanManageEscalations`)
@@ -233,8 +241,8 @@ Policies evaluate permission claims (`PermissionConstants.ClaimType`), not hardc
 - `GET /sla-report`
 - `GET /visits/{siteCode}`
 - `GET /visits/{visitId}/evidence`
-- `PATCH /workorders/{id}/accept`
-- `PATCH /workorders/{id}/reject`
+- `PATCH /workorders/{id}/accept` (`CanManagePortalWorkOrders`)
+- `PATCH /workorders/{id}/reject` (`CanManagePortalWorkOrders`)
 
 ### DailyPlansController (`/api/daily-plans`) class policy: `CanManageSites`
 - `POST /`
@@ -269,7 +277,28 @@ Policies evaluate permission claims (`PermissionConstants.ClaimType`), not hardc
 - Domain/Application exceptions support localized message keys.
 - Validation errors return structured `Errors` dictionary and localized messages.
 
+Unified error contract for failed requests:
+```json
+{
+  "code": "request.failed",
+  "message": "Human-readable localized message",
+  "correlationId": "X-Correlation-ID value",
+  "errors": {
+    "fieldName": ["validation message"]
+  },
+  "meta": {
+    "Rule": "BusinessRuleName"
+  }
+}
+```
+Notes:
+- `errors` and `meta` are optional and appear only when applicable.
+- Stable error codes include: `internal.error`, `request.failed`, `request.validation_failed`,
+  `resource.not_found`, `auth.unauthorized`, `auth.forbidden`, `request.conflict`,
+  `business.rule_violation`.
+
 ## Operational Notes
 - All business timestamps are UTC in domain/application logic.
 - Request/response behaviors are mediated through commands/queries; controllers do not contain core business logic.
+- Operational metrics are emitted from meter `TelecomPM.Operations` for import/sync/notification flows.
 - Keep this file aligned with controller route/attribute changes.

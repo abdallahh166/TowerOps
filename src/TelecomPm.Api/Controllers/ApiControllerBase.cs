@@ -3,7 +3,7 @@ namespace TelecomPm.Api.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net;
+using TelecomPM.Api.Errors;
 using TelecomPm.Api.Localization;
 using TelecomPM.Application.Common;
 
@@ -40,57 +40,9 @@ public abstract class ApiControllerBase : ControllerBase
 
     private IActionResult HandleFailure(string error)
     {
-        var normalizedError = error ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(error))
-        {
-            return Problem(
-                title: LocalizedText.Get("RequestFailed", "Request failed"),
-                statusCode: StatusCodes.Status500InternalServerError);
-        }
-
-        if (LooksSensitiveError(normalizedError))
-        {
-            return Problem(
-                title: LocalizedText.Get("RequestFailed", "Request failed"),
-                detail: LocalizedText.Get("UnexpectedError", "An unexpected error occurred."),
-                statusCode: (int)HttpStatusCode.InternalServerError);
-        }
-
-        var statusCode = normalizedError.Contains("not found", StringComparison.OrdinalIgnoreCase)
-            ? StatusCodes.Status404NotFound
-            : normalizedError.Contains("unauthorized", StringComparison.OrdinalIgnoreCase)
-                ? StatusCodes.Status401Unauthorized
-                : normalizedError.Contains("forbidden", StringComparison.OrdinalIgnoreCase)
-                    ? StatusCodes.Status403Forbidden
-                    : StatusCodes.Status400BadRequest;
-
-        return Problem(
-            title: LocalizedText.Get("RequestFailed", "Request failed"),
-            detail: LocalizedText.TranslateMessage(normalizedError),
-            statusCode: statusCode);
-    }
-
-    private static bool LooksSensitiveError(string error)
-    {
-        if (string.IsNullOrWhiteSpace(error))
-            return false;
-
-        var sensitiveMarkers = new[]
-        {
-            "exception",
-            "stack trace",
-            " at ",
-            "system.",
-            "microsoft.",
-            "sql",
-            "connection string",
-            "accountkey=",
-            "inner exception",
-            "timeout expired"
-        };
-
-        return sensitiveMarkers.Any(marker =>
-            error.Contains(marker, StringComparison.OrdinalIgnoreCase));
+        var correlationId = HttpContext?.TraceIdentifier ?? string.Empty;
+        var mapped = ApiErrorFactory.FromFailureString(error, LocalizedText, correlationId);
+        return StatusCode(mapped.StatusCode, mapped.Error);
     }
 }
 

@@ -99,6 +99,7 @@ public static class DependencyInjection
         services.AddScoped<ISettingsEncryptionService, SettingsEncryptionService>();
         services.AddScoped<ISystemSettingsService, SystemSettingsService>();
         services.AddScoped<IOtpService, OtpService>();
+        services.AddSingleton<IOperationalMetrics, OperationalMetrics>();
         services.AddScoped<SlaEvaluationProcessor>();
 
         // Domain Services with Infrastructure dependencies (Repository-dependent)

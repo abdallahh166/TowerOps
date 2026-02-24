@@ -2,6 +2,7 @@ using ClosedXML.Excel;
 using FluentValidation;
 using MediatR;
 using TelecomPM.Application.Common;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.DTOs.Sites;
 using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Enums;
@@ -33,21 +34,41 @@ public sealed class ImportPanoramaEvidenceCommandHandler : IRequestHandler<Impor
 {
     private readonly IVisitRepository _visitRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ISystemSettingsService? _systemSettingsService;
 
     public ImportPanoramaEvidenceCommandHandler(IVisitRepository visitRepository, IUnitOfWork unitOfWork)
+        : this(visitRepository, unitOfWork, null)
+    {
+    }
+
+    public ImportPanoramaEvidenceCommandHandler(
+        IVisitRepository visitRepository,
+        IUnitOfWork unitOfWork,
+        ISystemSettingsService? systemSettingsService)
     {
         _visitRepository = visitRepository;
         _unitOfWork = unitOfWork;
+        _systemSettingsService = systemSettingsService;
     }
 
     public async Task<Result<ImportSiteDataResult>> Handle(ImportPanoramaEvidenceCommand request, CancellationToken cancellationToken)
     {
+        var options = await ImportGuardrails.ResolveOptionsAsync(_systemSettingsService, cancellationToken);
+        var fileValidationError = ImportGuardrails.ValidateExcelPayload(request.FileContent, options);
+        if (fileValidationError is not null)
+            return Result.Failure<ImportSiteDataResult>(fileValidationError);
+
         var visit = await _visitRepository.GetByIdAsync(request.VisitId, cancellationToken);
         if (visit is null)
             return Result.Failure<ImportSiteDataResult>("Visit not found.");
 
         using var stream = new MemoryStream(request.FileContent);
         using var workbook = new XLWorkbook(stream);
+        var rowLimitFailure = ImportGuardrails.ValidateRowLimit(
+            ImportGuardrails.CountNonEmptyDataRows(workbook),
+            options);
+        if (rowLimitFailure is not null)
+            return rowLimitFailure;
 
         var result = new ImportSiteDataResult();
         var panoramaSheet = workbook.Worksheets.FirstOrDefault(w =>
@@ -69,6 +90,10 @@ public sealed class ImportPanoramaEvidenceCommandHandler : IRequestHandler<Impor
             await _visitRepository.UpdateAsync(visit, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
+
+        var strictFailure = ImportGuardrails.EnforceSkipInvalidRows(result, options);
+        if (strictFailure is not null)
+            return strictFailure;
 
         return Result.Success(result);
     }

@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using TelecomPM.Application.Commands.Imports;
 using TelecomPM.Application.Common;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.DTOs.Sites;
 using TelecomPM.Domain.Entities.UnusedAssets;
 using TelecomPM.Domain.Interfaces.Repositories;
@@ -32,25 +33,46 @@ public sealed class ImportUnusedAssetsCommandHandler : IRequestHandler<ImportUnu
     private readonly IVisitRepository _visitRepository;
     private readonly IUnusedAssetRepository _unusedAssetRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ISystemSettingsService? _systemSettingsService;
 
     public ImportUnusedAssetsCommandHandler(
         IVisitRepository visitRepository,
         IUnusedAssetRepository unusedAssetRepository,
         IUnitOfWork unitOfWork)
+        : this(visitRepository, unusedAssetRepository, unitOfWork, null)
+    {
+    }
+
+    public ImportUnusedAssetsCommandHandler(
+        IVisitRepository visitRepository,
+        IUnusedAssetRepository unusedAssetRepository,
+        IUnitOfWork unitOfWork,
+        ISystemSettingsService? systemSettingsService)
     {
         _visitRepository = visitRepository;
         _unusedAssetRepository = unusedAssetRepository;
         _unitOfWork = unitOfWork;
+        _systemSettingsService = systemSettingsService;
     }
 
     public async Task<Result<ImportSiteDataResult>> Handle(ImportUnusedAssetsCommand request, CancellationToken cancellationToken)
     {
+        var options = await ImportGuardrails.ResolveOptionsAsync(_systemSettingsService, cancellationToken);
+        var fileValidationError = ImportGuardrails.ValidateExcelPayload(request.FileContent, options);
+        if (fileValidationError is not null)
+            return Result.Failure<ImportSiteDataResult>(fileValidationError);
+
         var visit = await _visitRepository.GetByIdAsNoTrackingAsync(request.VisitId, cancellationToken);
         if (visit is null)
             return Result.Failure<ImportSiteDataResult>("Visit not found.");
 
         using var stream = new MemoryStream(request.FileContent);
         using var workbook = new XLWorkbook(stream);
+        var rowLimitFailure = ImportGuardrails.ValidateRowLimit(
+            ImportGuardrails.CountNonEmptyDataRows(workbook),
+            options);
+        if (rowLimitFailure is not null)
+            return rowLimitFailure;
 
         var worksheet = workbook.Worksheets.FirstOrDefault(w =>
             string.Equals(w.Name.Trim(), "unused assets", StringComparison.OrdinalIgnoreCase));
@@ -105,10 +127,19 @@ public sealed class ImportUnusedAssetsCommandHandler : IRequestHandler<ImportUnu
         {
             result.SkippedCount++;
             result.Errors.Add("No importable unused asset rows found.");
+            var strictFailure = ImportGuardrails.EnforceSkipInvalidRows(result, options);
+            if (strictFailure is not null)
+                return strictFailure;
+
             return Result.Success(result);
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var failure = ImportGuardrails.EnforceSkipInvalidRows(result, options);
+        if (failure is not null)
+            return failure;
+
         return Result.Success(result);
     }
 

@@ -18,6 +18,8 @@ These documents are intended to match current code behavior:
 - `docs/phase-2/10-sprint-12-dry-run-reconciliation.md`
 - `docs/phase-2/11-residual-gap-checklist.md`
 - `docs/phase-2/12-production-remediation-plan.md`
+- `docs/phase-2/13-observability-runbook.md`
+- `docs/phase-2/14-performance-baseline.md`
 
 ## Historical / Planning Snapshots
 These remain useful for context but can diverge from runtime implementation:

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.Commands.Imports.ImportAlarmCapture;
 using TelecomPM.Application.Commands.Imports.ImportBatteryDischargeTest;
 using TelecomPM.Application.Commands.Imports.ImportChecklistTemplate;
@@ -30,7 +31,8 @@ public class ImportCommandsRealFilesIntegrationTests
     {
         var (siteRepo, _) = CreateSiteRepository("3564DE");
         var unitOfWork = CreateUnitOfWork();
-        var sut = new ImportSiteAssetsCommandHandler(siteRepo.Object, unitOfWork.Object);
+        var settings = BuildImportSettings();
+        var sut = new ImportSiteAssetsCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object);
 
         var result = await sut.Handle(new ImportSiteAssetsCommand
         {
@@ -48,7 +50,8 @@ public class ImportCommandsRealFilesIntegrationTests
     {
         var (siteRepo, _) = CreateSiteRepository("3564DE");
         var unitOfWork = CreateUnitOfWork();
-        var sut = new ImportPowerDataCommandHandler(siteRepo.Object, unitOfWork.Object);
+        var settings = BuildImportSettings();
+        var sut = new ImportPowerDataCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object);
 
         var result = await sut.Handle(new ImportPowerDataCommand
         {
@@ -64,7 +67,8 @@ public class ImportCommandsRealFilesIntegrationTests
     {
         var (siteRepo, _) = CreateSiteRepository("3564DE");
         var unitOfWork = CreateUnitOfWork();
-        var sut = new ImportSiteRadioDataCommandHandler(siteRepo.Object, unitOfWork.Object);
+        var settings = BuildImportSettings();
+        var sut = new ImportSiteRadioDataCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object);
 
         var result = await sut.Handle(new ImportSiteRadioDataCommand
         {
@@ -80,7 +84,8 @@ public class ImportCommandsRealFilesIntegrationTests
     {
         var (siteRepo, _) = CreateSiteRepository("3564DE");
         var unitOfWork = CreateUnitOfWork();
-        var sut = new ImportSiteTxDataCommandHandler(siteRepo.Object, unitOfWork.Object);
+        var settings = BuildImportSettings();
+        var sut = new ImportSiteTxDataCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object);
 
         var result = await sut.Handle(new ImportSiteTxDataCommand
         {
@@ -96,7 +101,8 @@ public class ImportCommandsRealFilesIntegrationTests
     {
         var (siteRepo, _) = CreateSiteRepository("0658DE");
         var unitOfWork = CreateUnitOfWork();
-        var sut = new ImportSiteSharingDataCommandHandler(siteRepo.Object, unitOfWork.Object);
+        var settings = BuildImportSettings();
+        var sut = new ImportSiteSharingDataCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object);
 
         var result = await sut.Handle(new ImportSiteSharingDataCommand
         {
@@ -112,7 +118,8 @@ public class ImportCommandsRealFilesIntegrationTests
     {
         var (siteRepo, _) = CreateSiteRepository("3564DE");
         var unitOfWork = CreateUnitOfWork();
-        var sut = new ImportRFStatusCommandHandler(siteRepo.Object, unitOfWork.Object);
+        var settings = BuildImportSettings();
+        var sut = new ImportRFStatusCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object);
 
         var result = await sut.Handle(new ImportRFStatusCommand
         {
@@ -134,7 +141,8 @@ public class ImportCommandsRealFilesIntegrationTests
             .Returns(Task.CompletedTask);
 
         var unitOfWork = CreateUnitOfWork();
-        var sut = new ImportBatteryDischargeTestCommandHandler(siteRepo.Object, batteryRepo.Object, unitOfWork.Object);
+        var settings = BuildImportSettings();
+        var sut = new ImportBatteryDischargeTestCommandHandler(siteRepo.Object, batteryRepo.Object, unitOfWork.Object, settings.Object);
 
         var result = await sut.Handle(new ImportBatteryDischargeTestCommand
         {
@@ -154,7 +162,8 @@ public class ImportCommandsRealFilesIntegrationTests
     {
         var (siteRepo, _) = CreateSiteRepository("0700DE", "0676DE", "1067DE", "0058DE", "0907DE", "4390DE");
         var unitOfWork = CreateUnitOfWork();
-        var sut = new ImportDeltaSitesCommandHandler(siteRepo.Object, unitOfWork.Object);
+        var settings = BuildImportSettings();
+        var sut = new ImportDeltaSitesCommandHandler(siteRepo.Object, unitOfWork.Object, settings.Object);
 
         var result = await sut.Handle(new ImportDeltaSitesCommand
         {
@@ -180,7 +189,8 @@ public class ImportCommandsRealFilesIntegrationTests
             .Returns(Task.CompletedTask);
 
         var unitOfWork = CreateUnitOfWork();
-        var sut = new ImportChecklistTemplateCommandHandler(templateRepo.Object, unitOfWork.Object);
+        var settings = BuildImportSettings();
+        var sut = new ImportChecklistTemplateCommandHandler(templateRepo.Object, unitOfWork.Object, settings.Object);
 
         var result = await sut.Handle(new ImportChecklistTemplateCommand
         {
@@ -209,7 +219,8 @@ public class ImportCommandsRealFilesIntegrationTests
         visitRepo.Setup(x => x.UpdateAsync(visit, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         var unitOfWork = CreateUnitOfWork();
-        var sut = new ImportPanoramaEvidenceCommandHandler(visitRepo.Object, unitOfWork.Object);
+        var settings = BuildImportSettings();
+        var sut = new ImportPanoramaEvidenceCommandHandler(visitRepo.Object, unitOfWork.Object, settings.Object);
 
         var result = await sut.Handle(new ImportPanoramaEvidenceCommand
         {
@@ -232,7 +243,8 @@ public class ImportCommandsRealFilesIntegrationTests
         visitRepo.Setup(x => x.UpdateAsync(visit, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         var unitOfWork = CreateUnitOfWork();
-        var sut = new ImportAlarmCaptureCommandHandler(visitRepo.Object, unitOfWork.Object);
+        var settings = BuildImportSettings();
+        var sut = new ImportAlarmCaptureCommandHandler(visitRepo.Object, unitOfWork.Object, settings.Object);
 
         var result = await sut.Handle(new ImportAlarmCaptureCommand
         {
@@ -260,7 +272,8 @@ public class ImportCommandsRealFilesIntegrationTests
             .Returns(Task.CompletedTask);
 
         var unitOfWork = CreateUnitOfWork();
-        var sut = new ImportUnusedAssetsCommandHandler(visitRepo.Object, unusedAssetRepo.Object, unitOfWork.Object);
+        var settings = BuildImportSettings();
+        var sut = new ImportUnusedAssetsCommandHandler(visitRepo.Object, unusedAssetRepo.Object, unitOfWork.Object, settings.Object);
 
         var result = await sut.Handle(new ImportUnusedAssetsCommand
         {
@@ -280,6 +293,20 @@ public class ImportCommandsRealFilesIntegrationTests
         var unitOfWork = new Mock<IUnitOfWork>();
         unitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
         return unitOfWork;
+    }
+
+    private static Mock<ISystemSettingsService> BuildImportSettings()
+    {
+        var settings = new Mock<ISystemSettingsService>();
+        settings.Setup(x => x.GetAsync("Import:SkipInvalidRows", true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        settings.Setup(x => x.GetAsync("Import:MaxRows", 5000, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(25000);
+        settings.Setup(x => x.GetAsync("Import:MaxFileSizeBytes", 10 * 1024 * 1024, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(20 * 1024 * 1024);
+        settings.Setup(x => x.GetAsync("Import:DefaultDateFormat", "dd/MM/yyyy", It.IsAny<CancellationToken>()))
+            .ReturnsAsync("dd/MM/yyyy");
+        return settings;
     }
 
     private static (Mock<ISiteRepository> SiteRepository, List<Site> Sites) CreateSiteRepository(params string[] shortCodes)

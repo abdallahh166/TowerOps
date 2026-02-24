@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using TelecomPm.Application.Services.ExcelParsers;
 using TelecomPM.Application.Common;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.DTOs.Sites;
 using TelecomPM.Domain.Entities.Visits;
 using TelecomPM.Domain.Enums;
@@ -33,21 +34,41 @@ public sealed class ImportAlarmCaptureCommandHandler : IRequestHandler<ImportAla
 {
     private readonly IVisitRepository _visitRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ISystemSettingsService? _systemSettingsService;
 
     public ImportAlarmCaptureCommandHandler(IVisitRepository visitRepository, IUnitOfWork unitOfWork)
+        : this(visitRepository, unitOfWork, null)
+    {
+    }
+
+    public ImportAlarmCaptureCommandHandler(
+        IVisitRepository visitRepository,
+        IUnitOfWork unitOfWork,
+        ISystemSettingsService? systemSettingsService)
     {
         _visitRepository = visitRepository;
         _unitOfWork = unitOfWork;
+        _systemSettingsService = systemSettingsService;
     }
 
     public async Task<Result<ImportSiteDataResult>> Handle(ImportAlarmCaptureCommand request, CancellationToken cancellationToken)
     {
+        var options = await ImportGuardrails.ResolveOptionsAsync(_systemSettingsService, cancellationToken);
+        var fileValidationError = ImportGuardrails.ValidateExcelPayload(request.FileContent, options);
+        if (fileValidationError is not null)
+            return Result.Failure<ImportSiteDataResult>(fileValidationError);
+
         var visit = await _visitRepository.GetByIdAsync(request.VisitId, cancellationToken);
         if (visit is null)
             return Result.Failure<ImportSiteDataResult>("Visit not found.");
 
         using var stream = new MemoryStream(request.FileContent);
         using var workbook = new XLWorkbook(stream);
+        var rowLimitFailure = ImportGuardrails.ValidateRowLimit(
+            ImportGuardrails.CountNonEmptyDataRows(workbook),
+            options);
+        if (rowLimitFailure is not null)
+            return rowLimitFailure;
 
         var worksheet = workbook.Worksheets.FirstOrDefault(w =>
             string.Equals(w.Name.Trim(), "alarms capture", StringComparison.OrdinalIgnoreCase));
@@ -74,11 +95,20 @@ public sealed class ImportAlarmCaptureCommandHandler : IRequestHandler<ImportAla
         {
             result.SkippedCount++;
             result.Errors.Add("No alarm capture evidence rows were imported.");
+            var strictFailure = ImportGuardrails.EnforceSkipInvalidRows(result, options);
+            if (strictFailure is not null)
+                return strictFailure;
+
             return Result.Success(result);
         }
 
         await _visitRepository.UpdateAsync(visit, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var failure = ImportGuardrails.EnforceSkipInvalidRows(result, options);
+        if (failure is not null)
+            return failure;
+
         return Result.Success(result);
     }
 

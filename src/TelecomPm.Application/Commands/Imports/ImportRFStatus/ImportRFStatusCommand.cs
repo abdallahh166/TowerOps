@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using TelecomPM.Application.Commands.Imports;
 using TelecomPM.Application.Common;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.DTOs.Sites;
 using TelecomPM.Domain.Entities.Sites;
 using TelecomPM.Domain.Interfaces.Repositories;
@@ -29,19 +30,39 @@ public sealed class ImportRFStatusCommandHandler : IRequestHandler<ImportRFStatu
 {
     private readonly ISiteRepository _siteRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ISystemSettingsService? _systemSettingsService;
 
     public ImportRFStatusCommandHandler(ISiteRepository siteRepository, IUnitOfWork unitOfWork)
+        : this(siteRepository, unitOfWork, null)
+    {
+    }
+
+    public ImportRFStatusCommandHandler(
+        ISiteRepository siteRepository,
+        IUnitOfWork unitOfWork,
+        ISystemSettingsService? systemSettingsService)
     {
         _siteRepository = siteRepository;
         _unitOfWork = unitOfWork;
+        _systemSettingsService = systemSettingsService;
     }
 
     public async Task<Result<ImportSiteDataResult>> Handle(ImportRFStatusCommand request, CancellationToken cancellationToken)
     {
+        var options = await ImportGuardrails.ResolveOptionsAsync(_systemSettingsService, cancellationToken);
+        var fileValidationError = ImportGuardrails.ValidateExcelPayload(request.FileContent, options);
+        if (fileValidationError is not null)
+            return Result.Failure<ImportSiteDataResult>(fileValidationError);
+
         var result = new ImportSiteDataResult();
 
         using var stream = new MemoryStream(request.FileContent);
         using var workbook = new XLWorkbook(stream);
+        var rowLimitFailure = ImportGuardrails.ValidateRowLimit(
+            ImportGuardrails.CountNonEmptyDataRows(workbook),
+            options);
+        if (rowLimitFailure is not null)
+            return rowLimitFailure;
 
         var worksheet = ImportExcelSupport.FindWorksheet(workbook, "RF Status");
         if (worksheet is null)
@@ -90,6 +111,10 @@ public sealed class ImportRFStatusCommandHandler : IRequestHandler<ImportRFStatu
 
         if (result.ImportedCount > 0)
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var strictFailure = ImportGuardrails.EnforceSkipInvalidRows(result, options);
+        if (strictFailure is not null)
+            return strictFailure;
 
         return Result.Success(result);
     }

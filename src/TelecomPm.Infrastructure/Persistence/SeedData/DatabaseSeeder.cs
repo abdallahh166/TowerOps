@@ -494,6 +494,7 @@ public class DatabaseSeeder
             // Import
             CreateSetting("Import:SkipInvalidRows", "true", "Import", "bool", "Skip invalid rows during imports", false, seededBy),
             CreateSetting("Import:MaxRows", "5000", "Import", "int", "Maximum rows per import file", false, seededBy),
+            CreateSetting("Import:MaxFileSizeBytes", "10485760", "Import", "int", "Maximum import file size in bytes", false, seededBy),
             CreateSetting("Import:DefaultDateFormat", "dd/MM/yyyy", "Import", "string", "Default import date format", false, seededBy)
         };
 

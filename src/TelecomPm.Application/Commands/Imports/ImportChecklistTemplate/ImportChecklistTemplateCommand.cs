@@ -2,6 +2,7 @@ using ClosedXML.Excel;
 using FluentValidation;
 using MediatR;
 using TelecomPM.Application.Common;
+using TelecomPM.Application.Common.Interfaces;
 using TelecomPM.Application.DTOs.Sites;
 using TelecomPM.Domain.Entities.ChecklistTemplates;
 using TelecomPM.Domain.Enums;
@@ -57,23 +58,43 @@ public sealed class ImportChecklistTemplateCommandHandler : IRequestHandler<Impo
 
     private readonly IChecklistTemplateRepository _checklistTemplateRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ISystemSettingsService? _systemSettingsService;
 
     public ImportChecklistTemplateCommandHandler(
         IChecklistTemplateRepository checklistTemplateRepository,
         IUnitOfWork unitOfWork)
+        : this(checklistTemplateRepository, unitOfWork, null)
+    {
+    }
+
+    public ImportChecklistTemplateCommandHandler(
+        IChecklistTemplateRepository checklistTemplateRepository,
+        IUnitOfWork unitOfWork,
+        ISystemSettingsService? systemSettingsService)
     {
         _checklistTemplateRepository = checklistTemplateRepository;
         _unitOfWork = unitOfWork;
+        _systemSettingsService = systemSettingsService;
     }
 
     public async Task<Result<ImportSiteDataResult>> Handle(ImportChecklistTemplateCommand request, CancellationToken cancellationToken)
     {
+        var options = await ImportGuardrails.ResolveOptionsAsync(_systemSettingsService, cancellationToken);
+        var fileValidationError = ImportGuardrails.ValidateExcelPayload(request.FileContent, options);
+        if (fileValidationError is not null)
+            return Result.Failure<ImportSiteDataResult>(fileValidationError);
+
         var existing = await _checklistTemplateRepository.GetByVisitTypeAsync(request.VisitType, cancellationToken);
         if (existing.Any(x => string.Equals(x.Version, request.Version, StringComparison.OrdinalIgnoreCase)))
             return Result.Failure<ImportSiteDataResult>($"Template version '{request.Version}' already exists for {request.VisitType}.");
 
         using var stream = new MemoryStream(request.FileContent);
         using var workbook = new XLWorkbook(stream);
+        var rowLimitFailure = ImportGuardrails.ValidateRowLimit(
+            ImportGuardrails.CountNonEmptyDataRows(workbook),
+            options);
+        if (rowLimitFailure is not null)
+            return rowLimitFailure;
 
         var result = new ImportSiteDataResult();
         var template = ChecklistTemplate.Create(
@@ -96,6 +117,10 @@ public sealed class ImportChecklistTemplateCommandHandler : IRequestHandler<Impo
 
         await _checklistTemplateRepository.AddAsync(template, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var strictFailure = ImportGuardrails.EnforceSkipInvalidRows(result, options);
+        if (strictFailure is not null)
+            return strictFailure;
 
         return Result.Success(result);
     }

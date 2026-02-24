@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using TelecomPM.Api.Errors;
 using TelecomPM.Api.Middleware;
 using TelecomPm.Api.Localization;
 using TelecomPM.Domain.Exceptions;
@@ -17,7 +18,7 @@ namespace TelecomPM.Application.Tests.Middleware;
 public class ExceptionHandlingMiddlewareLocalizationTests
 {
     [Fact]
-    public async Task InvokeAsync_ShouldLocalizeDomainException_WhenAcceptLanguageIsArabic()
+    public async Task InvokeAsync_ShouldReturnUnifiedErrorContract_ForDomainNotFound()
     {
         var context = await InvokePipelineAsync(
             new EntityNotFoundException("Visit", "V-1"),
@@ -27,12 +28,14 @@ public class ExceptionHandlingMiddlewareLocalizationTests
         GetRequestCulture(context).Should().Be("ar-EG");
 
         var payload = await ReadJsonAsync(context.Response);
-        payload.GetProperty("Message").GetString()
-            .Should().Be("Visit Ø¨Ø§Ù„Ù…Ø¹Ø±Ù 'V-1' ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯");
+        payload.GetProperty("Code").GetString().Should().Be(ApiErrorCodes.ResourceNotFound);
+        payload.GetProperty("Message").GetString().Should().NotBeNullOrWhiteSpace();
+        payload.GetProperty("Message").GetString().Should().Contain("V-1");
+        payload.GetProperty("CorrelationId").GetString().Should().Be(context.TraceIdentifier);
     }
 
     [Fact]
-    public async Task InvokeAsync_ShouldLocalizeApplicationException_WhenAcceptLanguageIsArabic()
+    public async Task InvokeAsync_ShouldReturnUnifiedErrorContract_ForApplicationConflict()
     {
         var context = await InvokePipelineAsync(
             new TelecomPM.Application.Exceptions.ConflictException("Conflict."),
@@ -42,8 +45,10 @@ public class ExceptionHandlingMiddlewareLocalizationTests
         GetRequestCulture(context).Should().Be("ar-EG");
 
         var payload = await ReadJsonAsync(context.Response);
-        payload.GetProperty("Message").GetString()
-            .Should().Be("Ø§Ù„Ø·Ù„Ø¨ ÙŠØªØ¹Ø§Ø±Ø¶ Ù…Ø¹ Ø§Ù„Ø­Ø§Ù„Ø© Ø§Ù„Ø­Ø§Ù„ÙŠØ©");
+        payload.GetProperty("Code").GetString().Should().Be(ApiErrorCodes.Conflict);
+        payload.GetProperty("Message").GetString().Should().NotBeNullOrWhiteSpace();
+        payload.GetProperty("Message").GetString().Should().NotBe("Conflict.");
+        payload.GetProperty("CorrelationId").GetString().Should().Be(context.TraceIdentifier);
     }
 
     private static async Task<DefaultHttpContext> InvokePipelineAsync(Exception exception, string acceptLanguage)
