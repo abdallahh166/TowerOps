@@ -1,5 +1,7 @@
 # Senior .NET Architecture Assessment – TelecomPM
 
+This is a point-in-time assessment snapshot. Some findings may already be resolved. For current runtime behavior, use `docs/Api-Doc.md`, `docs/Application-Doc.md`, and `docs/Domain-Doc.md`.
+
 ## Scope
 - Reviewed API composition, Application layer (CQRS + behaviors), Infrastructure/EF Core persistence, and operational settings.
 - Review based on current code snapshot.

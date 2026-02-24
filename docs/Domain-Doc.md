@@ -1,63 +1,89 @@
-﻿# TelecomPM Domain Layer
+# TelecomPM Domain Layer Documentation
 
-## Overview
-This is the core business logic layer implementing Clean Architecture and Domain-Driven Design principles.
+## Purpose
+`TelecomPM.Domain` contains the core business model and invariants. It is framework-agnostic and does not depend on infrastructure implementation details.
 
-## Key Components
+## Scope
+- Aggregates and entities
+- Value objects
+- Domain events
+- Domain exceptions
+- Repository/service contracts
+- Specifications and business enums
 
-### Aggregates
-- **Site**: Telecom site with equipment and configuration
-- **Visit**: Preventive/corrective maintenance visit
-- **User**: Engineers and managers
-- **Office**: Regional offices
-- **Material**: Inventory items
+## Core Aggregates and Entities
 
-### Value Objects
-- `SiteCode`: Office code + sequence number
-- `Coordinates`: GPS location with distance calculation
-- `VoltageReading`: Validated voltage measurements
-- `Money`: Currency-aware monetary values
+### Operational entities
+- `Site` (+ owned/related site component entities)
+- `Visit` (+ photos, readings, checklist, issues, approvals, material usage)
+- `WorkOrder`
+- `Escalation`
+- `Material`
+- `Office`
+- `User`
 
-### Domain Events
-- `VisitSubmittedEvent`: Visit submitted for review
-- `VisitApprovedEvent`: Visit approved by manager
-- `LowStockAlertEvent`: Material stock below minimum
+### Extended domain entities
+- `ChecklistTemplate` and `ChecklistTemplateItem`
+- `AuditLog`
+- `ApprovalRecord`
+- `BatteryDischargeTest`
+- `DailyPlan`, `EngineerDayPlan`, `PlannedVisitStop`
+- `Asset` and `AssetServiceRecord`
+- `SyncQueue` and `SyncConflict`
+- `SystemSetting`
+- `ApplicationRole`
+- `Client`
+- `PasswordResetToken`
+- `UnusedAsset`
 
-## Design Principles
-- ✅ No infrastructure dependencies
-- ✅ Rich domain model (not anemic)
-- ✅ Encapsulation via private setters
-- ✅ Validation in constructors/methods
-- ✅ Domain events for side effects
+## Value Objects
+- Identifiers: `SiteCode`, `VisitNumber`, `MaterialCode`
+- Location: `Coordinates`, `GeoLocation`, `Address`
+- Contact: `Email`, `PhoneNumber`
+- Other: `Money`, `MaterialQuantity`, `TimeRange`, `EvidencePolicy`, `Signature`
 
-## Usage Example
-```csharp
-// Create visit
-var visit = Visit.Create(
-    visitNumber: "V2025001",
-    siteId: siteId,
-    siteCode: "TNT001",
-    siteName: "Tanta Central",
-    engineerId: engineerId,
-    engineerName: "Ahmed Hassan",
-    scheduledDate: DateTime.Today,
-    type: VisitType.PreventiveMaintenance
-);
+## Key Business Rules
+- Work-order lifecycle transitions are guarded (`Created -> Assigned -> InProgress -> ...`).
+- Visit lifecycle enforces status transitions and evidence policy before submit.
+- Portal-facing ownership checks rely on `ClientCode` scope.
+- Site ownership affects responsibility scope (`Host` => `Full`, otherwise `EquipmentOnly`).
+- Equipment-only sites cannot create tower-infrastructure work orders.
+- Signature capture enforces single-capture constraints and payload validation.
+- Domain exceptions carry message keys for localization.
 
-// Start visit
-var location = Coordinates.Create(30.7865, 30.9925);
-visit.StartVisit(location);
+## Visit Type Canonical Model
+- Canonical values: `BM`, `CM`
+- Backward-compatible aliases exist in enum (`PreventiveMaintenance`, `CorrectiveMaintenance`) and are normalized by `VisitTypeExtensions`.
 
-// Complete and submit
-visit.CompleteVisit();
-visit.Submit();
+## Domain Events
+Events are raised by aggregates and dispatched after successful persistence.
+Examples:
+- Visit lifecycle events (`VisitStartedEvent`, `VisitSubmittedEvent`, `VisitApprovedEvent`)
+- Work order lifecycle events (`WorkOrderSubmittedForCustomerAcceptanceEvent`, `SlaBreachedEvent`)
+- Site, material, checklist template, and asset events
 
-// Domain events raised automatically
-// → VisitSubmittedEvent dispatched
-```
-
-## Testing
-Run tests: `dotnet test TelecomPM.Domain.Tests`
+## Data and Time Assumptions
+- Business timestamps are UTC.
+- Domain methods enforce invariant checks with explicit exceptions.
+- Aggregate roots own mutation logic for child collections.
 
 ## Dependencies
-- None (pure domain logic)
+- No dependency on ASP.NET Core, EF Core, or infrastructure services.
+- Only pure .NET and domain contracts.
+
+## Testing
+Domain tests validate:
+- state transitions
+- invariants and guard conditions
+- value object validation
+- domain event emission
+
+Run tests:
+```bash
+dotnet test tests/TelecomPM.Domain.Tests/TelecomPM.Domain.Tests.csproj
+```
+
+## Maintenance Notes
+- Keep invariants inside aggregate methods.
+- Avoid bypassing domain methods from application/infrastructure code.
+- Add tests for every new transition or invariant.

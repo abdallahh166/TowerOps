@@ -1,5 +1,7 @@
 # Architecture Consistency & Duplication Review
 
+This is a point-in-time architecture review snapshot. Findings are valuable for design history but may not fully represent current implementation state.
+
 Date: 2026-02-19
 
 ## Scope

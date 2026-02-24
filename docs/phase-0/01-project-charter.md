@@ -1,45 +1,40 @@
-# Phase 0 — Project Charter (Year 1)
+# Phase 0 - Project Charter (Historical Baseline)
 
-## 1) Problem Statement
-Field maintenance operations currently depend on Excel-based workflows that create repetitive manual entry, weak traceability, ambiguous approvals, and no real-time SLA visibility.
+This document is a historical baseline captured during mobilization. It records targets and assumptions used to start delivery. For current runtime behavior, use `docs/Api-Doc.md`, `docs/Application-Doc.md`, and `docs/Domain-Doc.md`.
 
-## 2) Business Objective (Year 1)
-Digitally transform field maintenance operations by replacing Excel-based documentation with a centralized structured system for:
-- Corrective Maintenance (CM)
-- Preventive / Baseline Maintenance (PM / BM)
+## Problem Statement
+Field maintenance previously depended on spreadsheet-heavy execution with weak traceability, inconsistent approvals, and delayed SLA visibility.
 
-## 3) Measurable Targets (Year 1)
-- SLA Compliance: **≥ 95%**
-- MTTR: **≤ 8 hours**
-- First Time Fix: **≥ 90%**
-- Reopen Rate: **≤ 5%**
-- Evidence Completeness: **≥ 98%**
+## Year-1 Objectives (Baseline)
+- Digitize CM/BM execution
+- Track end-to-end work order lifecycle
+- Enforce evidence and approval flow
+- Improve KPI visibility (SLA, MTTR, FTF, reopen)
 
-## 4) In-Scope (Phase 1)
-- Work Order lifecycle management
+## Baseline KPIs (Planning Targets)
+- SLA compliance >= 95%
+- MTTR <= 8 hours
+- First-time-fix >= 90%
+- Reopen rate <= 5%
+- Evidence completeness >= 98%
+
+## Initial Scope Baseline
+- Work order lifecycle management
 - Visit execution tracking
-- Issue tracking
-- SLA Engine (response/resolution/breach)
-- Multi-layer approval workflow
 - Evidence upload and validation
-- Basic unified dashboard with filters
+- Escalation and approvals
+- KPI dashboard baseline
 
-## 5) Out-of-Scope (Deferred)
-- Mobile offline mode
-- Advanced BI
-- Predictive maintenance
-- Asset depreciation tracking
-- ERP integration
+## Initially Deferred in Planning Baseline
+The following were initially marked deferred but are now partially/fully implemented in code:
+- Offline sync
+- Extended analytics/reporting
 
-## 6) Governance Model
-Dual governance with separated CM and BM lines:
-- CM: Area Manager → Office Manager → CM Supervisor → Shift/Hardware Engineers
-- BM: Head of Maintenance → BM Manager → BM Monitoring Engineer → BM Field Engineers
+## Governance Baseline
+Dual governance model with CM and BM responsibility lines (see `docs/phase-0/02-raci-matrix.md` and `docs/phase-0/06-approval-role-matrix.md`).
 
-## 7) Success Definition
-The project is considered successful when:
-1. Engineers stop using Excel for operational execution.
-2. All Work Orders are traceable end-to-end.
-3. SLA is measurable in real time.
-4. Approvals are structured and role-driven.
-5. KPI ownership is explicit and enforced.
+## Success Definition (Baseline)
+1. Spreadsheet-only operation is replaced by controlled system workflows.
+2. Work orders and visits are auditable end to end.
+3. SLA and operational KPIs are measurable.
+4. Approval responsibilities are explicit.

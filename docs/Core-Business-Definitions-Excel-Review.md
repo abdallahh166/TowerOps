@@ -1,5 +1,7 @@
 # Core Business Definitions - Excel Review
 
+This document is an input-data review snapshot. It should be read together with `docs/Excel-Domain-Gap-Report.md` and current import command implementations.
+
 This document summarizes the three Excel workbooks added under `docs/` for core business definitions and operational templates.
 
 ## Reviewed files

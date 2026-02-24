@@ -1,5 +1,7 @@
 # Architecture Direction Freeze (Day-1 Decisions)
 
+This file records initial architecture decisions at the time of capture. Some decisions may have evolved; use current runtime docs as source of truth.
+
 Date: 2026-02-19
 
 ## Locked Decisions

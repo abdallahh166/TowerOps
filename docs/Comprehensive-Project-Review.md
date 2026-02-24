@@ -3,6 +3,8 @@
 Date: 2026-02-18  
 Repository: `telecomPm`
 
+This is a point-in-time review snapshot. Some issues listed here may already be addressed in code. Treat this document as historical analysis, and use live docs for current behavior.
+
 ## 1) Review Method
 
 I reviewed source modules, API/controllers, infrastructure services, domain entities, and phase/sprint documentation. I also ran static grep-style checks for unfinished code markers and attempted to run automated tests.

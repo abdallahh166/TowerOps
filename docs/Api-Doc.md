@@ -1,234 +1,275 @@
-# TelecomPM API Layer
+# TelecomPM API Documentation
 
-## Overview
-The API layer exposes domain/application capabilities over RESTful ASP.NET Core Web API (`net8.0`). It follows Clean Architecture and keeps business rules in Application + Domain.
+## Purpose
+This document describes the current ASP.NET Core API surface in `src/TelecomPm.Api`, including runtime behavior, authorization policies, and endpoint contracts at controller level.
 
-Related: operational process and lifecycle diagrams are documented in `docs/Operational-Workflow.md`.
+## Runtime Architecture
+- Framework: ASP.NET Core Web API (`net8.0`)
+- API style: controller-based REST endpoints
+- Auth: JWT bearer token
+- Authorization: policy + permission claims
+- Validation: FluentValidation through MediatR pipeline and model-state filter
+- Error handling: centralized `ExceptionHandlingMiddleware` with localized messages
+- Logging: Serilog + request logging middleware
+- Localization: `en-US`, `ar-EG` via query string, `Accept-Language`, or cookie
+- Health checks: `GET /health`
+- Swagger/OpenAPI: enabled in Development
 
-## Runtime Setup
-- JWT authentication (`JwtSettings`)
-- Policy-based authorization
-- Serilog request/error logging
-- Swagger/OpenAPI
-- Health checks (`/health`)
-- CORS from `Cors:AllowedOrigins`
-- Request localization (`en-US`, `ar-EG`) via `Accept-Language` / `?culture=`
-- Centralized bilingual message translation for API `ProblemDetails` and key auth/system responses
-- Validation error payloads (`Errors` dictionary) are localized for common field names and standard FluentValidation message patterns
+## Configuration and Environment
+Primary config file: `src/TelecomPm.Api/appsettings.json`
 
-## Authorization Policies
-- `CanManageWorkOrders`: Admin, Manager, Supervisor
-- `CanViewWorkOrders`: Admin, Manager, Supervisor, PMEngineer
-- `CanReviewVisits`: Admin, Manager, Supervisor
-- `CanManageEscalations`: Admin, Manager, Supervisor
-- `CanViewEscalations`: Admin, Manager, Supervisor, PMEngineer
-- `CanViewKpis`: Admin, Manager, Supervisor
-- `CanManageUsers`: Admin, Manager
-- `CanManageOffices`: Admin, Manager
-- `CanManageSites`: Admin, Manager, Supervisor
-- `CanViewSites`: Admin, Manager, Supervisor, PMEngineer
-- `CanViewAnalytics`: Admin, Manager, Supervisor, PMEngineer
-- `CanViewReports`: Admin, Manager, Supervisor, PMEngineer
-- `CanViewMaterials`: Admin, Manager, Supervisor, PMEngineer
-- `CanManageMaterials`: Admin, Manager, Supervisor
-- `CanManageSettings`: Admin (via `settings.edit` permission)
+Critical settings:
+- `ConnectionStrings:DefaultConnection`
+- `JwtSettings:Issuer`
+- `JwtSettings:Audience`
+- `Localization:*`
+- `Settings:EncryptionKey`
 
-## Access Model
-- All business controllers are protected with `[Authorize]` and selected actions enforce role policies.
-- `AuthController` login endpoint is `[AllowAnonymous]`.
+Environment variables:
+- `JWT_SECRET`
+  - required in Production (startup guard)
+  - Development fallback can come from `appsettings.Development.json`
 
-## Endpoint Catalog by Controller
+## Security Model
+### Authentication
+- `POST /api/auth/login` is anonymous and returns JWT.
+- Other protected endpoints require bearer token.
 
-### `AuthController` (`/api/auth`)
-- `POST /login` (AllowAnonymous)
-  - Credentials validated by `email + password` for active users.
-  - Returns JWT access token with `NameIdentifier`, `Email`, `Role`, `OfficeId` claims.
+### Authorization policies
+Defined in `src/TelecomPm.Api/Authorization/ApiAuthorizationPolicies.cs`:
+- `CanManageWorkOrders`
+- `CanViewWorkOrders`
+- `CanManageVisits`
+- `CanViewVisits`
+- `CanReviewVisits`
+- `CanManageEscalations`
+- `CanViewEscalations`
+- `CanViewKpis`
+- `CanManageUsers`
+- `CanViewUsers`
+- `CanManageOffices`
+- `CanManageSites`
+- `CanViewSites`
+- `CanViewAnalytics`
+- `CanViewReports`
+- `CanViewMaterials`
+- `CanManageMaterials`
+- `CanManageSettings`
+- `CanViewPortal`
 
-### `VisitsController` (`/api/visits`)
+Policies evaluate permission claims (`PermissionConstants.ClaimType`), not hardcoded roles.
+
+## Data Flow (Request Path)
+1. HTTP request reaches controller endpoint.
+2. AuthN/AuthZ middleware validates token and policy.
+3. Controller maps contract DTOs to commands/queries.
+4. MediatR pipeline executes:
+   - unhandled exception behavior
+   - logging behavior
+   - validation behavior
+   - performance behavior
+   - transaction behavior (commands)
+5. Handler executes domain/application logic and persistence via repositories/unit of work.
+6. Domain events are dispatched from `ApplicationDbContext.SaveChangesAsync`.
+7. Controller returns standardized success/failure envelope through `ApiControllerBase.HandleResult`.
+
+## Controllers and Endpoints
+
+### AuthController (`/api/auth`)
+- `POST /login` (`AllowAnonymous`)
+- `POST /forgot-password` (`AllowAnonymous`)
+- `POST /reset-password` (`AllowAnonymous`)
+- `POST /change-password` (`Authorize`)
+
+### VisitsController (`/api/visits`) class policy: `CanViewVisits`
 - `GET /{visitId}`
 - `GET /engineers/{engineerId}`
 - `GET /pending-reviews`
 - `GET /scheduled`
-- `POST /`
 - `GET /{visitId}/evidence-status`
-- `POST /{visitId}/start`
-- `POST /{visitId}/complete`
-- `POST /{visitId}/submit`
-- `POST /{visitId}/approve` (**CanReviewVisits**)
-- `POST /{visitId}/reject` (**CanReviewVisits**)
-- `POST /{visitId}/request-correction` (**CanReviewVisits**)
-- `POST /{visitId}/checklist-items`
-- `PATCH /{visitId}/checklist-items/{checklistItemId}`
-- `POST /{visitId}/issues`
-- `POST /{visitId}/issues/{issueId}/resolve`
-- `POST /{visitId}/readings`
-- `PATCH /{visitId}/readings/{readingId}`
-- `POST /{visitId}/photos`
-- `POST /{visitId}/import/panorama`
-- `POST /{visitId}/import/alarms`
-- `POST /{visitId}/import/unused-assets`
-- `DELETE /{visitId}/photos/{photoId}`
-- `POST /{visitId}/cancel`
-- `POST /{visitId}/reschedule`
+- `GET /{visitId}/signature`
+- `POST /` (`CanManageVisits`)
+- `POST /{visitId}/start` (`CanManageVisits`)
+- `POST /{visitId}/checkin` (`CanManageVisits`)
+- `POST /{visitId}/checkout` (`CanManageVisits`)
+- `POST /{visitId}/complete` (`CanManageVisits`)
+- `POST /{visitId}/submit` (`CanManageVisits`)
+- `POST /{visitId}/approve` (`CanReviewVisits`)
+- `POST /{visitId}/reject` (`CanReviewVisits`)
+- `POST /{visitId}/request-correction` (`CanReviewVisits`)
+- `POST /{visitId}/checklist-items` (`CanManageVisits`)
+- `PATCH /{visitId}/checklist-items/{checklistItemId}` (`CanManageVisits`)
+- `POST /{visitId}/issues` (`CanManageVisits`)
+- `POST /{visitId}/issues/{issueId}/resolve` (`CanManageVisits`)
+- `POST /{visitId}/readings` (`CanManageVisits`)
+- `PATCH /{visitId}/readings/{readingId}` (`CanManageVisits`)
+- `POST /{visitId}/photos` (`CanManageVisits`)
+- `DELETE /{visitId}/photos/{photoId}` (`CanManageVisits`)
+- `POST /{visitId}/cancel` (`CanManageVisits`)
+- `POST /{visitId}/reschedule` (`CanManageVisits`)
+- `POST /{visitId}/signature` (`CanManageVisits`)
+- `POST /{visitId}/import/panorama` (`CanManageVisits`)
+- `POST /{visitId}/import/alarms` (`CanManageVisits`)
+- `POST /{visitId}/import/unused-assets` (`CanManageVisits`)
 
-### `WorkOrdersController` (`/api/workorders`)
-- `POST /` (**CanManageWorkOrders**)
-- `GET /{workOrderId}` (**CanViewWorkOrders**)
-- `POST /{workOrderId}/assign` (**CanManageWorkOrders**)
-- `PATCH /{id}/start` (**CanManageWorkOrders**)
-- `PATCH /{id}/complete` (**CanManageWorkOrders**)
-- `PATCH /{id}/close` (**CanManageWorkOrders**)
-- `PATCH /{id}/cancel` (**CanManageWorkOrders**)
-- `PATCH /{id}/submit-for-acceptance` (**CanManageWorkOrders**)
-- `PATCH /{id}/customer-accept` (**CanManageWorkOrders**)
-- `PATCH /{id}/customer-reject` (**CanManageWorkOrders**)
+### WorkOrdersController (`/api/workorders`) class policy: `Authorize`
+- `POST /` (`CanManageWorkOrders`)
+- `GET /{workOrderId}` (`CanViewWorkOrders`)
+- `POST /{workOrderId}/assign` (`CanManageWorkOrders`)
+- `PATCH /{id}/start` (`CanManageWorkOrders`)
+- `PATCH /{id}/complete` (`CanManageWorkOrders`)
+- `PATCH /{id}/close` (`CanManageWorkOrders`)
+- `PATCH /{id}/cancel` (`CanManageWorkOrders`)
+- `PATCH /{id}/submit-for-acceptance` (`CanManageWorkOrders`)
+- `PATCH /{id}/customer-accept` (`CanManageWorkOrders`)
+- `PATCH /{id}/customer-reject` (`CanManageWorkOrders`)
+- `POST /{id}/signature` (`CanManageWorkOrders`)
+- `GET /{id}/signature` (`CanViewWorkOrders`)
 
-### `EscalationsController` (`/api/escalations`)
-- `POST /` (**CanManageEscalations**)
-- `GET /{escalationId}` (**CanManageEscalations**)
-- `PATCH /{id}/review` (**CanManageEscalations**)
-- `PATCH /{id}/approve` (**CanManageEscalations**)
-- `PATCH /{id}/reject` (**CanManageEscalations**)
-- `PATCH /{id}/close` (**CanManageEscalations**)
+### EscalationsController (`/api/escalations`) class policy: `Authorize`
+- `POST /` (`CanManageEscalations`)
+- `GET /{escalationId}` (`CanManageEscalations`)
+- `PATCH /{id}/review` (`CanManageEscalations`)
+- `PATCH /{id}/approve` (`CanManageEscalations`)
+- `PATCH /{id}/reject` (`CanManageEscalations`)
+- `PATCH /{id}/close` (`CanManageEscalations`)
 
-### `KpiController` (`/api/kpi`)
-- `GET /operations` (**CanViewKpis**)
-  - Filters: `fromDateUtc`, `toDateUtc`, `officeCode`, `slaClass`
-
-### `SitesController` (`/api/sites`)
-- `POST /` (**CanManageSites**)
-- `PUT /{siteId}` (**CanManageSites**)
-- `PATCH /{siteId}/status` (**CanManageSites**)
-- `POST /{siteId}/assign` (**CanManageSites**)
-- `POST /{siteId}/unassign` (**CanManageSites**)
-- `PUT /{siteCode}/ownership` (**CanManageSites**)
-- `POST /import` (**CanManageSites**) - GH-DE Data Collection import
-- `POST /import/site-assets` (**CanManageSites**)
-- `POST /import/power-data` (**CanManageSites**)
-- `POST /import/radio-data` (**CanManageSites**)
-- `POST /import/tx-data` (**CanManageSites**)
-- `POST /import/sharing-data` (**CanManageSites**)
-- `POST /import/rf-status` (**CanManageSites**)
-- `POST /import/battery-discharge-tests` (**CanManageSites**)
-- `POST /import/delta-sites` (**CanManageSites**)
-- `GET /{siteId}` (**CanViewSites**)
-- `GET /{siteCode}/location` (**CanViewSites**)
-- `GET /office/{officeId}` (**CanViewSites**)
-- `GET /maintenance` (**CanViewSites**)
-
-### `MaterialsController` (`/api/materials`)
-- `POST /` (**CanManageMaterials**)
-- `PUT /{id}` (**CanManageMaterials**)
-- `DELETE /{id}` (**CanManageMaterials**)
-- `POST /{id}/stock/add` (**CanManageMaterials**)
-- `POST /{id}/stock/reserve` (**CanManageMaterials**)
-- `POST /{id}/stock/consume` (**CanManageMaterials**)
-- `GET /{id}` (**CanViewMaterials**)
-- `GET /` (**CanViewMaterials**)
-- `GET /low-stock/{officeId}`
-
-### `ChecklistTemplatesController` (`/api/checklisttemplates`)
-- `GET /?visitType={visitType}`
-- `GET /{id}`
-- `GET /history?visitType={visitType}`
-- `POST /import` (**CanManageWorkOrders**)
-- `POST /` (**CanManageWorkOrders**)
-- `POST /{id}/activate` (**CanManageWorkOrders**)
-
-### `AssetsController` (`/api/assets`)
-- `GET /site/{siteCode}` (**CanViewSites**)
-- `GET /{assetCode}` (**CanViewSites**)
-- `GET /{assetCode}/history` (**CanViewSites**)
-- `POST /` (**CanManageSites**)
-- `PUT /{assetCode}/service` (**CanManageSites**)
-- `PUT /{assetCode}/fault` (**CanManageSites**)
-- `PUT /{assetCode}/replace` (**CanManageSites**)
-- `GET /expiring-warranties?days={days}` (**CanViewSites**)
-- `GET /faulty` (**CanViewSites**)
-
-### `ClientPortalController` (`/api/portal`)
-- `GET /dashboard` (**CanViewPortal**)
-- `GET /sites` (**CanViewPortal**)
-- `GET /sites/{siteCode}` (**CanViewPortal**)
-- `GET /workorders` (**CanViewPortal**)
-- `PATCH /workorders/{id}/accept` (**CanViewPortal**)
-- `PATCH /workorders/{id}/reject` (**CanViewPortal**)
-- `GET /sla-report` (**CanViewPortal**)
-- `GET /visits/{siteCode}` (**CanViewPortal**)
-- `GET /visits/{visitId}/evidence` (**CanViewPortal**)
-
-### `DailyPlansController` (`/api/daily-plans`)
-- `POST /` (**CanManageSites**)
-- `GET /{officeId}/{date}` (**CanManageSites**)
-- `POST /{planId}/assign` (**CanManageSites**)
-- `DELETE /{planId}/assign` (**CanManageSites**)
-- `GET /{planId}/suggest/{engineerId}` (**CanManageSites**)
-- `GET /{officeId}/{date}/unassigned` (**CanManageSites**)
-- `POST /{planId}/publish` (**CanManageSites**)
-
-Daily planning behavior:
-- Base cap is `Route:MaxSitesPerEngineerPerDay`.
-- During Ramadan (Hijri month 9), cap is reduced when `Route:EnableRamadanScheduling=true` and bounded by `Route:RamadanMaxSitesPerEngineerPerDay`.
-- During khamsin window (`Route:KhamsinStartMonthDay`..`Route:KhamsinEndMonthDay`), route speed uses `Route:KhamsinAverageSpeedKmh` when `Route:EnableKhamsinSeasonAdjustment=true`.
-
-### `SyncController` (`/api/sync`)
-- `POST /`
-- `GET /status/{deviceId}`
-- `GET /conflicts/{engineerId}`
-
-### `ReportsController` (`/api/reports`)
-- `GET /visits/{visitId}`
-- `GET /scorecard?officeCode={officeCode}&month={month}&year={year}`
-- `GET /checklist?visitId={visitId?}&visitType={visitType?}`
-- `GET /bdt?fromDateUtc={from?}&toDateUtc={to?}`
-- `GET /data-collection?officeCode={officeCode?}`
-
-### `UsersController` (`/api/users`)
-- `POST /` (**CanManageUsers**)
-- `GET /{userId}`
-- `PUT /{userId}` (**CanManageUsers**)
-- `DELETE /{userId}` (**CanManageUsers**)
-- `PATCH /{userId}/role` (**CanManageUsers**)
-- `PATCH /{userId}/activate` (**CanManageUsers**)
-- `PATCH /{userId}/deactivate` (**CanManageUsers**)
+### SitesController (`/api/sites`) class policy: `CanViewSites`
+- `GET /{siteId}`
+- `GET /{siteCode}/location`
 - `GET /office/{officeId}`
-- `GET /role/{role}`
-- `GET /{userId}/performance`
+- `GET /maintenance`
+- `POST /` (`CanManageSites`)
+- `PUT /{siteId}` (`CanManageSites`)
+- `PATCH /{siteId}/status` (`CanManageSites`)
+- `POST /{siteId}/assign` (`CanManageSites`)
+- `POST /{siteId}/unassign` (`CanManageSites`)
+- `PUT /{siteCode}/ownership` (`CanManageSites`)
+- `POST /import` (`CanManageSites`)
+- `POST /import/site-assets` (`CanManageSites`)
+- `POST /import/power-data` (`CanManageSites`)
+- `POST /import/radio-data` (`CanManageSites`)
+- `POST /import/tx-data` (`CanManageSites`)
+- `POST /import/sharing-data` (`CanManageSites`)
+- `POST /import/rf-status` (`CanManageSites`)
+- `POST /import/battery-discharge-tests` (`CanManageSites`)
+- `POST /import/delta-sites` (`CanManageSites`)
 
-### `RolesController` (`/api/roles`)
-- `GET /`
-- `GET /permissions`
+### MaterialsController (`/api/materials`) class policy: `CanViewMaterials`
 - `GET /{id}`
-- `POST /` (**CanManageSettings**)
-- `PUT /{id}` (**CanManageSettings**)
-- `DELETE /{id}` (**CanManageSettings**)
-
-### `SettingsController` (`/api/settings`)
-- `GET /` (**CanManageSettings**)
-- `GET /{group}` (**CanManageSettings**)
-- `PUT /` (**CanManageSettings**)
-- `POST /test/{service}` (**CanManageSettings**)
-
-### `OfficesController` (`/api/offices`)
-- `POST /` (**CanManageOffices**)
-- `GET /{officeId}`
 - `GET /`
-- `GET /region/{region}`
-- `GET /{officeId}/statistics`
-- `PUT /{officeId}` (**CanManageOffices**)
-- `PATCH /{officeId}/contact` (**CanManageOffices**)
-- `DELETE /{officeId}` (**CanManageOffices**)
+- `GET /low-stock/{officeId}`
+- `POST /` (`CanManageMaterials`)
+- `PUT /{id}` (`CanManageMaterials`)
+- `DELETE /{id}` (`CanManageMaterials`)
+- `POST /{id}/stock/add` (`CanManageMaterials`)
+- `POST /{id}/stock/reserve` (`CanManageMaterials`)
+- `POST /{id}/stock/consume` (`CanManageMaterials`)
 
-### `AnalyticsController` (`/api/analytics`)
+### ReportsController (`/api/reports`) class policy: `CanViewReports`
+- `GET /visits/{visitId}`
+- `GET /scorecard`
+- `GET /checklist`
+- `GET /bdt`
+- `GET /data-collection`
+
+### AnalyticsController (`/api/analytics`) class policy: `CanViewAnalytics`
 - `GET /engineer-performance/{engineerId}`
 - `GET /site-maintenance/{siteId}`
 - `GET /office-statistics/{officeId}`
 - `GET /material-usage/{materialId}`
 - `GET /visit-completion-trends`
 - `GET /issue-analytics`
-  - All analytics endpoints require **CanViewAnalytics**
 
-## Run locally
-```bash
-dotnet run --project src/TelecomPm.Api
-```
+### KpiController (`/api/kpi`) class policy: `Authorize`
+- `GET /operations` (`CanViewKpis`)
+
+### UsersController (`/api/users`) class policy: `CanViewUsers`
+- `GET /{userId}`
+- `GET /office/{officeId}`
+- `GET /role/{role}`
+- `GET /{userId}/performance`
+- `POST /` (`CanManageUsers`)
+- `PUT /{userId}` (`CanManageUsers`)
+- `DELETE /{userId}` (`CanManageUsers`)
+- `PATCH /{userId}/role` (`CanManageUsers`)
+- `PATCH /{userId}/activate` (`CanManageUsers`)
+- `PATCH /{userId}/deactivate` (`CanManageUsers`)
+
+### OfficesController (`/api/offices`) class policy: `CanManageOffices`
+- `POST /`
+- `GET /{officeId}`
+- `GET /`
+- `GET /region/{region}`
+- `GET /{officeId}/statistics`
+- `PUT /{officeId}`
+- `PATCH /{officeId}/contact`
+- `DELETE /{officeId}`
+
+### ChecklistTemplatesController (`/api/checklisttemplates`) class policy: `Authorize`
+- `GET /`
+- `GET /{id}`
+- `GET /history`
+- `POST /` (`CanManageWorkOrders`)
+- `POST /{id}/activate` (`CanManageWorkOrders`)
+- `POST /import` (`CanManageWorkOrders`)
+
+### AssetsController (`/api/assets`) class policy: `Authorize`
+- `GET /site/{siteCode}` (`CanViewSites`)
+- `GET /{assetCode}` (`CanViewSites`)
+- `GET /{assetCode}/history` (`CanViewSites`)
+- `POST /` (`CanManageSites`)
+- `PUT /{assetCode}/service` (`CanManageSites`)
+- `PUT /{assetCode}/fault` (`CanManageSites`)
+- `PUT /{assetCode}/replace` (`CanManageSites`)
+- `GET /expiring-warranties` (`CanViewSites`)
+- `GET /faulty` (`CanViewSites`)
+
+### ClientPortalController (`/api/portal`) class policy: `CanViewPortal`
+- `GET /dashboard`
+- `GET /sites`
+- `GET /sites/{siteCode}`
+- `GET /workorders`
+- `GET /sla-report`
+- `GET /visits/{siteCode}`
+- `GET /visits/{visitId}/evidence`
+- `PATCH /workorders/{id}/accept`
+- `PATCH /workorders/{id}/reject`
+
+### DailyPlansController (`/api/daily-plans`) class policy: `CanManageSites`
+- `POST /`
+- `GET /{officeId}/{date}`
+- `POST /{planId}/assign`
+- `DELETE /{planId}/assign`
+- `GET /{planId}/suggest/{engineerId}`
+- `GET /{officeId}/{date}/unassigned`
+- `POST /{planId}/publish`
+
+### SyncController (`/api/sync`) class policy: `CanManageVisits`
+- `POST /`
+- `GET /status/{deviceId}`
+- `GET /conflicts/{engineerId}`
+
+### SettingsController (`/api/settings`) class policy: `CanManageSettings`
+- `GET /`
+- `GET /{group}`
+- `PUT /`
+- `POST /test/{service}`
+
+### RolesController (`/api/roles`) class policy: `CanManageSettings`
+- `GET /`
+- `GET /permissions`
+- `GET /{id}`
+- `POST /`
+- `PUT /{id}`
+- `DELETE /{id}`
+
+## Error Handling and Localization
+- Exceptions are normalized by `ExceptionHandlingMiddleware`.
+- Domain/Application exceptions support localized message keys.
+- Validation errors return structured `Errors` dictionary and localized messages.
+
+## Operational Notes
+- All business timestamps are UTC in domain/application logic.
+- Request/response behaviors are mediated through commands/queries; controllers do not contain core business logic.
+- Keep this file aligned with controller route/attribute changes.

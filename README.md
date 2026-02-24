@@ -74,11 +74,13 @@ dotnet test TelecomPM.sln --logger "console;verbosity=minimal"
 
 ## Documentation
 
+- Documentation index (source-of-truth map): `docs/Documentation-Index.md`
 - API Docs: `docs/Api-Doc.md`
 - Operational Workflow: `docs/Operational-Workflow.md`
 - Domain Notes: `docs/Domain-Doc.md`
 - Application Notes: `docs/Application-Doc.md`
 - Excel Gap Audit: `docs/Excel-Domain-Gap-Report.md`
+- Remaining documentation gaps: `docs/Documentation-Gap-Report.md`
 
 ## Repository Structure
 

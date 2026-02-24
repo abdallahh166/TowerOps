@@ -1,52 +1,45 @@
-# Phase 2 — Architecture Blueprint (v1)
+# Phase 2 - Architecture Blueprint (Implementation Baseline)
 
 ## Objective
-Translate Phase-1 analysis outputs into implementation-ready technical architecture with enforceable policies for:
-- WorkOrder lifecycle
-- CM/BM parallel approval hierarchies
-- SLA clock + breach engine
-- Escalation policy engine
-- Evidence validation and audit trail
+Provide implementation guardrails for delivering the platform in Clean Architecture with operational controls.
 
-## Bounded Components
-1. **WorkOrder Service**
-   - Owns WO state machine and identifiers.
-2. **Visit Execution Service**
-   - Owns readings, checklist, photos, evidence completeness.
-3. **Approval Engine**
-   - Config-driven policy model for CM and BM flows.
-4. **SLA Engine**
-   - UTC-based response/resolution timers and breach evaluation.
-5. **Escalation Engine**
-   - Rule evaluation and mandatory data validation before escalation.
-6. **KPI Aggregation Layer**
-   - SLA compliance, MTTR, FTF, reopen rate, evidence completeness.
+## Implemented Architectural Components
+1. WorkOrder lifecycle service path
+2. Visit execution and evidence workflow
+3. Approval and review flow
+4. SLA evaluation engine and hosted processing
+5. Escalation lifecycle
+6. KPI/analytics/reporting read models
+7. Portal read model with client scoping
 
-## Data Model Baseline
-- `WorkOrders`
-- `Visits`
-- `VisitReadings`
-- `VisitChecklistItems`
-- `VisitPhotos`
-- `ApprovalRecords`
-- `EscalationRecords`
-- `SlaSnapshots`
-- `AuditLogs`
+## Data Model Coverage
+Representative persisted components:
+- WorkOrders
+- Visits + evidence sub-entities
+- Materials + transactions
+- Escalations
+- ChecklistTemplates
+- AuditLogs and ApprovalRecords
+- DailyPlans
+- Assets
+- SyncQueue/SyncConflict
+- SystemSettings
 
-## Critical Technical Rules
-1. Store all timestamps in UTC.
-2. Block escalation API submission on missing mandatory fields.
-3. No hardcoded approval chain in handlers/controllers.
-4. Persist immutable breach/audit history.
-5. Enforce role + stage policy checks on all workflow actions.
+## Critical Rules Enforced in Code
+- UTC timestamps for business state transitions
+- Policy/permission-based API authorization
+- Domain state-transition guards
+- Localized exception/message handling
+- Additive migration policy
 
-## Security Controls (Design-time)
-- JWT authentication + policy-based authorization.
-- Secrets externalized from source control.
-- Environment-specific CORS profiles.
-- Audit record for every state transition.
+## Security Controls
+- JWT authentication
+- Permission-claim authorization policies
+- Secrets expected outside source in production (`JWT_SECRET`)
+- Request logging and centralized exception handling
 
-## NFR Targets
-- API p95 latency < 500ms for core WO operations.
-- 99.9% service availability target (production).
-- Full traceability for lifecycle actions (who/when/what).
+## Non-Functional Direction
+- Transaction behavior for command handlers
+- Performance behavior instrumentation in MediatR pipeline
+- Notification HTTP resilience (retry/circuit-breaker/timeout)
+- CI gate with build + tests + documentation drift checks
