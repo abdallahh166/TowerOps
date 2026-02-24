@@ -70,6 +70,21 @@ public sealed class PortalReadRepository : IPortalReadRepository
         };
     }
 
+    public Task<bool> SiteExistsForClientAsync(
+        string clientCode,
+        string siteCode,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedClientCode = NormalizeClientCode(clientCode);
+        var normalizedSiteCode = string.IsNullOrWhiteSpace(siteCode) ? string.Empty : siteCode.Trim();
+
+        return _context.Sites
+            .AsNoTracking()
+            .AnyAsync(
+                s => s.ClientCode == normalizedClientCode && s.SiteCode.Value == normalizedSiteCode,
+                cancellationToken);
+    }
+
     public async Task<IReadOnlyList<PortalSiteDto>> GetSitesAsync(
         string clientCode,
         string? siteCode,
