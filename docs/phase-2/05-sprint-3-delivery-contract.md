@@ -1,4 +1,4 @@
-# Sprint 3 — Delivery Contract (Execution)
+# Sprint 3 â€” Delivery Contract (Execution)
 
 ## Scope
 1. Escalation API with hard mandatory-field validation
@@ -33,11 +33,11 @@
 
 
 ## Status Update
-- ✅ Escalation endpoints implemented in `EscalationsController`.
-- ✅ Escalation authorization policies now wired in API startup via `ApiAuthorizationPolicies`.
-- ✅ Visit review actions use `CanReviewVisits` policy.
+- âœ… Escalation endpoints implemented in `EscalationsController`.
+- âœ… Escalation authorization policies now wired in API startup via `ApiAuthorizationPolicies`.
+- âœ… Visit review actions use `CanReviewVisits` policy.
 
 ## Implementation References
-- `src/TelecomPm.Api/Controllers/EscalationsController.cs`
-- `src/TelecomPm.Api/Controllers/VisitsController.cs`
-- `src/TelecomPm.Api/Authorization/ApiAuthorizationPolicies.cs`
+- `src/TowerOps.Api/Controllers/EscalationsController.cs`
+- `src/TowerOps.Api/Controllers/VisitsController.cs`
+- `src/TowerOps.Api/Authorization/ApiAuthorizationPolicies.cs`

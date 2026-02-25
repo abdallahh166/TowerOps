@@ -1,6 +1,6 @@
-# TelecomPM Frontend Review and Implementation Blueprint (API-informed)
+# TowerOps Frontend Review and Implementation Blueprint (API-informed)
 
-This review is now based on the provided `TelecomPM API Documentation` (ASP.NET Core `net8.0`, JWT auth, policy/permission authorization, controller-based endpoints).
+This review is now based on the provided `TowerOps API Documentation` (ASP.NET Core `net8.0`, JWT auth, policy/permission authorization, controller-based endpoints).
 
 ## 1) Product surface inferred from API
 The backend already exposes a broad operations platform, so the frontend should be organized around **workflows**, not entities only:
@@ -23,8 +23,8 @@ The backend already exposes a broad operations platform, so the frontend should 
 - Axios client with auth interceptor and error normalizer
 - Optional: Zustand for local UI state only (filters/view prefs)
 
-### Why Next.js for TelecomPM (instead of plain React/Vite)
-- **Routing + layouts for large domains:** TelecomPM has many bounded contexts (operations, admin, portal, analytics). App Router route groups/layouts keep these isolated and maintainable.
+### Why Next.js for TowerOps (instead of plain React/Vite)
+- **Routing + layouts for large domains:** TowerOps has many bounded contexts (operations, admin, portal, analytics). App Router route groups/layouts keep these isolated and maintainable.
 - **Built-in auth-friendly middleware:** Easy request-time redirects/guards for login and unauthorized pages in one framework.
 - **Server Components for heavy data screens:** KPI/analytics/report pages can render faster with server data fetching where appropriate.
 - **Hybrid rendering per page:** Use SSR for role-sensitive dashboards, static rendering for mostly static admin/help areas.
@@ -35,7 +35,7 @@ The backend already exposes a broad operations platform, so the frontend should 
 - **Not because Angular is bad**: Angular is strong for enterprise apps, but here it adds more framework overhead than needed for the first delivery phases.
 - **Slower initial iteration for this team plan**: The current blueprint leans on React ecosystem utilities (TanStack Query, shadcn/ui patterns) that map directly to Next.js with less glue code.
 - **Rendering flexibility gap for portal needs**: Next.js gives SSR/SSG/hybrid rendering primitives out-of-the-box for future client-portal SEO/performance without extra platform decisions.
-- **Auth + route middleware ergonomics**: Next.js middleware and App Router layout boundaries make permission-aware route segmentation straightforward for TelecomPM's large policy surface.
+- **Auth + route middleware ergonomics**: Next.js middleware and App Router layout boundaries make permission-aware route segmentation straightforward for TowerOps's large policy surface.
 - **Hiring/ecosystem velocity for this stack**: For mixed dashboard + portal products, React/Next has broader template/component/tooling reuse, reducing time-to-first-feature.
 - **Migration risk control**: Starting with Next.js does not lock out Angular forever; API contracts remain framework-agnostic, so a future UI rewrite is possible if org standards require Angular.
 
@@ -180,22 +180,22 @@ Define a permission constant map in frontend for:
 
 ## 6) Suggested phased delivery
 
-### Phase 1 (2 weeks) — Foundation
+### Phase 1 (2 weeks) â€” Foundation
 - Next.js app shell + auth + permission guard layer.
 - API client, error model, query client, i18n scaffolding.
 - Implement: login, dashboard shell, unauthorized page.
 
-### Phase 2 (3 weeks) — Core operations
+### Phase 2 (3 weeks) â€” Core operations
 - Work orders + visits execution and review flows.
 - Sites overview and basic assets lookup.
 - KPI operations dashboard.
 
-### Phase 3 (2 weeks) — Admin and inventory
+### Phase 3 (2 weeks) â€” Admin and inventory
 - Users/offices/roles/settings.
 - Materials and stock actions.
 - Reports + analytics pages.
 
-### Phase 4 (1–2 weeks) — Hardening
+### Phase 4 (1â€“2 weeks) â€” Hardening
 - Accessibility pass, role matrix QA, e2e smoke tests.
 - Performance tuning (table virtualization, request dedupe, caching strategy).
 

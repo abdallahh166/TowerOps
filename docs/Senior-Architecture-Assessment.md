@@ -1,4 +1,4 @@
-# Senior .NET Architecture Assessment – TelecomPM
+# Senior .NET Architecture Assessment â€“ TowerOps
 
 This is a point-in-time assessment snapshot. Some findings may already be resolved. For current runtime behavior, use `docs/Api-Doc.md`, `docs/Application-Doc.md`, and `docs/Domain-Doc.md`.
 
@@ -6,7 +6,7 @@ This is a point-in-time assessment snapshot. Some findings may already be resolv
 - Reviewed API composition, Application layer (CQRS + behaviors), Infrastructure/EF Core persistence, and operational settings.
 - Review based on current code snapshot.
 
-## 1) Architecture — **7/10**
+## 1) Architecture â€” **7/10**
 
 ### What is strong
 - Clear layered structure (`Api`, `Application`, `Domain`, `Infrastructure`) with DI entry points per layer.
@@ -27,7 +27,7 @@ This is a point-in-time assessment snapshot. Some findings may already be resolv
   - Application layer registers only pure/in-process services.
   - Infrastructure layer registers external/I/O-backed implementations.
 
-## 2) Code Quality — **7/10**
+## 2) Code Quality â€” **7/10**
 
 ### What is strong
 - Good separation in handlers/validators and use of async/cancellation.
@@ -44,7 +44,7 @@ This is a point-in-time assessment snapshot. Some findings may already be resolv
   - Prefer a single global exception -> `ProblemDetails` pipeline.
   - Keep command/query failures as typed `Result<T>` with error codes.
 
-## 3) Security — **4/10**
+## 3) Security â€” **4/10**
 
 ### High-risk issues
 - **Hardcoded sensitive settings** in `appsettings.json` (JWT secret, SMTP password placeholder style, storage connection string format).
@@ -56,7 +56,7 @@ This is a point-in-time assessment snapshot. Some findings may already be resolv
 - Replace `AllowAll` with named, environment-based origin allowlists.
 - Apply policy-based authorization at controller/action level (roles/claims per use case).
 
-## 4) Performance — **6/10**
+## 4) Performance â€” **6/10**
 
 ### What is strong
 - Query-side repository methods support `AsNoTracking`.
@@ -73,7 +73,7 @@ This is a point-in-time assessment snapshot. Some findings may already be resolv
 - Add projection-first query handlers (AutoMapper `ProjectTo`) for read-heavy endpoints.
 - Add targeted load/perf tests for top APIs (visits list, analytics queries).
 
-## 5) EF Core Usage — **7/10**
+## 5) EF Core Usage â€” **7/10**
 
 ### What is strong
 - Configurations are explicit and mostly robust (indexes, conversions, owned types).
@@ -89,7 +89,7 @@ This is a point-in-time assessment snapshot. Some findings may already be resolv
 - Consider EF execution strategy + resilient transactions for cloud SQL transient faults.
 - Ensure migration pipeline and startup validation for schema drift in production.
 
-## 6) Production Readiness — **6/10**
+## 6) Production Readiness â€” **6/10**
 
 ### Good baseline
 - Serilog configured; health check endpoint exists.
@@ -110,7 +110,7 @@ This is a point-in-time assessment snapshot. Some findings may already be resolv
 
 ## Prioritized Improvement Plan
 
-### P0 (Immediate – before production exposure)
+### P0 (Immediate â€“ before production exposure)
 1. Remove secrets from source and rotate JWT/SMTP/storage credentials.
 2. Lock down CORS by environment and origin.
 3. Enforce `[Authorize]` + policy-based authorization on all sensitive endpoints.

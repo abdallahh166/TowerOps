@@ -1,11 +1,11 @@
 # TowerOps Domain Layer Documentation
 
 ## Purpose
-`TelecomPM.Domain` contains the core business model and invariants. It is framework-agnostic and does not depend on infrastructure implementation details.
+`TowerOps.Domain` contains the core business model and invariants. It is framework-agnostic and does not depend on infrastructure implementation details.
 
 Branding note:
 - Product brand: `TowerOps` (Seven Pictures)
-- Internal domain assembly remains `TelecomPM.Domain`
+- Internal domain assembly remains `TowerOps.Domain`
 
 ## Scope
 - Aggregates and entities
@@ -84,7 +84,7 @@ Domain tests validate:
 
 Run tests:
 ```bash
-dotnet test tests/TelecomPM.Domain.Tests/TelecomPM.Domain.Tests.csproj
+dotnet test tests/TowerOps.Domain.Tests/TowerOps.Domain.Tests.csproj
 ```
 
 ## Maintenance Notes

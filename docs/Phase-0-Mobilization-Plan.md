@@ -1,4 +1,4 @@
-# TelecomPM — Phase 0 Mobilization Plan
+# TowerOps â€” Phase 0 Mobilization Plan
 
 ## Objective
 Start the project with a controlled foundation before implementation by locking:
@@ -7,7 +7,7 @@ Start the project with a controlled foundation before implementation by locking:
 3. SLA/approval operating rules
 4. Security and production guardrails
 
-This phase is designed for the Mobiegypt × Orange Egypt subcontractor context and prepares the project for formal System Analysis (Phase 1).
+This phase is designed for the Mobiegypt Ã— Orange Egypt subcontractor context and prepares the project for formal System Analysis (Phase 1).
 
 ---
 
@@ -62,48 +62,48 @@ Must include:
 ## Workplan (Day-by-day)
 
 ## Week 1
-### Day 1 — Kickoff & Alignment
+### Day 1 â€” Kickoff & Alignment
 - Kickoff meeting with sponsor, ops, QA, engineering, and field representatives.
 - Confirm project success metrics and delivery timeline.
 - Open RAID log.
 
-### Day 2 — Scope & Stakeholders
+### Day 2 â€” Scope & Stakeholders
 - Draft scope boundaries (in-scope / out-of-scope).
 - Build stakeholder map and assign decision owners.
 
-### Day 3 — Data Discovery
+### Day 3 â€” Data Discovery
 - Consolidate all workbook fields and current API/domain fields.
 - Identify duplicates/conflicts in terms and labels.
 
-### Day 4 — Definition Workshop
+### Day 4 â€” Definition Workshop
 - Freeze top business definitions:
   - WO, Visit, SLA, Evidence Pack, Approval, FTF, MTTR.
 - Start Data Dictionary v1.
 
-### Day 5 — Governance Review
+### Day 5 â€” Governance Review
 - Review RACI, communication cadence, and escalation model.
 - Publish Week 1 status report.
 
 ## Week 2
-### Day 6 — SLA Workshop
+### Day 6 â€” SLA Workshop
 - Define SLA classes and target times.
 - Define breach and exception handling rules.
 
-### Day 7 — Approval & Role Matrix
+### Day 7 â€” Approval & Role Matrix
 - Finalize authorization responsibilities per role:
   - Dispatcher, Engineer, Supervisor, QA, Manager, Customer rep.
 - Finalize approval chain and closure requirements.
 
-### Day 8 — Security Baseline
+### Day 8 â€” Security Baseline
 - Approve secret management plan.
 - Approve environment CORS profile.
 - Approve authz policy baseline.
 
-### Day 9 — Readiness Consolidation
+### Day 9 â€” Readiness Consolidation
 - Package all outputs into Phase 1 readiness bundle.
 - Prepare unresolved items list with owners and due dates.
 
-### Day 10 — Steering Sign-off
+### Day 10 â€” Steering Sign-off
 - Steering committee review.
 - Final sign-off / go-no-go for Phase 1.
 
@@ -164,4 +164,4 @@ Recommended structure under `docs/phase-0/`:
 ---
 
 ## Immediate Next Action
-Start with **Day 1 Kickoff** and assign owners for D1–D6 deliverables before any new feature development.
+Start with **Day 1 Kickoff** and assign owners for D1â€“D6 deliverables before any new feature development.

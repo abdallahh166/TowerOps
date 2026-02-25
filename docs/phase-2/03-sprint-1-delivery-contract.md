@@ -1,4 +1,4 @@
-# Sprint 1 — Delivery Contract
+# Sprint 1 â€” Delivery Contract
 
 ## Scope
 1. `POST /api/workorders`
@@ -29,7 +29,7 @@
 
 
 ## Implementation References
-- Controller: `src/TelecomPm.Api/Controllers/WorkOrdersController.cs`
+- Controller: `src/TowerOps.Api/Controllers/WorkOrdersController.cs`
 - Commands: `CreateWorkOrderCommand`, `AssignWorkOrderCommand`
-- Domain: `src/TelecomPM.Domain/Entities/WorkOrders/WorkOrder.cs`
-- Policy wiring: `src/TelecomPm.Api/Authorization/ApiAuthorizationPolicies.cs`
+- Domain: `src/TowerOps.Domain/Entities/WorkOrders/WorkOrder.cs`
+- Policy wiring: `src/TowerOps.Api/Authorization/ApiAuthorizationPolicies.cs`

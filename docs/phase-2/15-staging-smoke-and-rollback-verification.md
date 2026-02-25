@@ -16,15 +16,15 @@ Execution was performed on a staging-equivalent local environment using the same
 ## Command set
 
 ```powershell
-dotnet test TelecomPM.sln --configuration Debug --no-build --filter "FullyQualifiedName~AuthControllerTests|FullyQualifiedName~LoginCommandHandlerTests|FullyQualifiedName~ForgotPasswordCommandHandlerTests|FullyQualifiedName~ResetPasswordCommandHandlerTests|FullyQualifiedName~ChangePasswordCommandHandlerTests|FullyQualifiedName~ChangePasswordCommandValidatorTests" --logger "console;verbosity=minimal"
+dotnet test TowerOps.sln --configuration Debug --no-build --filter "FullyQualifiedName~AuthControllerTests|FullyQualifiedName~LoginCommandHandlerTests|FullyQualifiedName~ForgotPasswordCommandHandlerTests|FullyQualifiedName~ResetPasswordCommandHandlerTests|FullyQualifiedName~ChangePasswordCommandHandlerTests|FullyQualifiedName~ChangePasswordCommandValidatorTests" --logger "console;verbosity=minimal"
 
-dotnet test TelecomPM.sln --configuration Debug --no-build --filter "FullyQualifiedName~StartVisitCommandHandlerTests|FullyQualifiedName~SubmitVisitCommandHandlerTests|FullyQualifiedName~CancelVisitCommandHandlerTests|FullyQualifiedName~RescheduleVisitCommandHandlerTests|FullyQualifiedName~VisitQueryEfficiencyTests|FullyQualifiedName~GetVisitEvidenceStatusQueryHandlerTests|FullyQualifiedName~VisitTests|FullyQualifiedName~VisitLifecycleTests|FullyQualifiedName~VisitReviewFlowTests|FullyQualifiedName~VisitEditCancelRulesTests" --logger "console;verbosity=minimal"
+dotnet test TowerOps.sln --configuration Debug --no-build --filter "FullyQualifiedName~StartVisitCommandHandlerTests|FullyQualifiedName~SubmitVisitCommandHandlerTests|FullyQualifiedName~CancelVisitCommandHandlerTests|FullyQualifiedName~RescheduleVisitCommandHandlerTests|FullyQualifiedName~VisitQueryEfficiencyTests|FullyQualifiedName~GetVisitEvidenceStatusQueryHandlerTests|FullyQualifiedName~VisitTests|FullyQualifiedName~VisitLifecycleTests|FullyQualifiedName~VisitReviewFlowTests|FullyQualifiedName~VisitEditCancelRulesTests" --logger "console;verbosity=minimal"
 
-dotnet test TelecomPM.sln --configuration Debug --no-build --filter "FullyQualifiedName~CreateWorkOrderCommandHandlerTests|FullyQualifiedName~CustomerDecisionPortalGuardTests|FullyQualifiedName~WorkOrderTests" --logger "console;verbosity=minimal"
+dotnet test TowerOps.sln --configuration Debug --no-build --filter "FullyQualifiedName~CreateWorkOrderCommandHandlerTests|FullyQualifiedName~CustomerDecisionPortalGuardTests|FullyQualifiedName~WorkOrderTests" --logger "console;verbosity=minimal"
 
-dotnet test TelecomPM.sln --configuration Debug --no-build --filter "FullyQualifiedName~ImportSiteDataCommandHandlerTests|FullyQualifiedName~ImportCommandsRealFilesIntegrationTests|FullyQualifiedName~Sprint12DryRunReconciliationTests" --logger "console;verbosity=minimal"
+dotnet test TowerOps.sln --configuration Debug --no-build --filter "FullyQualifiedName~ImportSiteDataCommandHandlerTests|FullyQualifiedName~ImportCommandsRealFilesIntegrationTests|FullyQualifiedName~Sprint12DryRunReconciliationTests" --logger "console;verbosity=minimal"
 
-dotnet test TelecomPM.sln --configuration Debug --no-build --filter "FullyQualifiedName~PortalQueriesTests|FullyQualifiedName~PortalReadRepositoryTests|FullyQualifiedName~CustomerDecisionPortalGuardTests" --logger "console;verbosity=minimal"
+dotnet test TowerOps.sln --configuration Debug --no-build --filter "FullyQualifiedName~PortalQueriesTests|FullyQualifiedName~PortalReadRepositoryTests|FullyQualifiedName~CustomerDecisionPortalGuardTests" --logger "console;verbosity=minimal"
 ```
 
 ## Results summary
@@ -48,7 +48,7 @@ Related reconciliation artifact:
 Command:
 
 ```powershell
-dotnet ef migrations list --project src/TelecomPm.Infrastructure/TelecomPm.Infrastructure.csproj --startup-project src/TelecomPm.Api/TelecomPm.Api.csproj
+dotnet ef migrations list --project src/TowerOps.Infrastructure/TowerOps.Infrastructure.csproj --startup-project src/TowerOps.Api/TowerOps.Api.csproj
 ```
 
 Result:
@@ -60,9 +60,9 @@ Result:
 Commands:
 
 ```powershell
-dotnet ef migrations script --idempotent --project src/TelecomPm.Infrastructure/TelecomPm.Infrastructure.csproj --startup-project src/TelecomPm.Api/TelecomPm.Api.csproj --output artifacts/phase-2/forward-idempotent.sql
+dotnet ef migrations script --idempotent --project src/TowerOps.Infrastructure/TowerOps.Infrastructure.csproj --startup-project src/TowerOps.Api/TowerOps.Api.csproj --output artifacts/phase-2/forward-idempotent.sql
 
-dotnet ef migrations script 20260223225829_AddResidualGapFieldsAndUnusedAssets 20260222025332_AddTowerOwnershipToSite --project src/TelecomPm.Infrastructure/TelecomPm.Infrastructure.csproj --startup-project src/TelecomPm.Api/TelecomPm.Api.csproj --output artifacts/phase-2/rollback-from-latest.sql
+dotnet ef migrations script 20260223225829_AddResidualGapFieldsAndUnusedAssets 20260222025332_AddTowerOwnershipToSite --project src/TowerOps.Infrastructure/TowerOps.Infrastructure.csproj --startup-project src/TowerOps.Api/TowerOps.Api.csproj --output artifacts/phase-2/rollback-from-latest.sql
 ```
 
 Produced artifacts:
@@ -72,7 +72,7 @@ Produced artifacts:
 ## Rehearsal execution (apply + rollback)
 
 Command flow:
-1. Create temporary LocalDB database: `TelecomPM_RollbackSmoke_ccdeddd0`
+1. Create temporary LocalDB database: `TowerOps_RollbackSmoke_ccdeddd0`
 2. Apply all migrations up to latest.
 3. Roll back from latest to previous migration.
 4. Drop temporary database.

@@ -1,4 +1,4 @@
-# Sprint 2 — Delivery Contract (Execution)
+# Sprint 2 â€” Delivery Contract (Execution)
 
 ## Scope
 1. Visit start / complete / submit workflow
@@ -52,5 +52,5 @@
 ```
 
 ## Implementation References
-- Controller: `src/TelecomPm.Api/Controllers/VisitsController.cs`
+- Controller: `src/TowerOps.Api/Controllers/VisitsController.cs`
 - Query handler: `GetVisitEvidenceStatusQueryHandler`

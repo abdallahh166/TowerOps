@@ -24,7 +24,7 @@ This release closes Phase 2 production remediation gates and marks the system as
 - Latest successful run evidence:  
   `https://github.com/boda166/telecomPm/actions/runs/22373242789`
 - Local full test run evidence at release prep:
-  - `dotnet test TelecomPM.sln --configuration Debug --no-build --logger "console;verbosity=minimal"`
+  - `dotnet test TowerOps.sln --configuration Debug --no-build --logger "console;verbosity=minimal"`
   - Result: `404 passed, 0 failed`
 
 ## 4) Migration and Rollback

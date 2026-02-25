@@ -7,10 +7,10 @@ import sys
 
 
 repo = Path(__file__).resolve().parents[1]
-controllers_dir = repo / "src" / "TelecomPm.Api" / "Controllers"
-policies_file = repo / "src" / "TelecomPm.Api" / "Authorization" / "ApiAuthorizationPolicies.cs"
-imports_dir = repo / "src" / "TelecomPm.Application" / "Commands" / "Imports"
-reports_dir = repo / "src" / "TelecomPm.Application" / "Commands" / "Reports"
+controllers_dir = repo / "src" / "TowerOps.Api" / "Controllers"
+policies_file = repo / "src" / "TowerOps.Api" / "Authorization" / "ApiAuthorizationPolicies.cs"
+imports_dir = repo / "src" / "TowerOps.Application" / "Commands" / "Imports"
+reports_dir = repo / "src" / "TowerOps.Application" / "Commands" / "Reports"
 api_doc_text = (repo / "docs" / "Api-Doc.md").read_text(encoding="utf-8")
 app_doc_text = (repo / "docs" / "Application-Doc.md").read_text(encoding="utf-8")
 
