@@ -19,7 +19,7 @@ A formal maintenance request (usually from NOC/planning/customer operations).
 
 **Recommended fields**:
 - WO Number
-- Customer (Orange)
+- Customer (Tower Owner / Operator)
 - Site Code / Site ID
 - Priority (P1/P2/P3)
 - SLA response time
@@ -55,8 +55,8 @@ All proof artifacts required to close a task:
 Formal quality/operations validation of completed work.
 
 Recommended approval levels:
-1. **Internal approval** (Mobiegypt supervisor)
-2. **Customer acceptance** (Orange representative or delegated team)
+1. **Internal approval** (Subcontractor supervisor)
+2. **Customer acceptance** (Client representative or delegated team)
 
 ## 2.6 Repeat Issue
 A fault recurring at same site/equipment within a defined window (e.g., 7/14/30 days).
@@ -73,7 +73,7 @@ Formula:
 
 ---
 
-## 3) Target operating model for Mobiegypt
+## 3) Target operating model for subcontractor operations
 
 ## 3.1 End-to-end process
 1. **WO Intake**
@@ -88,7 +88,7 @@ Formula:
 5. **Quality Review**
    - Supervisor approves/rejects/requests correction.
 6. **Customer Acceptance**
-   - Optional/required final acceptance by Orange side.
+   - Optional/required final acceptance by client side.
 7. **Closure & Reporting**
    - KPI update, SLA compliance record, and archival of evidence.
 
@@ -98,7 +98,7 @@ Formula:
 - **Supervisor / QA**: validates quality and compliance before closure.
 - **Warehouse/Logistics**: supports material reservation/consumption.
 - **Operations Manager**: tracks KPI and escalates SLA risks.
-- **Customer Interface (Orange side)**: acceptance and service quality sign-off.
+- **Customer Interface (Client side)**: acceptance and service quality sign-off.
 
 ---
 
@@ -182,7 +182,7 @@ Average consumed material value per WO.
 ## 7) 30-60-90 implementation plan
 
 ## 7.1 First 30 days (stabilize business alignment)
-- Freeze KPI definitions with Mobiegypt operations and Orange stakeholders.
+- Freeze KPI definitions with subcontractor operations and client stakeholders.
 - Define SLA matrix and evidence policy by work type.
 - Add BRD section: contractual closure criteria.
 
@@ -199,7 +199,7 @@ Average consumed material value per WO.
 ---
 
 ## 8) Practical glossary (quick reference)
-- **Subcontractor**: service provider contracted by operator (Mobiegypt for Orange scope).
+- **Subcontractor**: service provider contracted by operator/tower owner to execute field operations.
 - **NOC**: Network Operations Center (monitoring/escalation origin).
 - **Preventive Maintenance (PM)**: scheduled checks to prevent failures.
 - **Corrective Maintenance (CM)**: reactive fixes after faults.
@@ -212,7 +212,7 @@ Average consumed material value per WO.
 ## 9) What to share with stakeholders tomorrow
 Use this short message:
 
-> "TowerOps already supports visit execution and review. To align with Mobiegypt contractual operations with Orange Egypt, we will introduce explicit Work Orders, SLA policy enforcement, customer acceptance, and a fixed KPI governance model (SLA, FTF, MTTR, repeat rate)."
+> "TowerOps already supports visit execution and review. To align with subcontractor contractual operations, we will introduce explicit Work Orders, SLA policy enforcement, customer acceptance, and a fixed KPI governance model (SLA, FTF, MTTR, repeat rate)."
 
 
 

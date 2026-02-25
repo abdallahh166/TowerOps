@@ -122,9 +122,9 @@ public class DatabaseSeeder
         };
 
         // Set contact info for offices
-        offices[0].SetContactInfo("Ahmed Hassan", "+201234567890", "cairo@telecompm.com");
-        offices[1].SetContactInfo("Mohamed Ali", "+201234567891", "alex@telecompm.com");
-        offices[2].SetContactInfo("Sara Mohamed", "+201234567892", "giza@telecompm.com");
+        offices[0].SetContactInfo("Ahmed Hassan", "+201234567890", "cairo@towerops.com");
+        offices[1].SetContactInfo("Mohamed Ali", "+201234567891", "alex@towerops.com");
+        offices[2].SetContactInfo("Sara Mohamed", "+201234567892", "giza@towerops.com");
 
         await _context.Offices.AddRangeAsync(offices);
         _logger.LogInformation("Seeded {Count} offices", offices.Count);
@@ -143,7 +143,7 @@ public class DatabaseSeeder
             // Admins
             User.Create(
                 "System Admin",
-                "admin@telecompm.com",
+                "admin@towerops.com",
                 "+201000000000",
                 UserRole.Admin,
                 cairoOffice.Id),
@@ -151,14 +151,14 @@ public class DatabaseSeeder
             // Managers
             User.Create(
                 "Omar Manager",
-                "omar.manager@telecompm.com",
+                "omar.manager@towerops.com",
                 "+201011111111",
                 UserRole.Manager,
                 cairoOffice.Id),
 
             User.Create(
                 "Fatma Manager",
-                "fatma.manager@telecompm.com",
+                "fatma.manager@towerops.com",
                 "+201022222222",
                 UserRole.Manager,
                 alexOffice.Id),
@@ -166,7 +166,7 @@ public class DatabaseSeeder
             // Supervisors
             User.Create(
                 "Hassan Supervisor",
-                "hassan.supervisor@telecompm.com",
+                "hassan.supervisor@towerops.com",
                 "+201033333333",
                 UserRole.Supervisor,
                 cairoOffice.Id),
@@ -174,21 +174,21 @@ public class DatabaseSeeder
             // PM Engineers
             User.Create(
                 "Ahmed Engineer",
-                "ahmed.engineer@telecompm.com",
+                "ahmed.engineer@towerops.com",
                 "+201044444444",
                 UserRole.PMEngineer,
                 cairoOffice.Id),
 
             User.Create(
                 "Mona Engineer",
-                "mona.engineer@telecompm.com",
+                "mona.engineer@towerops.com",
                 "+201055555555",
                 UserRole.PMEngineer,
                 cairoOffice.Id),
 
             User.Create(
                 "Khaled Engineer",
-                "khaled.engineer@telecompm.com",
+                "khaled.engineer@towerops.com",
                 "+201066666666",
                 UserRole.PMEngineer,
                 alexOffice.Id),
@@ -196,14 +196,14 @@ public class DatabaseSeeder
             // Technicians
             User.Create(
                 "Mahmoud Technician",
-                "mahmoud.tech@telecompm.com",
+                "mahmoud.tech@towerops.com",
                 "+201077777777",
                 UserRole.Technician,
                 cairoOffice.Id),
 
             User.Create(
                 "Noha Technician",
-                "noha.tech@telecompm.com",
+                "noha.tech@towerops.com",
                 "+201088888888",
                 UserRole.Technician,
                 alexOffice.Id)

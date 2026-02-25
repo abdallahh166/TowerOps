@@ -21,7 +21,7 @@ It also defines alert thresholds and the first response actions.
 
 ## Log path
 - API log sink: `logs/api-log-*.txt` (Serilog file sink)
-- App log sink: `logs/telecompm-*.txt`
+- App log sink: `logs/towerops-*.txt`
 
 ## Security-sensitive flows to inspect with correlation
 - Auth endpoints: `/api/auth/*`
@@ -34,26 +34,26 @@ Metrics are emitted through `System.Diagnostics.Metrics` meter:
 - Meter name: `TowerOps.Operations`
 
 ## Import metrics
-- `telecompm_import_requests_total` (counter)
+- `towerops_import_requests_total` (counter)
   - tags: `operation`, `outcome`
-- `telecompm_import_rows_imported_total` (counter)
-- `telecompm_import_rows_skipped_total` (counter)
-- `telecompm_import_rows_errors_total` (counter)
-- `telecompm_import_duration_ms` (histogram)
+- `towerops_import_rows_imported_total` (counter)
+- `towerops_import_rows_skipped_total` (counter)
+- `towerops_import_rows_errors_total` (counter)
+- `towerops_import_duration_ms` (histogram)
 
 ## Sync metrics
-- `telecompm_sync_batches_total` (counter)
+- `towerops_sync_batches_total` (counter)
   - tags: `operation`, `outcome`
-- `telecompm_sync_items_processed_total` (counter)
-- `telecompm_sync_items_conflicts_total` (counter)
-- `telecompm_sync_items_failed_total` (counter)
-- `telecompm_sync_items_skipped_total` (counter)
-- `telecompm_sync_batch_duration_ms` (histogram)
+- `towerops_sync_items_processed_total` (counter)
+- `towerops_sync_items_conflicts_total` (counter)
+- `towerops_sync_items_failed_total` (counter)
+- `towerops_sync_items_skipped_total` (counter)
+- `towerops_sync_batch_duration_ms` (histogram)
 
 ## Notification metrics
-- `telecompm_notifications_total` (counter)
+- `towerops_notifications_total` (counter)
   - tags: `channel`, `outcome`
-- `telecompm_notification_duration_ms` (histogram)
+- `towerops_notification_duration_ms` (histogram)
 
 Channels:
 - `sms`
@@ -73,7 +73,7 @@ Outcomes:
 ## A. Import reliability
 - Condition:
   - `outcome=failed|exception` rate > 5% over 15 minutes
-  - OR p95 `telecompm_import_duration_ms` > 10,000 ms over 15 minutes
+  - OR p95 `towerops_import_duration_ms` > 10,000 ms over 15 minutes
 - Severity:
   - Warning at 5%
   - Critical at 10%
@@ -94,7 +94,7 @@ Outcomes:
 
 ## D. Notification latency
 - Condition:
-  - p95 `telecompm_notification_duration_ms` > 5,000 ms over 15 minutes
+  - p95 `towerops_notification_duration_ms` > 5,000 ms over 15 minutes
 - Severity:
   - Warning
 

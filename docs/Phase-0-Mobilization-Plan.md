@@ -7,7 +7,7 @@ Start the project with a controlled foundation before implementation by locking:
 3. SLA/approval operating rules
 4. Security and production guardrails
 
-This phase is designed for the Mobiegypt Ã— Orange Egypt subcontractor context and prepares the project for formal System Analysis (Phase 1).
+This phase is designed for telecom subcontractor and client (tower owner/operator) context and prepares the project for formal System Analysis (Phase 1).
 
 ---
 
@@ -42,8 +42,8 @@ Must include:
 - SLA matrix by priority/class (response & resolution targets)
 - Breach policy definition
 - Approval workflow:
-  - Internal approval (Mobiegypt)
-  - Customer acceptance (Orange side)
+  - Internal approval (subcontractor)
+  - Customer acceptance (client side)
 
 ## D5) Security & Production Baseline
 - Secrets management approach (no secrets in source)

@@ -1,7 +1,7 @@
 # Comprehensive Project Review (Code + Documentation)
 
 Date: 2026-02-18  
-Repository: `telecomPm`
+Repository: `TowerOps`
 
 This is a point-in-time review snapshot. Some issues listed here may already be addressed in code. Treat this document as historical analysis, and use live docs for current behavior.
 
@@ -107,7 +107,7 @@ I reviewed source modules, API/controllers, infrastructure services, domain enti
 - **Consistency note:** Visit endpoints require the policy, but startup policy registration is missing.
 - **Recommendation:** Add implementation checklist line item: "Policy registered + integration test passing".
 
-#### 14) `docs/Mobiegypt-Project-Operating-Guide.md` (Markdown)
+#### 14) `docs/Subcontractor-Project-Operating-Guide.md` (Markdown)
 - **Issue:** Gap analysis claims "No explicit Work Order aggregate" although code already includes WorkOrder aggregate and APIs.
 - **Impact:** Business stakeholders may be misled about current capability maturity.
 - **Suggested correction:** Reclassify this as "implemented (baseline), requires maturity hardening".

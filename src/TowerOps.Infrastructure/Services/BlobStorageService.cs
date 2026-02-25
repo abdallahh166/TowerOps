@@ -27,7 +27,7 @@ public class BlobStorageService : IFileStorageService
         }
 
         _blobServiceClient = new BlobServiceClient(connectionString);
-        _containerName = configuration["AzureBlobStorage:ContainerName"] ?? "telecompm";
+        _containerName = configuration["AzureBlobStorage:ContainerName"] ?? "towerops";
     }
 
     public async Task<string> UploadFileAsync(

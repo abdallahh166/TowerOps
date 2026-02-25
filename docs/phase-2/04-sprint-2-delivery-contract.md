@@ -47,7 +47,7 @@
 ```json
 {
   "resolution": "Replaced damaged cable lug",
-  "resolvedBy": "engineer@telecompm.com"
+  "resolvedBy": "engineer@towerops.com"
 }
 ```
 
