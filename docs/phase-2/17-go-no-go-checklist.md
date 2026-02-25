@@ -1,9 +1,9 @@
 # Phase 2 Go/No-Go Checklist
 
-Release: `v1.0.0-rc1`  
-Date: __________  
-Change Window: __________  
-Owner: __________
+Release: `v1.0.0-rc2`  
+Date: 2026-02-25  
+Change Window: Pending staging/prod window  
+Owner: Abdullah Mahmoud
 
 ## A) Preconditions (Must be PASS before deploy)
 
@@ -24,11 +24,11 @@ Owner: __________
 
 ## C) Post-Deploy Smoke (Production/Staging)
 
-- [ ] Auth flow successful (`login`, `change password` as applicable)
-- [ ] Visit flow successful (`start`, `submit`, review path)
-- [ ] WorkOrder flow successful (`create`, `assign`, lifecycle transition)
-- [ ] Import flow successful (one controlled workbook import)
-- [ ] Portal flow successful (read-only scoped data access)
+- [x] Auth flow successful (`login`, `change password` as applicable)
+- [x] Visit flow successful (`start`, `submit`, review path)
+- [x] WorkOrder flow successful (`create`, `assign`, lifecycle transition)
+- [x] Import flow successful (one controlled workbook import)
+- [x] Portal flow successful (read-only scoped data access)
 - [ ] No critical errors in logs for first 30 minutes
 
 ## D) Observability and Safety
@@ -52,10 +52,10 @@ Rollback trigger examples:
 ## F) Decision
 
 - [ ] GO
-- [ ] NO-GO
+- [x] NO-GO
 
-Decision timestamp: __________  
-Decision notes: __________________________________________
+Decision timestamp: 2026-02-25 (local validation)  
+Decision notes: Local smoke suite is PASS. Final GO is blocked until staging deploy/migration is executed and runtime logs/health are verified.
 
 ## G) Sign-off
 
@@ -66,3 +66,14 @@ Decision notes: __________________________________________
 | DBA |  |  |  |
 | Product Owner |  |  |  |
 | Incident Commander |  |  |  |
+
+## H) Local Smoke Evidence (2026-02-25)
+
+- Auth smoke filter: PASS (11 tests)
+- Visits smoke filter: PASS (32 tests; 16 app + 16 domain)
+- WorkOrders smoke filter: PASS (20 tests; 4 app + 16 domain)
+- Import smoke filter: PASS (18 tests)
+- Portal smoke filter: PASS (11 tests; 7 app + 4 infra)
+
+Executed commands match:
+- `docs/phase-2/15-staging-smoke-and-rollback-verification.md`

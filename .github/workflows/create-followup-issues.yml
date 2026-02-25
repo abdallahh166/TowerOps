@@ -1,0 +1,159 @@
+name: Create Follow-up Issues
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag (for issue context)"
+        required: false
+        default: "v1.0.0-rc2"
+      dry_run:
+        description: "If true, do not create issues"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  create-follow-up-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create or Reuse Follow-up Issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const releaseTag = "${{ github.event.inputs.release_tag || 'v1.0.0-rc2' }}";
+            const dryRunRaw = "${{ github.event.inputs.dry_run || 'false' }}";
+            const dryRun = String(dryRunRaw).toLowerCase() === "true";
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const labels = [
+              { name: "tech-debt", color: "d4c5f9", description: "Technical debt follow-up" },
+              { name: "ef-core", color: "0e8a16", description: "Entity Framework Core related work" },
+              { name: "post-release", color: "fbca04", description: "Scheduled after release cut" }
+            ];
+
+            async function ensureLabel(label) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch (err) {
+                if (err.status === 404) {
+                  await github.rest.issues.createLabel({
+                    owner,
+                    repo,
+                    name: label.name,
+                    color: label.color,
+                    description: label.description
+                  });
+                } else {
+                  throw err;
+                }
+              }
+            }
+
+            for (const label of labels) {
+              await ensureLabel(label);
+            }
+
+            const issueDefinitions = [
+              {
+                title: "P1: EF enum sentinel warnings hardening",
+                body: [
+                  `Created from release flow for ${releaseTag}.`,
+                  "",
+                  "## Problem",
+                  "EF warns about enum sentinel/default behavior for:",
+                  "- `Site.ResponsibilityScope`",
+                  "- `Site.TowerOwnershipType`",
+                  "- `WorkOrder.Scope`",
+                  "",
+                  "## Risk",
+                  "Ambiguous default/sentinel behavior can create subtle data-shape bugs and make future migrations fragile.",
+                  "",
+                  "## Scope",
+                  "1. Add explicit EF configuration for enum defaults/sentinels.",
+                  "2. Ensure migration is additive and backward-safe.",
+                  "3. Add regression tests for create/read/update with default enum values.",
+                  "",
+                  "## Acceptance Criteria",
+                  "- No enum sentinel warnings during migration/update.",
+                  "- Existing records remain readable without data loss.",
+                  "- Tests cover default-value behavior and pass in CI."
+                ].join("\n"),
+                labels: ["tech-debt", "ef-core", "post-release"]
+              },
+              {
+                title: "P1: configure explicit decimal precision for escalation fields",
+                body: [
+                  `Created from release flow for ${releaseTag}.`,
+                  "",
+                  "## Problem",
+                  "EF warns that escalation decimal precision is not explicitly configured for:",
+                  "- `Escalation.FinancialImpactEgp`",
+                  "- `Escalation.SlaImpactPercentage`",
+                  "",
+                  "## Risk",
+                  "Implicit precision can cause truncation/rounding differences across environments.",
+                  "",
+                  "## Scope",
+                  "1. Add explicit precision/scale in EF configuration.",
+                  "2. Generate additive migration.",
+                  "3. Add repository/integration test covering persisted precision.",
+                  "",
+                  "## Acceptance Criteria",
+                  "- No decimal precision warnings for escalation fields.",
+                  "- Persisted values match expected precision/scale in SQL Server.",
+                  "- Migration applies cleanly in staging and CI."
+                ].join("\n"),
+                labels: ["tech-debt", "ef-core", "post-release"]
+              }
+            ];
+
+            const results = [];
+
+            for (const def of issueDefinitions) {
+              const q = `repo:${owner}/${repo} is:issue is:open in:title "${def.title}"`;
+              const search = await github.rest.search.issuesAndPullRequests({ q, per_page: 1 });
+              const existing = search.data.items?.[0];
+
+              if (existing) {
+                results.push({ title: def.title, action: "reused", url: existing.html_url });
+                continue;
+              }
+
+              if (dryRun) {
+                results.push({ title: def.title, action: "dry-run", url: "" });
+                continue;
+              }
+
+              const created = await github.rest.issues.create({
+                owner,
+                repo,
+                title: def.title,
+                body: def.body,
+                labels: def.labels
+              });
+
+              results.push({ title: def.title, action: "created", url: created.data.html_url });
+            }
+
+            core.summary
+              .addHeading("Follow-up Issue Automation Result")
+              .addTable([
+                [
+                  { data: "Title", header: true },
+                  { data: "Action", header: true },
+                  { data: "URL", header: true }
+                ],
+                ...results.map(r => [r.title, r.action, r.url || "-"])
+              ])
+              .write();
+
+            core.info(JSON.stringify(results, null, 2));
