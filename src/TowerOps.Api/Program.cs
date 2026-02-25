@@ -26,7 +26,7 @@ Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
     .WriteTo.Console()
-    .WriteTo.File("logs/telecompm-.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.File("logs/towerops-.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
 builder.Host.UseSerilog();

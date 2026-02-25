@@ -1,6 +1,6 @@
 # TowerOps
 
-[![.NET CI](https://github.com/boda166/telecomPm/actions/workflows/dotnet.yml/badge.svg)](https://github.com/boda166/telecomPm/actions/workflows/dotnet.yml)
+![CI](https://img.shields.io/badge/CI-GitHub%20Actions-success)
 ![Platform](https://img.shields.io/badge/platform-.NET%208%20API-blue)
 ![Tests](https://img.shields.io/badge/tests-xUnit-success)
 

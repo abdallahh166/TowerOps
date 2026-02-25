@@ -22,7 +22,7 @@ This release closes Phase 2 production remediation gates and marks the system as
 
 - CI workflow: `.NET CI`
 - Latest successful run evidence:  
-  `https://github.com/boda166/telecomPm/actions/runs/22373242789`
+  `https://github.com/<owner>/<repo>/actions/runs/22373242789` (replace with your repository path)
 - Local full test run evidence at release prep:
   - `dotnet test TowerOps.sln --configuration Debug --no-build --logger "console;verbosity=minimal"`
   - Result: `404 passed, 0 failed`
