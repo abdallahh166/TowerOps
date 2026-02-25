@@ -1,7 +1,11 @@
-# TelecomPM Domain Layer Documentation
+# TowerOps Domain Layer Documentation
 
 ## Purpose
 `TelecomPM.Domain` contains the core business model and invariants. It is framework-agnostic and does not depend on infrastructure implementation details.
+
+Branding note:
+- Product brand: `TowerOps` (Seven Pictures)
+- Internal domain assembly remains `TelecomPM.Domain`
 
 ## Scope
 - Aggregates and entities

@@ -1,7 +1,11 @@
-# TelecomPM API Documentation
+# TowerOps API Documentation
 
 ## Purpose
-This document describes the current ASP.NET Core API surface in `src/TelecomPm.Api`, including runtime behavior, authorization policies, and endpoint contracts at controller level.
+This document describes the current ASP.NET Core API surface in `src/TelecomPm.Api`, including runtime behavior, authorization policies, and endpoint contracts at controller level for the **TowerOps** product by **Seven Pictures**.
+
+Branding note:
+- Product brand: `TowerOps`
+- Internal code namespaces/project names: `TelecomPM` / `TelecomPm` (kept for compatibility)
 
 ## Runtime Architecture
 - Framework: ASP.NET Core Web API (`net8.0`)

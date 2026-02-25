@@ -1,4 +1,4 @@
-# TelecomPM Release Notes - v1.0.0-rc1
+# TowerOps Release Notes - v1.0.0-rc1
 
 Date: 2026-02-24  
 Release Owner: Engineering

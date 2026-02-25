@@ -1,6 +1,6 @@
-@TelecomPm.Api_HostAddress = http://localhost:5277
+@TowerOps_Api_HostAddress = http://localhost:5277
 
-GET {{TelecomPm.Api_HostAddress}}/weatherforecast/
+GET {{TowerOps_Api_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###

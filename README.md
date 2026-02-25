@@ -1,13 +1,22 @@
-# TelecomPM
+# TowerOps
 
 [![.NET CI](https://github.com/boda166/telecomPm/actions/workflows/dotnet.yml/badge.svg)](https://github.com/boda166/telecomPm/actions/workflows/dotnet.yml)
 ![Platform](https://img.shields.io/badge/platform-.NET%208%20API-blue)
 ![Tests](https://img.shields.io/badge/tests-xUnit-success)
 
-TelecomPM is a field-operations platform for telecom maintenance subcontractors.  
-It helps operations teams plan visits, execute work orders, track evidence, manage materials, and provide controlled client visibility.
+TowerOps is a field-operations platform by **Seven Pictures** for telecom maintenance subcontractors.  
+It helps subcontractor teams plan PM/CM visits, execute work orders, track evidence, manage materials, and provide controlled client visibility for tower owners/operators (for example: Orange, Vodafone, WE, IHS).
 
-## Why TelecomPM
+## Brand and Positioning
+
+- Product name: `TowerOps`
+- Company: `Seven Pictures`
+- Target customers: subcontractor companies responsible for CM/PM telecom site operations
+- Typical clients of those subcontractors: mobile operators and tower companies
+
+Note: internal technical namespaces and solution/project names still use `TelecomPM` for backward compatibility.
+
+## Why TowerOps
 
 - Standardized visit and work-order lifecycles
 - GPS check-in/out and evidence-driven execution

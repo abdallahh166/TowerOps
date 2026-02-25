@@ -130,7 +130,7 @@ public sealed class SettingsController : ApiControllerBase
             return BadRequest("Current user phone number is not available.");
         }
 
-        await _notificationService.SendSmsAsync(user.PhoneNumber, "TelecomPM Twilio test message.", cancellationToken);
+        await _notificationService.SendSmsAsync(user.PhoneNumber, "TowerOps Twilio test message.", cancellationToken);
         return Ok(new { message = "Twilio test sent." });
     }
 
@@ -143,8 +143,8 @@ public sealed class SettingsController : ApiControllerBase
 
         await _emailService.SendEmailAsync(
             _currentUserService.Email,
-            "TelecomPM Email Test",
-            "<p>This is a TelecomPM SMTP test email.</p>",
+            "TowerOps Email Test",
+            "<p>This is a TowerOps SMTP test email.</p>",
             cancellationToken);
 
         return Ok(new { message = "Email test sent." });
@@ -159,7 +159,7 @@ public sealed class SettingsController : ApiControllerBase
 
         await _notificationService.SendPushNotificationAsync(
             _currentUserService.UserId,
-            "TelecomPM Push Test",
+            "TowerOps Push Test",
             "This is a Firebase push notification test.",
             cancellationToken);
 

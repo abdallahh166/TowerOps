@@ -448,7 +448,7 @@ public class DatabaseSeeder
             CreateSetting("Evidence:RequiredReadingTypes", "BatteryVoltage,RectifierOutput", "Evidence", "string", "Required reading types", false, seededBy),
 
             // Company
-            CreateSetting("Company:Name", "MobiEgypt", "Company", "string", "Company display name", false, seededBy),
+            CreateSetting("Company:Name", "Seven Pictures - TowerOps", "Company", "string", "Company display name", false, seededBy),
             CreateSetting("Company:DefaultTimezone", "Africa/Cairo", "Company", "string", "Default company timezone", false, seededBy),
             CreateSetting("Company:LogoUrl", string.Empty, "Company", "string", "Public logo URL", false, seededBy),
 

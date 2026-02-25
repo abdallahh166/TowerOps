@@ -1,8 +1,8 @@
-# Mobiegypt × Orange Egypt — TelecomPM Operating Guide
+﻿# Subcontractor x Tower Owner - TowerOps Operating Guide
 
 ## 1) What this project is (in simple terms)
-TelecomPM is a field-maintenance management platform for telecom sites.
-It helps Mobiegypt plan, execute, review, and report maintenance work done on Orange Egypt network sites.
+TowerOps is a field-maintenance management platform for telecom sites.
+It helps subcontractor companies plan, execute, review, and report maintenance work done for tower owners/operators (for example: Orange, Vodafone, WE, IHS).
 
 In plain language:
 - **Office teams** plan and assign maintenance work.
@@ -36,7 +36,7 @@ A field execution instance performed by engineer(s) at a site.
 - Contains evidence: photos, readings, checklist, issues, approvals.
 
 ## 2.3 SLA (Service Level Agreement)
-The contractual timing and quality rules that Mobiegypt must meet.
+The contractual timing and quality rules that the subcontractor must meet.
 
 **Common SLA measures**:
 - **Response Time**: time from WO creation to engineer arrival/start.
@@ -108,19 +108,19 @@ Formula:
 Percentage of closed WOs delivered within SLA.
 
 Formula:
-`SLA Compliance % = (WO closed within SLA / Total closed WO) × 100`
+`SLA Compliance % = (WO closed within SLA / Total closed WO) Ã— 100`
 
 ## 4.2 SLA Breach %
 Percentage of WOs that violated SLA.
 
 Formula:
-`SLA Breach % = (WO breached / Total closed WO) × 100`
+`SLA Breach % = (WO breached / Total closed WO) Ã— 100`
 
 ## 4.3 First Time Fix Rate %
 Percentage of WOs solved without repeat/reopen inside observation window.
 
 Formula:
-`FTF % = (WO fixed first time / Total WO closed) × 100`
+`FTF % = (WO fixed first time / Total WO closed) Ã— 100`
 
 ## 4.4 Average Response Time
 Average time between WO creation and visit start.
@@ -169,7 +169,7 @@ Average consumed material value per WO.
 
 ## 6.2 Lifecycle proposal
 `WorkOrder` states:
-- `Created` → `Assigned` → `InProgress` → `PendingInternalReview` → `PendingCustomerAcceptance` → `Closed`
+- `Created` â†’ `Assigned` â†’ `InProgress` â†’ `PendingInternalReview` â†’ `PendingCustomerAcceptance` â†’ `Closed`
 - plus exceptional states: `Rejected`, `Cancelled`, `Reopened`
 
 ## 6.3 Mapping to existing Visit model
@@ -218,3 +218,4 @@ Use this short message:
 
 ## 10) Execution kickoff
 - Start immediately with `docs/Phase-0-Mobilization-Plan.md` as the official mobilization track before feature delivery.
+

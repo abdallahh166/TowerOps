@@ -10,6 +10,7 @@ These documents are intended to match current code behavior:
 - `docs/Application-Doc.md`
 - `docs/Domain-Doc.md`
 - `docs/Operational-Workflow.md`
+- `docs/TowerOps-Brand-Profile.md`
 - `docs/phase-0/00-phase-overview.md`
 - `docs/phase-1/00-phase-overview.md`
 - `docs/phase-2/00-phase-overview.md`

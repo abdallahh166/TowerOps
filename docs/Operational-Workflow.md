@@ -1,6 +1,6 @@
-# TelecomPM Operational Workflow
+# TowerOps Operational Workflow
 
-This document describes how real users operate TelecomPM day to day, with explicit workflow/state diagrams aligned to current implementation.
+This document describes how real users operate TowerOps day to day, with explicit workflow/state diagrams aligned to current implementation.
 
 ## 1) Daily User Workflow (Role Interaction)
 

@@ -161,13 +161,13 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "TelecomPM API",
+        Title = "TowerOps API",
         Version = "v1",
-        Description = "Telecommunications Preventive Maintenance Management System",
+        Description = "TowerOps - Telecom Field Operations Platform for CM/PM subcontractors",
         Contact = new OpenApiContact
         {
-            Name = "TelecomPM Team",
-            Email = "support@telecompm.com"
+            Name = "Seven Pictures - TowerOps Team",
+            Email = "support@sevenpictures.com"
         }
     });
 
@@ -214,7 +214,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "TelecomPM API V1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "TowerOps API V1");
         c.RoutePrefix = string.Empty;
     });
 }
