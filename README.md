@@ -16,6 +16,7 @@ It is designed for day-to-day execution by office managers, supervisors, enginee
 - [Architecture](#architecture)
 - [Repository Structure](#repository-structure)
 - [Quick Start](#quick-start)
+- [Frontend Workspace](#frontend-workspace)
 - [Configuration](#configuration)
 - [Database and Migrations](#database-and-migrations)
 - [API and Testing](#api-and-testing)
@@ -76,6 +77,8 @@ flowchart LR
 |  |- TowerOps.Domain.Tests/
 |  \- TowerOps.Infrastructure.Tests/
 |- docs/
+|- frontend/
+|  \- towerops-web/
 |- tools/
 \- TowerOps.sln
 ```
@@ -99,6 +102,29 @@ dotnet run --project src/TowerOps.Api/TowerOps.Api.csproj
 In `Development`, Swagger UI is available at:
 
 - `https://localhost:<port>/`
+
+## Frontend Workspace
+
+Frontend app path:
+
+- `frontend/towerops-web`
+
+Run frontend locally:
+
+```bash
+cd frontend/towerops-web
+npm install
+npm run dev
+```
+
+Default local URL:
+
+- `http://localhost:5173`
+
+For local API proxy, use:
+
+- `VITE_API_BASE_URL=/api`
+- `VITE_API_PROXY_TARGET=https://localhost:7259`
 
 ## Configuration
 
