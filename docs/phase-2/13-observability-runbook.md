@@ -31,7 +31,7 @@ It also defines alert thresholds and the first response actions.
 ## 3) Metrics Surface
 
 Metrics are emitted through `System.Diagnostics.Metrics` meter:
-- Meter name: `TelecomPM.Operations`
+- Meter name: `TowerOps.Operations`
 
 ## Import metrics
 - `telecompm_import_requests_total` (counter)

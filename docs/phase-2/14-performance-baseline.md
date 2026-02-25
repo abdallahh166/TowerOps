@@ -10,7 +10,7 @@ This document records the baseline thresholds and latest measured results for th
 - Site import pipeline
 - Offline sync batch processing
 
-These thresholds are enforced by automated tests in `tests/TelecomPM.Application.Tests/Performance/PerformanceBaselineSmokeTests.cs`.
+These thresholds are enforced by automated tests in `tests/TowerOps.Application.Tests/Performance/PerformanceBaselineSmokeTests.cs`.
 
 ## 2) Baseline Scenarios and Thresholds
 
@@ -25,7 +25,7 @@ These thresholds are enforced by automated tests in `tests/TelecomPM.Application
 Command:
 
 ```powershell
-dotnet test tests/TelecomPM.Application.Tests/TelecomPM.Application.Tests.csproj --configuration Debug --filter "FullyQualifiedName~PerformanceBaselineSmokeTests" --logger "console;verbosity=normal"
+dotnet test tests/TowerOps.Application.Tests/TowerOps.Application.Tests.csproj --configuration Debug --filter "FullyQualifiedName~PerformanceBaselineSmokeTests" --logger "console;verbosity=normal"
 ```
 
 Observed results:
@@ -41,6 +41,6 @@ Observed results:
 
 ## 5) Related Evidence
 
-- `tests/TelecomPM.Application.Tests/Performance/PerformanceBaselineSmokeTests.cs`
+- `tests/TowerOps.Application.Tests/Performance/PerformanceBaselineSmokeTests.cs`
 - `docs/phase-2/12-production-remediation-plan.md`
 - `docs/phase-2/13-observability-runbook.md`

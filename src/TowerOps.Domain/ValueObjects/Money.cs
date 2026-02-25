@@ -1,0 +1,79 @@
+using TowerOps.Domain.Exceptions;
+using TowerOps.Domain.ValueObjects;
+
+public sealed class Money : ValueObject
+{
+    public decimal Amount { get; }
+    public string Currency { get; }
+
+    private Money(decimal amount, string currency)
+    {
+        Amount = amount;
+        Currency = currency;
+    }
+
+    public static Money Create(decimal amount, string currency)
+    {
+        if (amount < 0)
+            throw new DomainException("Amount cannot be negative", "Money.Amount.NonNegative");
+
+        if (string.IsNullOrWhiteSpace(currency))
+            throw new DomainException("Currency is required", "Money.Currency.Required");
+
+        return new Money(amount, currency);
+    }
+
+    // Existing Add method...
+    public Money Add(Money other)
+    {
+        if (Currency != other.Currency)
+            throw new DomainException(
+                $"Cannot add different currencies: {Currency} and {other.Currency}",
+                "Money.Add.CurrencyMismatch",
+                Currency,
+                other.Currency);
+
+        return new Money(Amount + other.Amount, Currency);
+    }
+
+    // ADD subtract method
+    public Money Subtract(Money other)
+    {
+        if (Currency != other.Currency)
+            throw new DomainException(
+                $"Cannot subtract different currencies: {Currency} and {other.Currency}",
+                "Money.Subtract.CurrencyMismatch",
+                Currency,
+                other.Currency);
+
+        var result = Amount - other.Amount;
+
+        if (result < 0)
+            throw new DomainException("Subtraction would result in negative amount", "Money.Subtract.WouldBeNegative");
+
+        return new Money(result, Currency);
+    }
+
+    // BONUS: Add comparison and multiplication
+    public Money Multiply(decimal factor)
+    {
+        if (factor < 0)
+            throw new DomainException("Factor cannot be negative", "Money.Multiply.FactorNonNegative");
+
+        return new Money(Amount * factor, Currency);
+    }
+
+    public bool IsGreaterThan(Money other)
+    {
+        if (Currency != other.Currency)
+            throw new DomainException("Cannot compare different currencies", "Money.Compare.CurrencyMismatch");
+
+        return Amount > other.Amount;
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Amount;
+        yield return Currency;
+    }
+}

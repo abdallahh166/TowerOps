@@ -11,9 +11,9 @@ I reviewed source modules, API/controllers, infrastructure services, domain enti
 
 ## 2) Module / File Findings
 
-### A. API Module (`src/TelecomPm.Api`)
+### A. API Module (`src/TowerOps.Api`)
 
-#### 1) `src/TelecomPm.Api/Program.cs` (C#)
+#### 1) `src/TowerOps.Api/Program.cs` (C#)
 - **Issue:** Authorization policies are only registered for work-order scenarios (`CanManageWorkOrders`, `CanViewWorkOrders`), but not for policies used by other controllers.
 - **Evidence:** policy registration block only contains two policies.
   - `CanManageWorkOrders` and `CanViewWorkOrders` are defined in this file.
@@ -24,28 +24,28 @@ I reviewed source modules, API/controllers, infrastructure services, domain enti
   - `CanViewEscalations`
   - `CanViewKpis`
 
-#### 2) `src/TelecomPm.Api/Controllers/VisitsController.cs` (C#)
+#### 2) `src/TowerOps.Api/Controllers/VisitsController.cs` (C#)
 - **Issue:** Uses `[Authorize(Policy = "CanReviewVisits")]` on review endpoints.
 - **Evidence:** approve/reject/request-correction endpoints require `CanReviewVisits`.
 - **Impact:** If the policy is missing in `Program.cs`, these endpoints can fail authorization configuration checks.
 - **Suggested correction:** Register `CanReviewVisits` policy centrally and align role matrix with sprint contracts.
 - **Consistency note:** This aligns with Sprint 4 acceptance criteria requiring review policy enforcement.
 
-#### 3) `src/TelecomPm.Api/Controllers/EscalationsController.cs` (C#)
+#### 3) `src/TowerOps.Api/Controllers/EscalationsController.cs` (C#)
 - **Issue:** Uses `CanManageEscalations` and `CanViewEscalations` policies.
 - **Evidence:** `POST` and `GET` escalation endpoints are policy-protected.
 - **Impact:** Missing policy definitions in `Program.cs` lead to broken authorization behavior.
 - **Suggested correction:** Add both policies with explicit role mapping per governance model.
 - **Consistency note:** Sprint 3 requires policy-restricted escalation management/view.
 
-#### 4) `src/TelecomPm.Api/Controllers/KpiController.cs` (C#)
+#### 4) `src/TowerOps.Api/Controllers/KpiController.cs` (C#)
 - **Issue:** Uses `CanViewKpis` policy which is not currently defined in `Program.cs`.
 - **Evidence:** `GET /api/kpi/operations` endpoint requires `CanViewKpis`.
 - **Impact:** KPI endpoint authorization path is incomplete.
 - **Suggested correction:** Define `CanViewKpis` policy and include intended consumer roles (Ops manager/admin/etc.).
 - **Consistency note:** Sprint 4 explicitly calls for role-based policy around KPI/visit review security hardening.
 
-#### 5) `src/TelecomPm.Api/Controllers/UsersController.cs` (C#)
+#### 5) `src/TowerOps.Api/Controllers/UsersController.cs` (C#)
 - **Issue:** Deletion metadata uses hardcoded actor string (`"System"`).
 - **Evidence:** TODO in delete action indicates missing user-context extraction.
 - **Impact:** Audit trails lose accountability and may violate production governance expectations.
@@ -59,15 +59,15 @@ I reviewed source modules, API/controllers, infrastructure services, domain enti
 
 ---
 
-### B. Infrastructure Module (`src/TelecomPm.Infrastructure`)
+### B. Infrastructure Module (`src/TowerOps.Infrastructure`)
 
-#### 7) `src/TelecomPm.Infrastructure/Services/NotificationService.cs` (C#)
+#### 7) `src/TowerOps.Infrastructure/Services/NotificationService.cs` (C#)
 - **Issue:** Push and SMS notifications are placeholder implementations with TODO comments.
 - **Evidence:** methods log success-like messages but do not send through actual providers.
 - **Impact:** Feature appears implemented at API/application level but lacks production delivery behavior.
 - **Suggested correction:** Add provider adapters (e.g., Firebase/SignalR and Twilio), retry strategy, and provider-failure telemetry.
 
-#### 8) `src/TelecomPm.Infrastructure/Services/ReportGenerationService.cs` (C#)
+#### 8) `src/TowerOps.Infrastructure/Services/ReportGenerationService.cs` (C#)
 - **Issue:** Several report methods throw `NotImplementedException`.
 - **Evidence:** Excel report path and two report APIs are explicitly not implemented.
 - **Impact:** Runtime failures for report generation flows and incomplete sprint/reporting commitments.
@@ -75,9 +75,9 @@ I reviewed source modules, API/controllers, infrastructure services, domain enti
 
 ---
 
-### C. Domain Module (`src/TelecomPM.Domain`)
+### C. Domain Module (`src/TowerOps.Domain`)
 
-#### 9) `src/TelecomPM.Domain/Entities/WorkOrders/WorkOrder.cs` (C#)
+#### 9) `src/TowerOps.Domain/Entities/WorkOrders/WorkOrder.cs` (C#)
 - **Finding (positive):** WorkOrder aggregate exists with SLA deadlines and assignment workflow fields.
 - **Evidence:** class contains response/resolution deadlines and assignment metadata.
 - **Consistency note:** This directly conflicts with docs that still claim there is no explicit WorkOrder aggregate.

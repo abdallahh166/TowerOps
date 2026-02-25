@@ -1,4 +1,4 @@
-﻿# TowerOps Brand Profile
+# TowerOps Brand Profile
 
 ## Brand Identity
 - Product name: `TowerOps`
@@ -30,7 +30,7 @@ Examples of end-clients served by subcontractors:
 
 ## Naming Policy
 - External/product-facing name: `TowerOps`
-- Internal technical names in current codebase may remain `TelecomPM`/`TelecomPm` for compatibility during transition.
+- Internal technical names are now aligned to `TowerOps` across solution, projects, namespaces, and documentation.
 
 ## Suggested Tagline
 `TowerOps - PM/CM Operations Control for Telecom Subcontractors`

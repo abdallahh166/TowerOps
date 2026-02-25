@@ -1,11 +1,11 @@
 # TowerOps Application Layer Documentation
 
 ## Purpose
-`TelecomPm.Application` orchestrates use cases using CQRS + MediatR. It contains no infrastructure implementation details and coordinates domain behavior through repositories, services, and unit of work abstractions.
+`TowerOps.Application` orchestrates use cases using CQRS + MediatR. It contains no infrastructure implementation details and coordinates domain behavior through repositories, services, and unit of work abstractions.
 
 Branding note:
 - Product brand: `TowerOps` (Seven Pictures)
-- Internal assembly/module name remains `TelecomPm.Application`
+- Internal assembly/module name remains `TowerOps.Application`
 
 ## Scope
 - Commands: state-changing workflows
@@ -128,7 +128,7 @@ The application layer behavior depends on settings such as:
 
 Run tests:
 ```bash
-dotnet test tests/TelecomPM.Application.Tests/TelecomPM.Application.Tests.csproj
+dotnet test tests/TowerOps.Application.Tests/TowerOps.Application.Tests.csproj
 ```
 
 ## Maintenance Notes

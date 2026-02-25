@@ -1,11 +1,11 @@
 # TowerOps API Documentation
 
 ## Purpose
-This document describes the current ASP.NET Core API surface in `src/TelecomPm.Api`, including runtime behavior, authorization policies, and endpoint contracts at controller level for the **TowerOps** product by **Seven Pictures**.
+This document describes the current ASP.NET Core API surface in `src/TowerOps.Api`, including runtime behavior, authorization policies, and endpoint contracts at controller level for the **TowerOps** product by **Seven Pictures**.
 
 Branding note:
 - Product brand: `TowerOps`
-- Internal code namespaces/project names: `TelecomPM` / `TelecomPm` (kept for compatibility)
+- Internal code namespaces/project names: `TowerOps` / `TowerOps` (kept for compatibility)
 
 ## Runtime Architecture
 - Framework: ASP.NET Core Web API (`net8.0`)
@@ -23,7 +23,7 @@ Branding note:
 - Swagger/OpenAPI: enabled in Development
 
 ## Configuration and Environment
-Primary config file: `src/TelecomPm.Api/appsettings.json`
+Primary config file: `src/TowerOps.Api/appsettings.json`
 
 Critical settings:
 - `ConnectionStrings:DefaultConnection`
@@ -46,7 +46,7 @@ Environment variables:
 - Other protected endpoints require bearer token.
 
 ### Authorization policies
-Defined in `src/TelecomPm.Api/Authorization/ApiAuthorizationPolicies.cs`:
+Defined in `src/TowerOps.Api/Authorization/ApiAuthorizationPolicies.cs`:
 - `CanManageWorkOrders`
 - `CanViewWorkOrders`
 - `CanManageVisits`
@@ -304,5 +304,5 @@ Notes:
 ## Operational Notes
 - All business timestamps are UTC in domain/application logic.
 - Request/response behaviors are mediated through commands/queries; controllers do not contain core business logic.
-- Operational metrics are emitted from meter `TelecomPM.Operations` for import/sync/notification flows.
+- Operational metrics are emitted from meter `TowerOps.Operations` for import/sync/notification flows.
 - Keep this file aligned with controller route/attribute changes.

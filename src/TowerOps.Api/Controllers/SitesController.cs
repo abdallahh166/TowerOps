@@ -1,0 +1,250 @@
+namespace TowerOps.Api.Controllers;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using TowerOps.Api.Authorization;
+using TowerOps.Application.Common.Interfaces;
+using TowerOps.Api.Contracts.Sites;
+using TowerOps.Api.Mappings;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize(Policy = ApiAuthorizationPolicies.CanViewSites)]
+public sealed class SitesController : ApiControllerBase
+{
+    private readonly ICurrentUserService _currentUserService;
+
+    public SitesController(ICurrentUserService currentUserService)
+    {
+        _currentUserService = currentUserService;
+    }
+
+    [HttpPost]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> Create([FromBody] CreateSiteRequest request, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(), cancellationToken);
+        if (result.IsSuccess && result.Value is not null)
+        {
+            return CreatedAtAction(nameof(GetById), new { siteId = result.Value.Id }, result.Value);
+        }
+
+        return HandleResult(result);
+    }
+
+    [HttpPut("{siteId:guid}")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> Update(Guid siteId, [FromBody] UpdateSiteRequest request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name) ||
+            string.IsNullOrWhiteSpace(request.OMCName) ||
+            !request.SiteType.HasValue)
+        {
+            return BadRequest("Name, OMCName, and SiteType are required.");
+        }
+
+        var result = await Mediator.Send(request.ToCommand(siteId), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPatch("{siteId:guid}/status")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> UpdateStatus(
+        Guid siteId,
+        [FromBody] UpdateSiteStatusRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(siteId), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("{siteId:guid}/assign")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> AssignEngineer(
+        Guid siteId,
+        [FromBody] AssignEngineerRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        var result = await Mediator.Send(request.ToCommand(siteId, _currentUserService.UserId), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("{siteId:guid}/unassign")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> UnassignEngineer(Guid siteId, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(siteId.ToUnassignCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPut("{siteCode}/ownership")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> UpdateOwnership(
+        string siteCode,
+        [FromBody] UpdateSiteOwnershipRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(request.ToCommand(siteCode), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> Import([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/site-assets")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportSiteAssets([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToSiteAssetsImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/power-data")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportPowerData([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToPowerDataImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/radio-data")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportSiteRadioData([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToSiteRadioDataImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/tx-data")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportSiteTxData([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToSiteTxDataImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/sharing-data")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportSiteSharingData([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToSiteSharingDataImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/rf-status")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportRfStatus([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToRfStatusImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/battery-discharge-tests")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportBatteryDischargeTests([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToBatteryDischargeTestImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("import/delta-sites")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageSites)]
+    public async Task<IActionResult> ImportDeltaSites([FromForm] ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
+        if (fileBytes is null)
+            return BadRequest("Excel file is required.");
+
+        var result = await Mediator.Send(fileBytes.ToDeltaSitesImportCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpGet("{siteId:guid}")]
+    public async Task<IActionResult> GetById(Guid siteId, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(siteId.ToSiteByIdQuery(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpGet("{siteCode}/location")]
+    public async Task<IActionResult> GetLocation(string siteCode, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(siteCode.ToSiteLocationQuery(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpGet("office/{officeId:guid}")]
+    public async Task<IActionResult> GetForOffice(
+        Guid officeId,
+        [FromQuery] OfficeSitesQueryParameters parameters,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(parameters.ToOfficeSitesQuery(officeId), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpGet("maintenance")]
+    public async Task<IActionResult> GetNeedingMaintenance(
+        [FromQuery] MaintenanceSitesQueryParameters parameters,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(parameters.ToMaintenanceQuery(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    private static async Task<byte[]?> ReadExcelBytesOrNullAsync(ImportSiteDataRequest request, CancellationToken cancellationToken)
+    {
+        if (request.File is null || request.File.Length == 0)
+            return null;
+
+        await using var stream = request.File.OpenReadStream();
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms, cancellationToken);
+        return ms.ToArray();
+    }
+}

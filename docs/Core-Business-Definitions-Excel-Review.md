@@ -17,10 +17,10 @@ This document summarizes the three Excel workbooks added under `docs/` for core 
 **Purpose (inferred):** Battery discharge, power alarm logging, and high-level weekly summary tracking.
 
 **Sheets reviewed:**
-- `BDT sheet` — battery discharge test form with site/subcontractor metadata.
-- `Power Alarm` — alarm-oriented engineering capture.
-- `Config` — template/site configuration helper area.
-- `Summary` — roll-up table (week, site, date, nodal degree, PLVD/LLVD, linked sites).
+- `BDT sheet` â€” battery discharge test form with site/subcontractor metadata.
+- `Power Alarm` â€” alarm-oriented engineering capture.
+- `Config` â€” template/site configuration helper area.
+- `Summary` â€” roll-up table (week, site, date, nodal degree, PLVD/LLVD, linked sites).
 
 ### Strengths
 - Good operational focus for power-domain maintenance.
@@ -112,12 +112,12 @@ This document summarizes the three Excel workbooks added under `docs/` for core 
 - Add drop-downs and input constraints for all categorical fields.
 - Add format validation for IDs, phone/email, dates, and numeric ranges.
 
-## C) Integration Readiness (TelecomPM mapping)
+## C) Integration Readiness (TowerOps mapping)
 Map workbook fields to system entities:
-- Site metadata → `Site`
-- Visit execution/checklist/photos/readings → `Visit`, `VisitChecklist`, `VisitPhoto`, `VisitReading`
-- Pending remediation/issues → `VisitIssue`
-- Power/radio/TX structured data → Site component entities + analytics queries
+- Site metadata â†’ `Site`
+- Visit execution/checklist/photos/readings â†’ `Visit`, `VisitChecklist`, `VisitPhoto`, `VisitReading`
+- Pending remediation/issues â†’ `VisitIssue`
+- Power/radio/TX structured data â†’ Site component entities + analytics queries
 
 ## D) Operational KPIs to derive from these templates
 - Evidence completeness %
@@ -138,7 +138,7 @@ Map workbook fields to system entities:
 ### P1 (Next sprint)
 1. Add data dictionary + glossary tabs and ownership metadata.
 2. Add SLA tracking columns for pending resolutions.
-3. Build import mapping spec from Excel fields to TelecomPM DTOs/entities.
+3. Build import mapping spec from Excel fields to TowerOps DTOs/entities.
 
 ### P2 (Stabilization)
 1. Add automated validation and ingestion pipeline.

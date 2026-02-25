@@ -32,10 +32,10 @@ Each sprint deliverable must satisfy all checks before closure:
 - [x] Release notes summarize behavior changes and migration impact.
 
 ## Closure Evidence
-- Policy wiring + endpoint protection: `src/TelecomPm.Api/Authorization/ApiAuthorizationPolicies.cs`, controller policy attributes.
-- Unified exception handling path: `src/TelecomPm.Api/Middleware/ExceptionHandlingMiddleware.cs`.
-- API-edge mapping strategy rollout: `src/TelecomPm.Api/Mappings/*.cs` and mapped controllers.
-- Shared editable visit mutation workflow: `src/TelecomPm.Application/Services/EditableVisitMutationService.cs`.
+- Policy wiring + endpoint protection: `src/TowerOps.Api/Authorization/ApiAuthorizationPolicies.cs`, controller policy attributes.
+- Unified exception handling path: `src/TowerOps.Api/Middleware/ExceptionHandlingMiddleware.cs`.
+- API-edge mapping strategy rollout: `src/TowerOps.Api/Mappings/*.cs` and mapped controllers.
+- Shared editable visit mutation workflow: `src/TowerOps.Application/Services/EditableVisitMutationService.cs`.
 - Test coverage additions: mapper tests, auth/policy tests, infrastructure notification/report tests.
 - Release notes: `docs/phase-2/08-release-readiness-report.md`.
 - Sprint 12 reconciliation: `docs/phase-2/10-sprint-12-dry-run-reconciliation.md`.

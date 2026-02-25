@@ -1,0 +1,86 @@
+namespace TowerOps.Domain.Enums;
+
+// ==================== Site Related ====================
+public enum SiteType
+{
+    Macro = 1,
+    Nodal = 2,
+    BSC = 3,
+    VIP = 4,
+    Outdoor = 5,
+    Indoor = 6,
+    Repeater = 7,
+    MicroNano = 8,
+    GreenField = 20,
+    RoofTop = 21,
+    BTS = 22
+}
+
+public enum SiteComplexity
+{
+    Low = 1,
+    Medium = 2,
+    High = 3
+}
+
+public enum SiteStatus
+{
+    OnAir = 1,
+    OffAir = 2,
+    UnderMaintenance = 3,
+    Decommissioned = 4
+}
+
+public enum SiteEnclosureType
+{
+    Shelter = 1,
+    OutdoorCabinet = 2,
+    Grill = 3
+}
+
+public enum TowerType
+{
+    GFTower = 1,        // Ground Floor Tower
+    RTTower = 2,        // Roof Top Tower
+    GFMonopole = 3,
+    RTMonopole = 4,
+    PalmTree = 5,
+    QuickSite = 6,
+    Mast = 7,
+    Billboard = 8,
+    FlagPole = 9,
+    MobileStation = 10,
+    SpecialCamouflage = 11,
+    RTStubTower = 12
+}
+
+public enum TransmissionType
+{
+    MW = 1,             // Microwave
+    Fiber = 2,
+    EBand = 3,
+    Hybrid = 4
+}
+
+public enum PowerConfiguration
+{
+    ACOnly = 1,
+    DCOnly = 2,
+    Hybrid = 3,
+    Solar = 4,
+    Generator = 5,
+    SolarHybrid = 6
+}
+
+public enum TowerOwnershipType
+{
+    Host = 1,
+    Guest = 2,
+    IndependentTower = 3
+}
+
+public enum ResponsibilityScope
+{
+    Full = 1,
+    EquipmentOnly = 2
+}

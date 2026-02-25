@@ -4,7 +4,7 @@ Date: 2026-02-23
 
 Source of truth reviewed:
 - `docs/Excel-Domain-Gap-Report.md` (Section 4 + Section 5)
-- Current implementation in `src/` + integration tests in `tests/TelecomPM.Application.Tests/Integration/`
+- Current implementation in `src/` + integration tests in `tests/TowerOps.Application.Tests/Integration/`
 
 ## Summary
 - **High-priority gap recommendations from the original report are mostly implemented.**
@@ -73,7 +73,7 @@ Source of truth reviewed:
 
 ## 4) Release Gate for Sprint 13
 
-- `dotnet build TelecomPM.sln`
-- `dotnet test TelecomPM.sln --logger "console;verbosity=minimal"`
+- `dotnet build TowerOps.sln`
+- `dotnet test TowerOps.sln --logger "console;verbosity=minimal"`
 - `python tools/check_doc_drift.py`
 - Dry-run reconciliation refresh under `docs/phase-2/`

@@ -1,4 +1,4 @@
-﻿# Subcontractor x Tower Owner - TowerOps Operating Guide
+# Subcontractor x Tower Owner - TowerOps Operating Guide
 
 ## 1) What this project is (in simple terms)
 TowerOps is a field-maintenance management platform for telecom sites.
@@ -212,7 +212,7 @@ Average consumed material value per WO.
 ## 9) What to share with stakeholders tomorrow
 Use this short message:
 
-> "TelecomPM already supports visit execution and review. To align with Mobiegypt contractual operations with Orange Egypt, we will introduce explicit Work Orders, SLA policy enforcement, customer acceptance, and a fixed KPI governance model (SLA, FTF, MTTR, repeat rate)."
+> "TowerOps already supports visit execution and review. To align with Mobiegypt contractual operations with Orange Egypt, we will introduce explicit Work Orders, SLA policy enforcement, customer acceptance, and a fixed KPI governance model (SLA, FTF, MTTR, repeat rate)."
 
 
 

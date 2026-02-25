@@ -14,7 +14,7 @@ It helps subcontractor teams plan PM/CM visits, execute work orders, track evide
 - Target customers: subcontractor companies responsible for CM/PM telecom site operations
 - Typical clients of those subcontractors: mobile operators and tower companies
 
-Note: internal technical namespaces and solution/project names still use `TelecomPM` for backward compatibility.
+Technical naming is fully aligned: namespaces, projects, and solution now use `TowerOps`.
 
 ## Why TowerOps
 
@@ -56,7 +56,7 @@ Full API surface: `docs/Api-Doc.md`
 
 ### 2) Configure
 
-- Update DB connection in `src/TelecomPm.Api/appsettings.json`
+- Update DB connection in `src/TowerOps.Api/appsettings.json`
 - Set JWT secret:
 
 ```powershell
@@ -69,8 +69,8 @@ $env:JWT_SECRET = "replace-with-strong-secret"
 
 ```bash
 dotnet restore
-dotnet build TelecomPM.sln
-dotnet run --project src/TelecomPm.Api
+dotnet build TowerOps.sln
+dotnet run --project src/TowerOps.Api
 ```
 
 Swagger is enabled in Development.
@@ -78,7 +78,7 @@ Swagger is enabled in Development.
 ### 4) Test
 
 ```bash
-dotnet test TelecomPM.sln --logger "console;verbosity=minimal"
+dotnet test TowerOps.sln --logger "console;verbosity=minimal"
 ```
 
 ## Documentation
@@ -93,10 +93,10 @@ dotnet test TelecomPM.sln --logger "console;verbosity=minimal"
 
 ## Repository Structure
 
-- `src/TelecomPM.Domain`
-- `src/TelecomPm.Application`
-- `src/TelecomPm.Infrastructure`
-- `src/TelecomPm.Api`
+- `src/TowerOps.Domain`
+- `src/TowerOps.Application`
+- `src/TowerOps.Infrastructure`
+- `src/TowerOps.Api`
 - `tests/*`
 
 ## Contributing

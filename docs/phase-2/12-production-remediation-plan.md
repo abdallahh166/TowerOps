@@ -28,10 +28,10 @@ Scope:
 - Align escalation mutation permissions so create/review/approve/close are not over-granted or under-granted.
 
 Primary files:
-- `src/TelecomPm.Api/Authorization/ApiAuthorizationPolicies.cs`
-- `src/TelecomPm.Api/Controllers/ClientPortalController.cs`
-- `src/TelecomPm.Api/Controllers/EscalationsController.cs`
-- `tests/TelecomPM.Application.Tests/Services/ApiAuthorizationPoliciesTests.cs`
+- `src/TowerOps.Api/Authorization/ApiAuthorizationPolicies.cs`
+- `src/TowerOps.Api/Controllers/ClientPortalController.cs`
+- `src/TowerOps.Api/Controllers/EscalationsController.cs`
+- `tests/TowerOps.Application.Tests/Services/ApiAuthorizationPoliciesTests.cs`
 
 Acceptance criteria:
 - [ ] Portal user with only `portal.view_*` claims gets `403` on portal workorder accept/reject.
@@ -48,8 +48,8 @@ Scope:
 - Add regression tests proving deleted roles/settings (and other affected entities) are excluded from normal reads.
 
 Primary files:
-- `src/TelecomPm.Infrastructure/Persistence/ApplicationDbContext.cs`
-- `tests/TelecomPM.Infrastructure.Tests/*` (new/updated EF filter tests)
+- `src/TowerOps.Infrastructure/Persistence/ApplicationDbContext.cs`
+- `tests/TowerOps.Infrastructure.Tests/*` (new/updated EF filter tests)
 
 Acceptance criteria:
 - [ ] Soft-deleted `ApplicationRole` records are not returned by normal repository queries.
@@ -66,10 +66,10 @@ Scope:
 - Add command/domain tests for role demotion edge cases.
 
 Primary files:
-- `src/TelecomPm.Application/Commands/Users/ChangeUserRole/ChangeUserRoleCommandHandler.cs`
-- `src/TelecomPM.Domain/Entities/Users/User.cs` (if domain method needed)
-- `tests/TelecomPM.Application.Tests/Commands/Users/*`
-- `tests/TelecomPM.Domain.Tests/Entities/*User*`
+- `src/TowerOps.Application/Commands/Users/ChangeUserRole/ChangeUserRoleCommandHandler.cs`
+- `src/TowerOps.Domain/Entities/Users/User.cs` (if domain method needed)
+- `tests/TowerOps.Application.Tests/Commands/Users/*`
+- `tests/TowerOps.Domain.Tests/Entities/*User*`
 
 Acceptance criteria:
 - [ ] Changing role from `PMEngineer` to non-engineer succeeds without exception.
@@ -89,9 +89,9 @@ Scope:
 - Add unit tests for configuration resolution paths.
 
 Primary files:
-- `src/TelecomPm.Infrastructure/Services/BlobStorageService.cs`
-- `src/TelecomPm.Api/appsettings*.json` (if key normalization required)
-- `tests/TelecomPM.Infrastructure.Tests/Services/*Blob*`
+- `src/TowerOps.Infrastructure/Services/BlobStorageService.cs`
+- `src/TowerOps.Api/appsettings*.json` (if key normalization required)
+- `tests/TowerOps.Infrastructure.Tests/Services/*Blob*`
 
 Acceptance criteria:
 - [ ] Service starts successfully when any supported config key is present.
@@ -108,9 +108,9 @@ Scope:
 - Add middleware/application tests to verify sanitized error outputs.
 
 Primary files:
-- `src/TelecomPm.Application/Commands/**`
-- `src/TelecomPM.Api/Middleware/ExceptionHandlingMiddleware.cs`
-- `tests/TelecomPM.Application.Tests/Middleware/*`
+- `src/TowerOps.Application/Commands/**`
+- `src/TowerOps.Api/Middleware/ExceptionHandlingMiddleware.cs`
+- `tests/TowerOps.Application.Tests/Middleware/*`
 
 Acceptance criteria:
 - [ ] No endpoint returns raw framework/driver exception text.
@@ -127,9 +127,9 @@ Scope:
 - Add query-level tests proving bounded row reads and server-side filtering.
 
 Primary files:
-- `src/TelecomPm.Application/Queries/**`
-- `src/TelecomPm.Infrastructure/Persistence/Repositories/**`
-- `tests/TelecomPM.Application.Tests/Queries/**`
+- `src/TowerOps.Application/Queries/**`
+- `src/TowerOps.Infrastructure/Persistence/Repositories/**`
+- `tests/TowerOps.Application.Tests/Queries/**`
 
 Acceptance criteria:
 - [ ] Hot handlers no longer materialize full tables for filtered/paged requests.
@@ -146,9 +146,9 @@ Scope:
 - Ensure reconciliation outputs include imported/skipped/errors by entity.
 
 Primary files:
-- `src/TelecomPm.Application/Commands/*Import*`
-- `src/TelecomPm.Api/Controllers/*Import*`
-- `tests/TelecomPM.Application.Tests/Integration/Import*`
+- `src/TowerOps.Application/Commands/*Import*`
+- `src/TowerOps.Api/Controllers/*Import*`
+- `tests/TowerOps.Application.Tests/Integration/Import*`
 
 Acceptance criteria:
 - [ ] Oversized/invalid files are rejected deterministically.
@@ -165,9 +165,9 @@ Scope:
 - Validate CORS policy strictness for production origins.
 
 Primary files:
-- `src/TelecomPm.Api/Program.cs`
-- `src/TelecomPm.Api/appsettings*.json`
-- `tests/TelecomPM.Application.Tests/*` (new API behavior tests if present)
+- `src/TowerOps.Api/Program.cs`
+- `src/TowerOps.Api/appsettings*.json`
+- `tests/TowerOps.Application.Tests/*` (new API behavior tests if present)
 
 Acceptance criteria:
 - [ ] Rate limit is applied and verified on targeted routes.
@@ -184,8 +184,8 @@ Scope:
 - Define alert thresholds and operational runbook references.
 
 Primary files:
-- `src/TelecomPM.Api/Middleware/RequestLoggingMiddleware.cs`
-- `src/TelecomPm.Infrastructure/Services/*`
+- `src/TowerOps.Api/Middleware/RequestLoggingMiddleware.cs`
+- `src/TowerOps.Infrastructure/Services/*`
 - `docs/phase-2/*` operational docs
 
 Acceptance criteria:
@@ -247,8 +247,8 @@ Use this as the release gate checklist. Mark `PASS` only with linked evidence (P
 | PR-P2-01 Error contract unification complete | P2 | Backend | PASS | Unified API error schema (`Code`, `Message`, `CorrelationId`, optional `Errors`/`Meta`) implemented in `ApiControllerBase`, `ExceptionHandlingMiddleware`, and validation filter; tests: `ApiControllerBaseErrorSanitizationTests`, `ExceptionHandlingMiddlewareLocalizationTests` |
 | PR-P2-02 Domain/docs drift automation complete | P2 | Backend | PASS | `tools/check_doc_drift.py` now validates controller coverage + policy coverage + critical command (import/export/audit/customer acceptance) coverage across `Api-Doc` and `Application-Doc` |
 | PR-P2-03 Performance baseline complete | P2 | QA/Platform | PASS | Baseline thresholds enforced by `PerformanceBaselineSmokeTests`; report committed at `docs/phase-2/14-performance-baseline.md`; latest run: 3/3 pass |
-| `dotnet build TelecomPM.sln` green on CI | Gate | CI | PASS | GitHub Actions `.NET CI` run #90 (success): https://github.com/boda166/telecomPm/actions/runs/22373242789 |
-| `dotnet test TelecomPM.sln --logger "console;verbosity=minimal"` green on CI | Gate | CI | PASS | GitHub Actions `.NET CI` run #90 (success): https://github.com/boda166/telecomPm/actions/runs/22373242789 |
+| `dotnet build TowerOps.sln` green on CI | Gate | CI | PASS | GitHub Actions `.NET CI` run #90 (success): https://github.com/boda166/telecomPm/actions/runs/22373242789 |
+| `dotnet test TowerOps.sln --logger "console;verbosity=minimal"` green on CI | Gate | CI | PASS | GitHub Actions `.NET CI` run #90 (success): https://github.com/boda166/telecomPm/actions/runs/22373242789 |
 | `python tools/check_doc_drift.py` green on CI | Gate | CI | PASS | GitHub Actions `.NET CI` run #90 includes doc drift check and passed: https://github.com/boda166/telecomPm/actions/runs/22373242789 |
 | Staging smoke test (Auth, Visits, WorkOrders, Import, Portal) executed | Gate | QA | PASS | `docs/phase-2/15-staging-smoke-and-rollback-verification.md` (92 tests across Auth/Visits/WorkOrders/Import/Portal) |
 | Rollback and migration verification signed off | Gate | Backend/DBA | PASS | `docs/phase-2/15-staging-smoke-and-rollback-verification.md` + EF rehearsal (latest apply -> latest rollback -> DB drop) |
