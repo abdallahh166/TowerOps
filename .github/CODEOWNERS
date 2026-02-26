@@ -1,0 +1,15 @@
+# Default owner for the whole backend repo
+* @abdallahh166
+
+# Backend layers
+/src/TowerOps.Api/ @abdallahh166
+/src/TowerOps.Application/ @abdallahh166
+/src/TowerOps.Domain/ @abdallahh166
+/src/TowerOps.Infrastructure/ @abdallahh166
+
+# Tests and docs
+/tests/ @abdallahh166
+/docs/ @abdallahh166
+
+# CI/CD workflows
+/.github/workflows/ @abdallahh166
