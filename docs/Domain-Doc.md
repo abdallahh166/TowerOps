@@ -91,3 +91,4 @@ dotnet test tests/TowerOps.Domain.Tests/TowerOps.Domain.Tests.csproj
 - Keep invariants inside aggregate methods.
 - Avoid bypassing domain methods from application/infrastructure code.
 - Add tests for every new transition or invariant.
+- Cross-check API/auth/security assumptions with `docs/Backend-Auto-Discovery-Report.md` before changing contracts.
