@@ -56,7 +56,8 @@ public class GetVisitReportQueryHandler : IRequestHandler<GetVisitReportQuery, R
     private List<PhotoComparisonDto> GeneratePhotoComparisons(Visit visit)
     {
         var beforePhotos = visit.Photos.Where(p => p.Type == PhotoType.Before).ToList();
-        var afterPhotos = visit.Photos.Where(p => p.Type == PhotoType.After).ToList();
+        var afterPhotos = visit.Photos.Where(p => p.Type == PhotoType.After && p.FileStatus == UploadedFileStatus.Approved).ToList();
+        beforePhotos = beforePhotos.Where(p => p.FileStatus == UploadedFileStatus.Approved).ToList();
 
         var comparisons = new List<PhotoComparisonDto>();
 

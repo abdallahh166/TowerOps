@@ -183,6 +183,11 @@ public class ExcelExportService : IExcelExportService
         var row = 2;
         foreach (var photo in visit.Photos)
         {
+            if (photo.FileStatus.ToString() != TowerOps.Domain.Enums.UploadedFileStatus.Approved.ToString())
+            {
+                continue;
+            }
+
             worksheet.Cell($"A{row}").Value = photo.Type.ToString();
             worksheet.Cell($"B{row}").Value = photo.Category.ToString();
             worksheet.Cell($"C{row}").Value = photo.ItemName;

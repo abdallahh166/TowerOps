@@ -13,15 +13,21 @@ public class AddPhotoCommandHandler : IRequestHandler<AddPhotoCommand, Result<Vi
 {
     private readonly IEditableVisitMutationService _editableVisitMutationService;
     private readonly IFileStorageService _fileStorageService;
+    private readonly IUploadedFileValidationService _uploadedFileValidationService;
+    private readonly ISystemSettingsService _settingsService;
     private readonly IMapper _mapper;
 
     public AddPhotoCommandHandler(
         IEditableVisitMutationService editableVisitMutationService,
         IFileStorageService fileStorageService,
+        IUploadedFileValidationService uploadedFileValidationService,
+        ISystemSettingsService settingsService,
         IMapper mapper)
     {
         _editableVisitMutationService = editableVisitMutationService;
         _fileStorageService = fileStorageService;
+        _uploadedFileValidationService = uploadedFileValidationService;
+        _settingsService = settingsService;
         _mapper = mapper;
     }
 
@@ -30,19 +36,37 @@ public class AddPhotoCommandHandler : IRequestHandler<AddPhotoCommand, Result<Vi
             request.VisitId,
             async visit =>
             {
-                var containerName = $"visits/{visit.VisitNumber}/photos";
+                var validation = await _uploadedFileValidationService.ValidateAsync(
+                    request.FileName,
+                    request.FileStream,
+                    cancellationToken);
+
+                if (!validation.IsValid)
+                {
+                    throw new InvalidOperationException(validation.Error ?? "Invalid upload file.");
+                }
+
+                var quarantineContainerRoot = await _settingsService.GetAsync(
+                    "UploadSecurity:QuarantineContainer",
+                    "quarantine",
+                    cancellationToken);
+
+                var containerName = $"{quarantineContainerRoot.TrimEnd('/')}/visits/{visit.VisitNumber}/photos";
+                var originalFileName = Path.GetFileName(request.FileName);
+                var generatedFileName = $"{Guid.NewGuid():N}{Path.GetExtension(originalFileName)}";
+
                 var filePath = await _fileStorageService.UploadFileAsync(
                     request.FileStream,
-                    request.FileName,
+                    generatedFileName,
                     containerName,
                     cancellationToken);
 
-                var photo = VisitPhoto.Create(
+                var photo = VisitPhoto.CreatePendingUpload(
                     visit.Id,
                     request.Type,
                     request.Category,
                     request.ItemName,
-                    request.FileName,
+                    originalFileName,
                     filePath);
 
                 if (request.Latitude.HasValue && request.Longitude.HasValue)

@@ -190,7 +190,7 @@ public sealed class ExportChecklistCommandHandler : IRequestHandler<ExportCheckl
         var row = 2;
         foreach (var visit in visits)
         {
-            foreach (var photo in visit.Photos.Where(predicate))
+            foreach (var photo in visit.Photos.Where(p => p.FileStatus == UploadedFileStatus.Approved).Where(predicate))
             {
                 ws.Cell(row, 1).Value = visit.VisitNumber;
                 ws.Cell(row, 2).Value = visit.SiteCode;
@@ -214,8 +214,8 @@ public sealed class ExportChecklistCommandHandler : IRequestHandler<ExportCheckl
         var row = 2;
         foreach (var visit in visits)
         {
-            var before = visit.Photos.FirstOrDefault(p => p.Type == PhotoType.Before)?.FileName;
-            var after = visit.Photos.FirstOrDefault(p => p.Type == PhotoType.After)?.FileName;
+            var before = visit.Photos.FirstOrDefault(p => p.FileStatus == UploadedFileStatus.Approved && p.Type == PhotoType.Before)?.FileName;
+            var after = visit.Photos.FirstOrDefault(p => p.FileStatus == UploadedFileStatus.Approved && p.Type == PhotoType.After)?.FileName;
 
             ws.Cell(row, 1).Value = visit.VisitNumber;
             ws.Cell(row, 2).Value = visit.SiteCode;
@@ -321,9 +321,9 @@ public sealed class ExportChecklistCommandHandler : IRequestHandler<ExportCheckl
         {
             ws.Cell(row, 1).Value = visit.VisitNumber;
             ws.Cell(row, 2).Value = visit.SiteCode;
-            ws.Cell(row, 3).Value = visit.Photos.Any(p => p.Category == PhotoCategory.BTS);
-            ws.Cell(row, 4).Value = visit.Photos.Any(p => p.Category == PhotoCategory.NodeB);
-            ws.Cell(row, 5).Value = visit.Photos.Any(p => p.Category == PhotoCategory.MW);
+            ws.Cell(row, 3).Value = visit.Photos.Any(p => p.FileStatus == UploadedFileStatus.Approved && p.Category == PhotoCategory.BTS);
+            ws.Cell(row, 4).Value = visit.Photos.Any(p => p.FileStatus == UploadedFileStatus.Approved && p.Category == PhotoCategory.NodeB);
+            ws.Cell(row, 5).Value = visit.Photos.Any(p => p.FileStatus == UploadedFileStatus.Approved && p.Category == PhotoCategory.MW);
             row++;
         }
 

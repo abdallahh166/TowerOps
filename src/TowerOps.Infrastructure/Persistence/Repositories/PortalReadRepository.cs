@@ -337,7 +337,7 @@ public sealed class PortalReadRepository : IPortalReadRepository
 
         var photos = await _context.VisitPhotos
             .AsNoTracking()
-            .Where(p => p.VisitId == visitId)
+            .Where(p => p.VisitId == visitId && p.FileStatus == UploadedFileStatus.Approved)
             .OrderBy(p => p.CapturedAtUtc ?? p.CreatedAt)
             .Select(p => new PortalVisitPhotoEvidenceDto
             {

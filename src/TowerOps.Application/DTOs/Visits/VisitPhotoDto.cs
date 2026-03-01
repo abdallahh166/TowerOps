@@ -12,6 +12,9 @@ public record VisitPhotoDto
     public string FileUrl { get; init; } = string.Empty;
     public string? ThumbnailUrl { get; init; }
     public string? Description { get; init; }
+    public UploadedFileStatus FileStatus { get; init; }
+    public bool IsPendingApproval { get; init; }
+    public string? QuarantineReason { get; init; }
     public bool IsMandatory { get; init; }
     public DateTime CapturedAt { get; init; }
 }

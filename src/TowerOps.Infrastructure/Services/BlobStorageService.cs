@@ -8,7 +8,7 @@ using TowerOps.Application.Common.Interfaces;
 public class BlobStorageService : IFileStorageService
 {
     private readonly BlobServiceClient _blobServiceClient;
-    private readonly string _containerName;
+    private readonly string _defaultContainerName;
 
     public BlobStorageService(IConfiguration configuration)
     {
@@ -27,7 +27,7 @@ public class BlobStorageService : IFileStorageService
         }
 
         _blobServiceClient = new BlobServiceClient(connectionString);
-        _containerName = configuration["AzureBlobStorage:ContainerName"] ?? "towerops";
+        _defaultContainerName = configuration["AzureBlobStorage:ContainerName"] ?? "towerops";
     }
 
     public async Task<string> UploadFileAsync(
@@ -55,8 +55,7 @@ public class BlobStorageService : IFileStorageService
         string filePath,
         CancellationToken cancellationToken = default)
     {
-        var uri = new Uri(filePath);
-        var blobClient = new BlobClient(uri);
+        var blobClient = ResolveBlobClient(filePath);
 
         var response = await blobClient.DownloadAsync(cancellationToken);
         return response.Value.Content;
@@ -66,8 +65,7 @@ public class BlobStorageService : IFileStorageService
         string filePath,
         CancellationToken cancellationToken = default)
     {
-        var uri = new Uri(filePath);
-        var blobClient = new BlobClient(uri);
+        var blobClient = ResolveBlobClient(filePath);
 
         await blobClient.DeleteIfExistsAsync(cancellationToken: cancellationToken);
     }
@@ -90,5 +88,32 @@ public class BlobStorageService : IFileStorageService
             ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             _ => "application/octet-stream"
         };
+    }
+
+    private BlobClient ResolveBlobClient(string filePath)
+    {
+        if (Uri.TryCreate(filePath, UriKind.Absolute, out var absoluteUri))
+        {
+            var segments = absoluteUri.AbsolutePath.Trim('/').Split('/', 2, StringSplitOptions.RemoveEmptyEntries);
+            if (segments.Length == 2)
+            {
+                return _blobServiceClient
+                    .GetBlobContainerClient(segments[0])
+                    .GetBlobClient(segments[1]);
+            }
+        }
+
+        var relative = filePath.Trim('/').Replace('\\', '/');
+        var parts = relative.Split('/', 2, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 2)
+        {
+            return _blobServiceClient
+                .GetBlobContainerClient(parts[0])
+                .GetBlobClient(parts[1]);
+        }
+
+        return _blobServiceClient
+            .GetBlobContainerClient(_defaultContainerName)
+            .GetBlobClient(relative);
     }
 }

@@ -51,7 +51,7 @@ public class AddPhotoCommandValidator : AbstractValidator<AddPhotoCommand>
         if (string.IsNullOrWhiteSpace(fileName))
             return false;
 
-        var validExtensions = new[] { ".jpg", ".jpeg", ".png" };
+        var validExtensions = new[] { ".jpg", ".jpeg", ".png", ".pdf" };
         return validExtensions.Any(ext => fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
     }
 }

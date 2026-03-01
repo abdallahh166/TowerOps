@@ -99,11 +99,14 @@ public static class DependencyInjection
         services.AddScoped<IReportGenerationService, ReportGenerationService>();
         services.AddScoped<ISettingsEncryptionService, SettingsEncryptionService>();
         services.AddScoped<ISystemSettingsService, SystemSettingsService>();
+        services.AddScoped<IUploadedFileValidationService, UploadedFileValidationService>();
+        services.AddScoped<IFileMalwareScanService, FileMalwareScanService>();
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IMfaService, MfaService>();
         services.AddSingleton<IOperationalMetrics, OperationalMetrics>();
         services.AddScoped<SlaEvaluationProcessor>();
+        services.AddScoped<UploadScanProcessor>();
 
         // Domain Services with Infrastructure dependencies (Repository-dependent)
         services.AddScoped<IVisitNumberGeneratorService, VisitNumberGeneratorService>();
@@ -111,6 +114,7 @@ public static class DependencyInjection
         services.AddScoped<ISlaClockService, SlaClockService>();
         services.AddScoped<IGeoCheckInService, GeoCheckInService>();
         services.AddHostedService<SlaEvaluationHostedService>();
+        services.AddHostedService<UploadScanHostedService>();
 
         // HttpContextAccessor for CurrentUserService
         services.AddHttpContextAccessor();

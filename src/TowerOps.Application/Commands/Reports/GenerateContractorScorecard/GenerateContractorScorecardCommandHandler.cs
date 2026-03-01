@@ -172,7 +172,7 @@ public class GenerateContractorScorecardCommandHandler : IRequestHandler<Generat
             ws.Cell(row, 1).Value = visit.VisitNumber;
             ws.Cell(row, 2).Value = visit.SiteCode;
             ws.Cell(row, 3).Value = visit.EngineerName;
-            ws.Cell(row, 4).Value = visit.Photos.Count;
+            ws.Cell(row, 4).Value = visit.Photos.Count(p => p.FileStatus == UploadedFileStatus.Approved);
             ws.Cell(row, 5).Value = visit.Readings.Any();
             ws.Cell(row, 6).Value = checklistPercent;
             row++;

@@ -137,6 +137,51 @@ public class PortalReadRepositoryTests
         existsForVodafone.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task GetVisitEvidenceAsync_ShouldReturnOnlyApprovedPhotos()
+    {
+        await using var context = CreateContext();
+
+        var site = CreateSite("ORA100", "ORANGE");
+        await context.Sites.AddAsync(site);
+
+        var visit = Visit.Create(
+            "V-ORA-100",
+            site.Id,
+            site.SiteCode.Value,
+            site.Name,
+            Guid.NewGuid(),
+            "Engineer",
+            DateTime.UtcNow.Date,
+            VisitType.BM);
+
+        visit.AddPhoto(VisitPhoto.Create(
+            visit.Id,
+            PhotoType.Before,
+            PhotoCategory.Rectifier,
+            "Approved",
+            "approved.jpg",
+            "/approved.jpg"));
+
+        visit.AddPhoto(VisitPhoto.CreatePendingUpload(
+            visit.Id,
+            PhotoType.After,
+            PhotoCategory.Rectifier,
+            "Pending",
+            "pending.jpg",
+            "/pending.jpg"));
+
+        await context.Visits.AddAsync(visit);
+        await context.SaveChangesAsync();
+
+        var sut = new PortalReadRepository(context);
+        var result = await sut.GetVisitEvidenceAsync("ORANGE", visit.Id);
+
+        result.Should().NotBeNull();
+        result!.Photos.Should().HaveCount(1);
+        result.Photos[0].FileName.Should().Be("approved.jpg");
+    }
+
     private static ApplicationDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
