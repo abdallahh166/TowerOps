@@ -33,12 +33,14 @@ public class ChangePasswordCommandHandlerTests
         currentUserService.SetupGet(c => c.IsAuthenticated).Returns(true);
         currentUserService.SetupGet(c => c.UserId).Returns(user.Id);
 
+        var refreshTokenRepository = new Mock<IRefreshTokenRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
 
         var handler = new ChangePasswordCommandHandler(
             userRepository.Object,
             currentUserService.Object,
             passwordHasher,
+            refreshTokenRepository.Object,
             unitOfWork.Object);
 
         var result = await handler.Handle(new ChangePasswordCommand
@@ -51,6 +53,9 @@ public class ChangePasswordCommandHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("Current password is incorrect");
         unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        refreshTokenRepository.Verify(
+            r => r.RevokeAllByUserIdAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -75,6 +80,7 @@ public class ChangePasswordCommandHandlerTests
         currentUserService.SetupGet(c => c.IsAuthenticated).Returns(true);
         currentUserService.SetupGet(c => c.UserId).Returns(user.Id);
 
+        var refreshTokenRepository = new Mock<IRefreshTokenRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         unitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
@@ -82,6 +88,7 @@ public class ChangePasswordCommandHandlerTests
             userRepository.Object,
             currentUserService.Object,
             passwordHasher,
+            refreshTokenRepository.Object,
             unitOfWork.Object);
 
         var result = await handler.Handle(new ChangePasswordCommand
@@ -93,5 +100,8 @@ public class ChangePasswordCommandHandlerTests
 
         result.IsSuccess.Should().BeTrue();
         user.MustChangePassword.Should().BeFalse();
+        refreshTokenRepository.Verify(
+            r => r.RevokeAllByUserIdAsync(user.Id, "PasswordChanged", It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }

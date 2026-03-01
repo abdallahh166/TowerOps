@@ -39,7 +39,10 @@ public sealed class VisitsController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(parameters.ToQuery(engineerId), cancellationToken);
-        return HandleResult(result);
+        if (!result.IsSuccess || result.Value is null)
+            return HandleResult(result);
+
+        return Ok(result.Value.ToPagedResponse());
     }
 
     [HttpGet("pending-reviews")]
@@ -115,7 +118,7 @@ public sealed class VisitsController : ApiControllerBase
     {
         if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
         {
-            return Unauthorized();
+            return UnauthorizedFailure();
         }
 
         var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
@@ -131,7 +134,7 @@ public sealed class VisitsController : ApiControllerBase
     {
         if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
         {
-            return Unauthorized();
+            return UnauthorizedFailure();
         }
 
         var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
@@ -169,7 +172,7 @@ public sealed class VisitsController : ApiControllerBase
     {
         if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
         {
-            return Unauthorized();
+            return UnauthorizedFailure();
         }
 
         var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
@@ -185,7 +188,7 @@ public sealed class VisitsController : ApiControllerBase
     {
         if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
         {
-            return Unauthorized();
+            return UnauthorizedFailure();
         }
 
         var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
@@ -201,7 +204,7 @@ public sealed class VisitsController : ApiControllerBase
     {
         if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
         {
-            return Unauthorized();
+            return UnauthorizedFailure();
         }
 
         var result = await Mediator.Send(request.ToCommand(visitId), cancellationToken);
@@ -275,7 +278,7 @@ public sealed class VisitsController : ApiControllerBase
     {
         if (request.File.Length <= 0)
         {
-            return BadRequest("Photo file is required");
+            return Failure("Photo file is required");
         }
 
         await using var stream = request.File.OpenReadStream();
@@ -293,7 +296,7 @@ public sealed class VisitsController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request.File, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(visitId.ToImportPanoramaEvidenceCommand(fileBytes), cancellationToken);
         return HandleResult(result);
@@ -308,7 +311,7 @@ public sealed class VisitsController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request.File, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(visitId.ToImportAlarmCaptureCommand(fileBytes), cancellationToken);
         return HandleResult(result);
@@ -323,7 +326,7 @@ public sealed class VisitsController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request.File, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(visitId.ToImportUnusedAssetsCommand(fileBytes), cancellationToken);
         return HandleResult(result);

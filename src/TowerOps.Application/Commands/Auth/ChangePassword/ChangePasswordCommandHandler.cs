@@ -12,17 +12,20 @@ public sealed class ChangePasswordCommandHandler : IRequestHandler<ChangePasswor
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPasswordHasher<User> _passwordHasher;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public ChangePasswordCommandHandler(
         IUserRepository userRepository,
         ICurrentUserService currentUserService,
         IPasswordHasher<User> passwordHasher,
+        IRefreshTokenRepository refreshTokenRepository,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
         _currentUserService = currentUserService;
         _passwordHasher = passwordHasher;
+        _refreshTokenRepository = refreshTokenRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -45,6 +48,7 @@ public sealed class ChangePasswordCommandHandler : IRequestHandler<ChangePasswor
         user.ClearPasswordChangeRequirement();
 
         await _userRepository.UpdateAsync(user, cancellationToken);
+        await _refreshTokenRepository.RevokeAllByUserIdAsync(user.Id, "PasswordChanged", cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

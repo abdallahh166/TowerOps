@@ -25,7 +25,7 @@ public abstract class ApiControllerBase : ControllerBase
             return Ok();
         }
 
-        return HandleFailure(result.Error);
+        return Failure(result.Error);
     }
 
     protected IActionResult HandleResult<T>(Result<T> result)
@@ -35,14 +35,65 @@ public abstract class ApiControllerBase : ControllerBase
             return result.Value is null ? Ok() : Ok(result.Value);
         }
 
-        return HandleFailure(result.Error);
+        return Failure(result.Error);
     }
 
-    private IActionResult HandleFailure(string error)
+    protected IActionResult Failure(string error)
     {
         var correlationId = HttpContext?.TraceIdentifier ?? string.Empty;
         var mapped = ApiErrorFactory.FromFailureString(error, LocalizedText, correlationId);
         return StatusCode(mapped.StatusCode, mapped.Error);
+    }
+
+    protected IActionResult UnauthorizedFailure(string? message = null)
+    {
+        var correlationId = HttpContext?.TraceIdentifier ?? string.Empty;
+        var mapped = ApiErrorFactory.Build(
+            StatusCodes.Status401Unauthorized,
+            ApiErrorCodes.Unauthorized,
+            message ?? LocalizedText.Get("Unauthorized", "Unauthorized."),
+            correlationId);
+
+        return StatusCode(mapped.StatusCode, mapped.Error);
+    }
+
+    protected bool TryResolveSort(
+        string? sortBy,
+        string? sortDir,
+        IReadOnlyCollection<string> allowlist,
+        string defaultSortBy,
+        out string resolvedSortBy,
+        out bool sortDescending,
+        out IActionResult? errorResult)
+    {
+        var normalizedAllowlist = allowlist
+            .Select(v => v.Trim())
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var requestedSortBy = string.IsNullOrWhiteSpace(sortBy) ? defaultSortBy : sortBy.Trim();
+        if (!normalizedAllowlist.Contains(requestedSortBy))
+        {
+            resolvedSortBy = defaultSortBy;
+            sortDescending = true;
+            errorResult = Failure($"Invalid sortBy '{requestedSortBy}'. Allowed values: {string.Join(", ", normalizedAllowlist.OrderBy(v => v))}.");
+            return false;
+        }
+
+        var requestedSortDir = string.IsNullOrWhiteSpace(sortDir) ? "desc" : sortDir.Trim();
+        if (!requestedSortDir.Equals("asc", StringComparison.OrdinalIgnoreCase) &&
+            !requestedSortDir.Equals("desc", StringComparison.OrdinalIgnoreCase))
+        {
+            resolvedSortBy = defaultSortBy;
+            sortDescending = true;
+            errorResult = Failure("Invalid sortDir. Allowed values: asc, desc.");
+            return false;
+        }
+
+        resolvedSortBy = requestedSortBy;
+        sortDescending = requestedSortDir.Equals("desc", StringComparison.OrdinalIgnoreCase);
+        errorResult = null;
+        return true;
     }
 }
 

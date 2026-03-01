@@ -47,6 +47,25 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasDefaultValue(false);
 
+        builder.Property(u => u.FailedLoginAttempts)
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        builder.Property(u => u.LockoutCountInWindow)
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        builder.Property(u => u.IsManualLockout)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(u => u.IsMfaEnabled)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(u => u.MfaSecret)
+            .HasMaxLength(256);
+
         var stringListComparer = ValueComparerFactory.CreateReadOnlyStringCollectionComparer();
         var guidListComparer = ValueComparerFactory.CreateReadOnlyGuidCollectionComparer();
 

@@ -6,7 +6,7 @@ using TowerOps.Domain.Interfaces.Repositories;
 
 namespace TowerOps.Application.Queries.Portal.GetPortalWorkOrders;
 
-public sealed class GetPortalWorkOrdersQueryHandler : IRequestHandler<GetPortalWorkOrdersQuery, Result<IReadOnlyList<PortalWorkOrderDto>>>
+public sealed class GetPortalWorkOrdersQueryHandler : IRequestHandler<GetPortalWorkOrdersQuery, Result<PaginatedList<PortalWorkOrderDto>>>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IUserRepository _userRepository;
@@ -22,21 +22,29 @@ public sealed class GetPortalWorkOrdersQueryHandler : IRequestHandler<GetPortalW
         _portalReadRepository = portalReadRepository;
     }
 
-    public async Task<Result<IReadOnlyList<PortalWorkOrderDto>>> Handle(GetPortalWorkOrdersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<PortalWorkOrderDto>>> Handle(GetPortalWorkOrdersQuery request, CancellationToken cancellationToken)
     {
         var portalUser = await _userRepository.GetByIdAsNoTrackingAsync(_currentUserService.UserId, cancellationToken);
         if (portalUser is null || !portalUser.IsClientPortalUser || string.IsNullOrWhiteSpace(portalUser.ClientCode))
-            return Result.Failure<IReadOnlyList<PortalWorkOrderDto>>("Portal access is not enabled for this user.");
+            return Result.Failure<PaginatedList<PortalWorkOrderDto>>("Portal access is not enabled for this user.");
 
-        var safePageNumber = request.PageNumber < 1 ? 1 : request.PageNumber;
-        var safePageSize = Math.Clamp(request.PageSize, 1, 200);
+        var safePageNumber = request.Page < 1 ? 1 : request.Page;
+        var safePageSize = Math.Clamp(request.PageSize, 1, 100);
+        var sortBy = string.IsNullOrWhiteSpace(request.SortBy) ? "createdAt" : request.SortBy.Trim();
+
+        var totalCount = await _portalReadRepository.CountWorkOrdersAsync(
+            portalUser.ClientCode,
+            cancellationToken);
 
         var workOrders = await _portalReadRepository.GetWorkOrdersAsync(
             portalUser.ClientCode,
             safePageNumber,
             safePageSize,
+            sortBy,
+            request.SortDescending,
             cancellationToken);
 
-        return Result.Success(workOrders);
+        var paged = new PaginatedList<PortalWorkOrderDto>(workOrders.ToList(), totalCount, safePageNumber, safePageSize);
+        return Result.Success(paged);
     }
 }

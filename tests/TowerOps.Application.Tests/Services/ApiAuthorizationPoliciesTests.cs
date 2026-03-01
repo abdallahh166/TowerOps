@@ -154,12 +154,12 @@ public class ApiAuthorizationPoliciesTests
 
         var deniedPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-            new Claim(PermissionConstants.ClaimType, PermissionConstants.PortalViewSites)
+            new Claim(PermissionConstants.ClaimType, PermissionConstants.PortalViewWorkOrders)
         }, "test"));
 
         var allowedPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-            new Claim(PermissionConstants.ClaimType, PermissionConstants.PortalViewWorkOrders)
+            new Claim(PermissionConstants.ClaimType, PermissionConstants.PortalManageWorkOrders)
         }, "test"));
 
         var denied = await authService.AuthorizeAsync(deniedPrincipal, policy!);

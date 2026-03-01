@@ -7,7 +7,7 @@ using MediatR;
 
 namespace TowerOps.Application.Queries.Settings.GetAllSystemSettings;
 
-public sealed class GetAllSystemSettingsQueryHandler : IRequestHandler<GetAllSystemSettingsQuery, Result<IReadOnlyList<SystemSettingDto>>>
+public sealed class GetAllSystemSettingsQueryHandler : IRequestHandler<GetAllSystemSettingsQuery, Result<PaginatedList<SystemSettingDto>>>
 {
     private readonly ISystemSettingsRepository _settingsRepository;
     private readonly ISettingsEncryptionService _settingsEncryptionService;
@@ -20,35 +20,26 @@ public sealed class GetAllSystemSettingsQueryHandler : IRequestHandler<GetAllSys
         _settingsEncryptionService = settingsEncryptionService;
     }
 
-    public async Task<Result<IReadOnlyList<SystemSettingDto>>> Handle(GetAllSystemSettingsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<SystemSettingDto>>> Handle(GetAllSystemSettingsQuery request, CancellationToken cancellationToken)
     {
-        var pageNumber = request.PageNumber.GetValueOrDefault(1);
-        if (pageNumber < 1)
-        {
-            pageNumber = 1;
-        }
-
-        var pageSize = request.PageSize.GetValueOrDefault(100);
-        if (pageSize < 1)
-        {
-            pageSize = 1;
-        }
-
-        if (pageSize > 200)
-        {
-            pageSize = 200;
-        }
+        var pageNumber = request.Page < 1 ? 1 : request.Page;
+        var pageSize = Math.Clamp(request.PageSize, 1, 100);
+        var sortBy = string.IsNullOrWhiteSpace(request.SortBy) ? "group" : request.SortBy.Trim();
 
         var specification = new AllSystemSettingsSpecification(
             (pageNumber - 1) * pageSize,
-            pageSize);
+            pageSize,
+            sortBy,
+            request.SortDescending);
+        var totalCount = await _settingsRepository.CountAsync(specification, cancellationToken);
         var settings = await _settingsRepository.FindAsNoTrackingAsync(specification, cancellationToken);
 
         var result = settings
             .Select(s => MapToDto(s, request.MaskEncryptedValues))
             .ToList();
 
-        return Result.Success<IReadOnlyList<SystemSettingDto>>(result);
+        var paged = new PaginatedList<SystemSettingDto>(result, totalCount, pageNumber, pageSize);
+        return Result.Success(paged);
     }
 
     private SystemSettingDto MapToDto(Domain.Entities.SystemSettings.SystemSetting setting, bool maskEncryptedValues)

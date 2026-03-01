@@ -29,12 +29,33 @@ public sealed class ClientPortalController : ApiControllerBase
 
     [HttpGet("sites")]
     public async Task<IActionResult> GetSites(
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 50,
+        [FromQuery(Name = "page")] int page = 1,
+        [FromQuery] int pageSize = 25,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string sortDir = "desc",
         CancellationToken cancellationToken = default)
     {
-        var result = await Mediator.Send(PortalContractMapper.ToPortalSitesQuery(pageNumber, pageSize), cancellationToken);
-        return HandleResult(result);
+        var safePage = page < 1 ? 1 : page;
+        var safePageSize = Math.Clamp(pageSize, 1, 100);
+        if (!TryResolveSort(
+                sortBy,
+                sortDir,
+                new[] { "siteCode", "name", "status", "region" },
+                defaultSortBy: "siteCode",
+                out var resolvedSortBy,
+                out var sortDescending,
+                out var sortError))
+        {
+            return sortError!;
+        }
+
+        var result = await Mediator.Send(
+            PortalContractMapper.ToPortalSitesQuery(safePage, safePageSize, resolvedSortBy, sortDescending),
+            cancellationToken);
+        if (!result.IsSuccess || result.Value is null)
+            return HandleResult(result);
+
+        return Ok(result.Value.ToPagedResponse());
     }
 
     [HttpGet("sites/{siteCode}")]
@@ -46,12 +67,33 @@ public sealed class ClientPortalController : ApiControllerBase
 
     [HttpGet("workorders")]
     public async Task<IActionResult> GetWorkOrders(
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 50,
+        [FromQuery(Name = "page")] int page = 1,
+        [FromQuery] int pageSize = 25,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string sortDir = "desc",
         CancellationToken cancellationToken = default)
     {
-        var result = await Mediator.Send(new object().ToPortalWorkOrdersQuery(pageNumber, pageSize), cancellationToken);
-        return HandleResult(result);
+        var safePage = page < 1 ? 1 : page;
+        var safePageSize = Math.Clamp(pageSize, 1, 100);
+        if (!TryResolveSort(
+                sortBy,
+                sortDir,
+                new[] { "createdAt", "status", "priority", "siteCode", "slaDeadline" },
+                defaultSortBy: "createdAt",
+                out var resolvedSortBy,
+                out var sortDescending,
+                out var sortError))
+        {
+            return sortError!;
+        }
+
+        var result = await Mediator.Send(
+            new object().ToPortalWorkOrdersQuery(safePage, safePageSize, resolvedSortBy, sortDescending),
+            cancellationToken);
+        if (!result.IsSuccess || result.Value is null)
+            return HandleResult(result);
+
+        return Ok(result.Value.ToPagedResponse());
     }
 
     [HttpGet("sla-report")]
@@ -64,12 +106,33 @@ public sealed class ClientPortalController : ApiControllerBase
     [HttpGet("visits/{siteCode}")]
     public async Task<IActionResult> GetVisits(
         string siteCode,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 50,
+        [FromQuery(Name = "page")] int page = 1,
+        [FromQuery] int pageSize = 25,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string sortDir = "desc",
         CancellationToken cancellationToken = default)
     {
-        var result = await Mediator.Send(siteCode.ToPortalVisitsQuery(pageNumber, pageSize), cancellationToken);
-        return HandleResult(result);
+        var safePage = page < 1 ? 1 : page;
+        var safePageSize = Math.Clamp(pageSize, 1, 100);
+        if (!TryResolveSort(
+                sortBy,
+                sortDir,
+                new[] { "scheduledDate", "status", "type", "visitNumber" },
+                defaultSortBy: "scheduledDate",
+                out var resolvedSortBy,
+                out var sortDescending,
+                out var sortError))
+        {
+            return sortError!;
+        }
+
+        var result = await Mediator.Send(
+            siteCode.ToPortalVisitsQuery(safePage, safePageSize, resolvedSortBy, sortDescending),
+            cancellationToken);
+        if (!result.IsSuccess || result.Value is null)
+            return HandleResult(result);
+
+        return Ok(result.Value.ToPagedResponse());
     }
 
     [HttpGet("visits/{visitId:guid}/evidence")]

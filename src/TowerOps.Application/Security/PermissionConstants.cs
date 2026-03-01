@@ -69,6 +69,7 @@ public static class PermissionConstants
     public const string PortalViewVisits = "portal.view_visits";
     public const string PortalViewKpis = "portal.view_kpis";
     public const string PortalViewWorkOrders = "portal.view_workorders";
+    public const string PortalManageWorkOrders = "portal.manage_workorders";
     public const string PortalViewSla = "portal.view_sla";
 
     public static readonly IReadOnlyList<string> All = new[]
@@ -84,6 +85,6 @@ public static class PermissionConstants
         SettingsView, SettingsEdit,
         MaterialsView, MaterialsManage,
         EscalationsView, EscalationsCreate, EscalationsApprove,
-        PortalViewSites, PortalViewVisits, PortalViewKpis, PortalViewWorkOrders, PortalViewSla
+        PortalViewSites, PortalViewVisits, PortalViewKpis, PortalViewWorkOrders, PortalManageWorkOrders, PortalViewSla
     };
 }

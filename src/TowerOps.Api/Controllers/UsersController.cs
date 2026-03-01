@@ -102,6 +102,16 @@ public sealed class UsersController : ApiControllerBase
         return HandleResult(result);
     }
 
+    [HttpPatch("{userId:guid}/unlock-account")]
+    [Authorize(Policy = ApiAuthorizationPolicies.CanManageUsers)]
+    public async Task<IActionResult> UnlockAccount(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(userId.ToUnlockAccountCommand(), cancellationToken);
+        return HandleResult(result);
+    }
+
     [HttpGet("office/{officeId:guid}")]
     public async Task<IActionResult> GetByOffice(
         Guid officeId,
@@ -118,7 +128,7 @@ public sealed class UsersController : ApiControllerBase
     {
         if (!Enum.TryParse<UserRole>(role, true, out var userRole))
         {
-            return BadRequest($"Invalid role: {role}");
+            return Failure($"Invalid role: {role}");
         }
 
         var result = await Mediator.Send(userRole.ToQuery(), cancellationToken);

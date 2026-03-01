@@ -2,7 +2,6 @@ namespace TowerOps.Application.Queries.Offices.GetAllOffices;
 
 using AutoMapper;
 using MediatR;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using TowerOps.Application.Common;
@@ -10,7 +9,7 @@ using TowerOps.Application.DTOs.Offices;
 using TowerOps.Domain.Interfaces.Repositories;
 using TowerOps.Domain.Specifications.OfficeSpecifications;
 
-public class GetAllOfficesQueryHandler : IRequestHandler<GetAllOfficesQuery, Result<List<OfficeDto>>>
+public class GetAllOfficesQueryHandler : IRequestHandler<GetAllOfficesQuery, Result<PaginatedList<OfficeDto>>>
 {
     private readonly IOfficeRepository _officeRepository;
     private readonly IMapper _mapper;
@@ -23,34 +22,25 @@ public class GetAllOfficesQueryHandler : IRequestHandler<GetAllOfficesQuery, Res
         _mapper = mapper;
     }
 
-    public async Task<Result<List<OfficeDto>>> Handle(GetAllOfficesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<OfficeDto>>> Handle(GetAllOfficesQuery request, CancellationToken cancellationToken)
     {
         var onlyActive = request.OnlyActive ?? false;
-        var pageNumber = request.PageNumber.GetValueOrDefault(1);
-        if (pageNumber < 1)
-        {
-            pageNumber = 1;
-        }
-
-        var pageSize = request.PageSize.GetValueOrDefault(100);
-        if (pageSize < 1)
-        {
-            pageSize = 1;
-        }
-
-        if (pageSize > 200)
-        {
-            pageSize = 200;
-        }
+        var pageNumber = request.Page < 1 ? 1 : request.Page;
+        var pageSize = Math.Clamp(request.PageSize, 1, 100);
+        var sortBy = string.IsNullOrWhiteSpace(request.SortBy) ? "code" : request.SortBy.Trim();
 
         var specification = new AllOfficesFilteredSpecification(
             onlyActive,
             (pageNumber - 1) * pageSize,
-            pageSize);
-        var filteredOffices = await _officeRepository.FindAsNoTrackingAsync(specification, cancellationToken);
+            pageSize,
+            sortBy,
+            request.SortDescending);
 
+        var totalCount = await _officeRepository.CountAsync(specification, cancellationToken);
+        var filteredOffices = await _officeRepository.FindAsNoTrackingAsync(specification, cancellationToken);
         var dtos = _mapper.Map<List<OfficeDto>>(filteredOffices);
-        return Result.Success(dtos);
+        var paged = new PaginatedList<OfficeDto>(dtos, totalCount, pageNumber, pageSize);
+        return Result.Success(paged);
     }
 }
 

@@ -38,8 +38,10 @@ public class PerformanceBaselineSmokeTests
             .ReturnsAsync(user);
 
         var readRepo = new Mock<IPortalReadRepository>();
-        readRepo.Setup(x => x.GetSitesAsync("ORANGE", null, 1, 200, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Enumerable.Range(1, 200).Select(i => new PortalSiteDto
+        readRepo.Setup(x => x.CountSitesAsync("ORANGE", null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1000);
+        readRepo.Setup(x => x.GetSitesAsync("ORANGE", null, 1, 100, "siteCode", true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Enumerable.Range(1, 100).Select(i => new PortalSiteDto
             {
                 SiteCode = $"S-{i:0000}",
                 Name = $"Site {i}",
@@ -54,12 +56,13 @@ public class PerformanceBaselineSmokeTests
         {
             var result = await sut.Handle(new GetPortalSitesQuery
             {
-                PageNumber = 1,
-                PageSize = 200
+                Page = 1,
+                PageSize = 100
             }, CancellationToken.None);
 
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().HaveCount(200);
+            result.Value.Should().NotBeNull();
+            result.Value!.Items.Should().HaveCount(100);
         }
         sw.Stop();
 

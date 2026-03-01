@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TowerOps.Api.Contracts.Settings;
 using TowerOps.Api.Authorization;
+using TowerOps.Api.Mappings;
 using TowerOps.Application.Commands.Settings.UpsertSystemSettings;
 using TowerOps.Application.Common.Interfaces;
 using TowerOps.Application.DTOs.Settings;
@@ -35,31 +36,43 @@ public sealed class SettingsController : ApiControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetAll(
-        [FromQuery] int? pageNumber,
-        [FromQuery] int? pageSize,
-        CancellationToken cancellationToken)
+        [FromQuery(Name = "page")] int page = 1,
+        [FromQuery] int pageSize = 25,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string sortDir = "desc",
+        CancellationToken cancellationToken = default)
     {
+        var safePage = page < 1 ? 1 : page;
+        var safePageSize = Math.Clamp(pageSize, 1, 100);
+        if (!TryResolveSort(
+                sortBy,
+                sortDir,
+                new[] { "group", "key", "dataType", "updatedAtUtc" },
+                defaultSortBy: "group",
+                out var resolvedSortBy,
+                out var sortDescending,
+                out var sortError))
+        {
+            return sortError!;
+        }
+
         var result = await Mediator.Send(
             new GetAllSystemSettingsQuery
             {
-                PageNumber = pageNumber,
-                PageSize = pageSize
+                Page = safePage,
+                PageSize = safePageSize,
+                SortBy = resolvedSortBy,
+                SortDescending = sortDescending
             },
             cancellationToken);
         if (!result.IsSuccess || result.Value is null)
             return HandleResult(result);
 
-        var grouped = result.Value
-            .GroupBy(s => s.Group)
-            .OrderBy(g => g.Key)
-            .ToDictionary(
-                g => g.Key,
-                g => g
-                    .OrderBy(s => s.Key)
-                    .Select(ToResponse)
-                    .ToList());
-
-        return Ok(grouped);
+        var mapped = result.Value.Items.Select(ToResponse).ToList();
+        return Ok(mapped.ToPagedResponse(
+            result.Value.PageNumber,
+            result.Value.PageSize,
+            result.Value.TotalCount));
     }
 
     [HttpGet("{group}")]
@@ -113,7 +126,7 @@ public sealed class SettingsController : ApiControllerBase
             "twilio" => await TestTwilioAsync(cancellationToken),
             "email" => await TestEmailAsync(cancellationToken),
             "firebase" => await TestFirebaseAsync(cancellationToken),
-            _ => BadRequest(LocalizedText.Get("SettingsUnsupportedService", "Unsupported service. Use twilio, email, or firebase."))
+            _ => Failure(LocalizedText.Get("SettingsUnsupportedService", "Unsupported service. Use twilio, email, or firebase."))
         };
     }
 
@@ -121,13 +134,13 @@ public sealed class SettingsController : ApiControllerBase
     {
         if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
         {
-            return Unauthorized();
+            return UnauthorizedFailure();
         }
 
         var user = await _userRepository.GetByIdAsNoTrackingAsync(_currentUserService.UserId, cancellationToken);
         if (user is null || string.IsNullOrWhiteSpace(user.PhoneNumber))
         {
-            return BadRequest("Current user phone number is not available.");
+            return Failure("Current user phone number is not available.");
         }
 
         await _notificationService.SendSmsAsync(user.PhoneNumber, "TowerOps Twilio test message.", cancellationToken);
@@ -138,7 +151,7 @@ public sealed class SettingsController : ApiControllerBase
     {
         if (!_currentUserService.IsAuthenticated || string.IsNullOrWhiteSpace(_currentUserService.Email))
         {
-            return Unauthorized();
+            return UnauthorizedFailure();
         }
 
         await _emailService.SendEmailAsync(
@@ -154,7 +167,7 @@ public sealed class SettingsController : ApiControllerBase
     {
         if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
         {
-            return Unauthorized();
+            return UnauthorizedFailure();
         }
 
         await _notificationService.SendPushNotificationAsync(

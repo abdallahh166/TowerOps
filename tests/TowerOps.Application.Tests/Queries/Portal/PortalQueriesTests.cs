@@ -28,7 +28,10 @@ public class PortalQueriesTests
 
         var portalReadRepository = new Mock<IPortalReadRepository>();
         portalReadRepository
-            .Setup(r => r.GetSitesAsync("ORANGE", null, 1, 50, It.IsAny<CancellationToken>()))
+            .Setup(r => r.CountSitesAsync("ORANGE", null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+        portalReadRepository
+            .Setup(r => r.GetSitesAsync("ORANGE", null, 1, 25, "siteCode", true, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<PortalSiteDto>
             {
                 new() { SiteCode = "CAI001", Name = "Site CAI001" }
@@ -42,11 +45,12 @@ public class PortalQueriesTests
         var result = await sut.Handle(new GetPortalSitesQuery(), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().HaveCount(1);
-        result.Value![0].SiteCode.Should().Be("CAI001");
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().HaveCount(1);
+        result.Value.Items[0].SiteCode.Should().Be("CAI001");
 
         portalReadRepository.Verify(
-            r => r.GetSitesAsync("ORANGE", null, 1, 50, It.IsAny<CancellationToken>()),
+            r => r.GetSitesAsync("ORANGE", null, 1, 25, "siteCode", true, It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -71,7 +75,10 @@ public class PortalQueriesTests
             .Setup(r => r.SiteExistsForClientAsync("ORANGE", "CAI001", It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         portalReadRepository
-            .Setup(r => r.GetVisitsAsync("ORANGE", "CAI001", 1, 50, true, It.IsAny<CancellationToken>()))
+            .Setup(r => r.CountVisitsAsync("ORANGE", "CAI001", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+        portalReadRepository
+            .Setup(r => r.GetVisitsAsync("ORANGE", "CAI001", 1, 25, "scheduledDate", true, true, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<PortalVisitDto>
             {
                 new()
@@ -94,8 +101,9 @@ public class PortalQueriesTests
         var result = await sut.Handle(new GetPortalVisitsQuery { SiteCode = "CAI001" }, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().HaveCount(1);
-        result.Value![0].EngineerDisplayName.Should().Be("Field Engineer");
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().HaveCount(1);
+        result.Value.Items[0].EngineerDisplayName.Should().Be("Field Engineer");
     }
 
     [Fact]
@@ -127,7 +135,7 @@ public class PortalQueriesTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be("Site not found.");
         portalReadRepository.Verify(
-            r => r.GetVisitsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
+            r => r.GetVisitsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -145,7 +153,10 @@ public class PortalQueriesTests
 
         var portalReadRepository = new Mock<IPortalReadRepository>();
         portalReadRepository
-            .Setup(r => r.GetSitesAsync("ORANGE", null, 1, 200, It.IsAny<CancellationToken>()))
+            .Setup(r => r.CountSitesAsync("ORANGE", null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(0);
+        portalReadRepository
+            .Setup(r => r.GetSitesAsync("ORANGE", null, 1, 100, "siteCode", true, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<PortalSiteDto>());
 
         var sut = new GetPortalSitesQueryHandler(
@@ -153,11 +164,11 @@ public class PortalQueriesTests
             users.Object,
             portalReadRepository.Object);
 
-        var result = await sut.Handle(new GetPortalSitesQuery { PageNumber = 0, PageSize = 500 }, CancellationToken.None);
+        var result = await sut.Handle(new GetPortalSitesQuery { Page = 0, PageSize = 500 }, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
         portalReadRepository.Verify(
-            r => r.GetSitesAsync("ORANGE", null, 1, 200, It.IsAny<CancellationToken>()),
+            r => r.GetSitesAsync("ORANGE", null, 1, 100, "siteCode", true, It.IsAny<CancellationToken>()),
             Times.Once);
     }
 

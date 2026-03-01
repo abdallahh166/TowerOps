@@ -7,6 +7,7 @@ using Moq;
 using System.Globalization;
 using TowerOps.Api.Contracts.Auth;
 using TowerOps.Api.Controllers;
+using TowerOps.Api.Errors;
 using TowerOps.Application.Commands.Auth.Login;
 using TowerOps.Application.Commands.Auth.ForgotPassword;
 using TowerOps.Application.Common;
@@ -59,7 +60,10 @@ public class AuthControllerTests
             Password = "WrongPass123!"
         }, CancellationToken.None);
 
-        response.Should().BeOfType<UnauthorizedObjectResult>();
+        var objectResult = response.Should().BeOfType<ObjectResult>().Subject;
+        objectResult.StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
+        var payload = objectResult.Value.Should().BeOfType<ApiErrorResponse>().Subject;
+        payload.Code.Should().Be(ApiErrorCodes.Unauthorized);
     }
 
     [Fact]

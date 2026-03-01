@@ -8,6 +8,7 @@ using TowerOps.Application.Commands.Roles.CreateApplicationRole;
 using TowerOps.Application.Commands.Roles.DeleteApplicationRole;
 using TowerOps.Application.Commands.Roles.UpdateApplicationRole;
 using TowerOps.Application.DTOs.Roles;
+using TowerOps.Api.Mappings;
 using TowerOps.Application.Queries.Roles.GetAllApplicationRoles;
 using TowerOps.Application.Queries.Roles.GetApplicationRoleById;
 using TowerOps.Application.Security;
@@ -19,21 +20,43 @@ public sealed class RolesController : ApiControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll(
-        [FromQuery] int? pageNumber,
-        [FromQuery] int? pageSize,
-        CancellationToken cancellationToken)
+        [FromQuery(Name = "page")] int page = 1,
+        [FromQuery] int pageSize = 25,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string sortDir = "desc",
+        CancellationToken cancellationToken = default)
     {
+        var safePage = page < 1 ? 1 : page;
+        var safePageSize = Math.Clamp(pageSize, 1, 100);
+        if (!TryResolveSort(
+                sortBy,
+                sortDir,
+                new[] { "name", "displayName", "isActive", "isSystem", "updatedAt" },
+                defaultSortBy: "name",
+                out var resolvedSortBy,
+                out var sortDescending,
+                out var sortError))
+        {
+            return sortError!;
+        }
+
         var result = await Mediator.Send(
             new GetAllApplicationRolesQuery
             {
-                PageNumber = pageNumber,
-                PageSize = pageSize
+                Page = safePage,
+                PageSize = safePageSize,
+                SortBy = resolvedSortBy,
+                SortDescending = sortDescending
             },
             cancellationToken);
         if (!result.IsSuccess || result.Value is null)
             return HandleResult(result);
 
-        return Ok(result.Value.Select(ToResponse).ToList());
+        var mapped = result.Value.Items.Select(ToResponse).ToList();
+        return Ok(mapped.ToPagedResponse(
+            result.Value.PageNumber,
+            result.Value.PageSize,
+            result.Value.TotalCount));
     }
 
     [HttpGet("permissions")]
@@ -74,7 +97,7 @@ public sealed class RolesController : ApiControllerBase
         if (!result.IsSuccess || result.Value is null)
         {
             if (result.Error.Contains("already exists", StringComparison.OrdinalIgnoreCase))
-                return Conflict(result.Error);
+                return Failure(result.Error);
 
             return HandleResult(result);
         }
@@ -115,7 +138,7 @@ public sealed class RolesController : ApiControllerBase
         if (!result.IsSuccess)
         {
             if (result.Error.Contains("system roles cannot be deleted", StringComparison.OrdinalIgnoreCase))
-                return BadRequest(result.Error);
+                return Failure(result.Error);
 
             return HandleResult(result);
         }

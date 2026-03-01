@@ -88,7 +88,7 @@ public sealed class MaterialsController : ApiControllerBase
         var effectiveOfficeId = officeId != Guid.Empty ? officeId : _currentUserService.OfficeId;
         if (effectiveOfficeId == Guid.Empty)
         {
-            return BadRequest("officeId is required.");
+            return Failure("officeId is required.");
         }
 
         var result = await Mediator.Send(effectiveOfficeId.ToQuery(onlyInStock), cancellationToken);

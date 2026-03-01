@@ -20,6 +20,13 @@ public sealed class User : AggregateRoot<Guid>
     public bool IsActive { get; private set; }
     public bool MustChangePassword { get; private set; }
     public DateTime? LastLoginAt { get; private set; }
+    public int FailedLoginAttempts { get; private set; }
+    public DateTime? LockoutEndUtc { get; private set; }
+    public int LockoutCountInWindow { get; private set; }
+    public DateTime? LockoutWindowStartUtc { get; private set; }
+    public bool IsManualLockout { get; private set; }
+    public bool IsMfaEnabled { get; private set; }
+    public string? MfaSecret { get; private set; }
     public string? ClientCode { get; private set; }
     public bool IsClientPortalUser { get; private set; }
     
@@ -195,6 +202,110 @@ public sealed class User : AggregateRoot<Guid>
     public void RecordLogin()
     {
         LastLoginAt = DateTime.UtcNow;
+    }
+
+    public bool IsLockedOut(DateTime nowUtc)
+    {
+        return IsManualLockout || (LockoutEndUtc.HasValue && LockoutEndUtc.Value > nowUtc);
+    }
+
+    public bool RegisterFailedLoginAttempt(
+        DateTime nowUtc,
+        int maxAttempts = 5,
+        int temporaryLockoutMinutes = 15,
+        int manualLockoutThreshold = 3,
+        int manualWindowHours = 24)
+    {
+        if (IsManualLockout)
+            return true;
+
+        if (maxAttempts <= 0)
+            maxAttempts = 5;
+
+        if (temporaryLockoutMinutes <= 0)
+            temporaryLockoutMinutes = 15;
+
+        if (manualLockoutThreshold <= 0)
+            manualLockoutThreshold = 3;
+
+        if (manualWindowHours <= 0)
+            manualWindowHours = 24;
+
+        // Expired temporary lockout should not keep stale lock state.
+        if (LockoutEndUtc.HasValue && LockoutEndUtc.Value <= nowUtc)
+        {
+            LockoutEndUtc = null;
+        }
+
+        FailedLoginAttempts++;
+        if (FailedLoginAttempts < maxAttempts)
+        {
+            MarkAsUpdated(Email);
+            return false;
+        }
+
+        FailedLoginAttempts = 0;
+        var windowDuration = TimeSpan.FromHours(manualWindowHours);
+
+        if (!LockoutWindowStartUtc.HasValue || (nowUtc - LockoutWindowStartUtc.Value) > windowDuration)
+        {
+            LockoutWindowStartUtc = nowUtc;
+            LockoutCountInWindow = 1;
+        }
+        else
+        {
+            LockoutCountInWindow++;
+        }
+
+        if (LockoutCountInWindow >= manualLockoutThreshold)
+        {
+            IsManualLockout = true;
+            LockoutEndUtc = null;
+            MarkAsUpdated(Email);
+            return true;
+        }
+
+        LockoutEndUtc = nowUtc.AddMinutes(temporaryLockoutMinutes);
+        MarkAsUpdated(Email);
+        return false;
+    }
+
+    public void RegisterSuccessfulLogin(DateTime nowUtc)
+    {
+        LastLoginAt = nowUtc;
+        FailedLoginAttempts = 0;
+        LockoutEndUtc = null;
+
+        // Keep manual lockout until explicit admin unlock.
+        if (!IsManualLockout &&
+            LockoutWindowStartUtc.HasValue &&
+            (nowUtc - LockoutWindowStartUtc.Value) > TimeSpan.FromHours(24))
+        {
+            LockoutWindowStartUtc = null;
+            LockoutCountInWindow = 0;
+        }
+
+        MarkAsUpdated(Email);
+    }
+
+    public void UnlockByAdmin()
+    {
+        FailedLoginAttempts = 0;
+        LockoutEndUtc = null;
+        LockoutCountInWindow = 0;
+        LockoutWindowStartUtc = null;
+        IsManualLockout = false;
+        MarkAsUpdated(Email);
+    }
+
+    public void ConfigureMfa(string secret, bool enabled)
+    {
+        if (enabled && string.IsNullOrWhiteSpace(secret))
+            throw new DomainException("MFA secret is required when enabling MFA.", "User.Mfa.SecretRequired");
+
+        MfaSecret = string.IsNullOrWhiteSpace(secret) ? null : secret.Trim();
+        IsMfaEnabled = enabled;
+        MarkAsUpdated(Email);
     }
 
     public void EnableClientPortalAccess(string clientCode)

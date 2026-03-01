@@ -43,7 +43,7 @@ public sealed class SitesController : ApiControllerBase
             string.IsNullOrWhiteSpace(request.OMCName) ||
             !request.SiteType.HasValue)
         {
-            return BadRequest("Name, OMCName, and SiteType are required.");
+            return Failure("Name, OMCName, and SiteType are required.");
         }
 
         var result = await Mediator.Send(request.ToCommand(siteId), cancellationToken);
@@ -70,7 +70,7 @@ public sealed class SitesController : ApiControllerBase
     {
         if (!_currentUserService.IsAuthenticated || _currentUserService.UserId == Guid.Empty)
         {
-            return Unauthorized();
+            return UnauthorizedFailure();
         }
 
         var result = await Mediator.Send(request.ToCommand(siteId, _currentUserService.UserId), cancellationToken);
@@ -102,7 +102,7 @@ public sealed class SitesController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(fileBytes.ToCommand(), cancellationToken);
         return HandleResult(result);
@@ -114,7 +114,7 @@ public sealed class SitesController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(fileBytes.ToSiteAssetsImportCommand(), cancellationToken);
         return HandleResult(result);
@@ -126,7 +126,7 @@ public sealed class SitesController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(fileBytes.ToPowerDataImportCommand(), cancellationToken);
         return HandleResult(result);
@@ -138,7 +138,7 @@ public sealed class SitesController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(fileBytes.ToSiteRadioDataImportCommand(), cancellationToken);
         return HandleResult(result);
@@ -150,7 +150,7 @@ public sealed class SitesController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(fileBytes.ToSiteTxDataImportCommand(), cancellationToken);
         return HandleResult(result);
@@ -162,7 +162,7 @@ public sealed class SitesController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(fileBytes.ToSiteSharingDataImportCommand(), cancellationToken);
         return HandleResult(result);
@@ -174,7 +174,7 @@ public sealed class SitesController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(fileBytes.ToRfStatusImportCommand(), cancellationToken);
         return HandleResult(result);
@@ -186,7 +186,7 @@ public sealed class SitesController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(fileBytes.ToBatteryDischargeTestImportCommand(), cancellationToken);
         return HandleResult(result);
@@ -198,7 +198,7 @@ public sealed class SitesController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(fileBytes.ToDeltaSitesImportCommand(), cancellationToken);
         return HandleResult(result);
@@ -225,7 +225,10 @@ public sealed class SitesController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(parameters.ToOfficeSitesQuery(officeId), cancellationToken);
-        return HandleResult(result);
+        if (!result.IsSuccess || result.Value is null)
+            return HandleResult(result);
+
+        return Ok(result.Value.ToPagedResponse());
     }
 
     [HttpGet("maintenance")]

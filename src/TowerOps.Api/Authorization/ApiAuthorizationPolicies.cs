@@ -109,7 +109,7 @@ public static class ApiAuthorizationPolicies
                 PermissionConstants.PortalViewSla));
 
         options.AddPolicy(CanManagePortalWorkOrders, policy =>
-            RequireAnyPermission(policy, PermissionConstants.PortalViewWorkOrders));
+            RequireAnyPermission(policy, PermissionConstants.PortalManageWorkOrders));
     }
 
     private static void RequireAnyPermission(AuthorizationPolicyBuilder policy, params string[] requiredPermissions)

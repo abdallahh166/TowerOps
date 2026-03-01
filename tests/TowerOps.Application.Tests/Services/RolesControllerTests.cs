@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TowerOps.Api.Contracts.Roles;
 using TowerOps.Api.Controllers;
+using TowerOps.Api.Errors;
 using TowerOps.Application.Commands.Roles.CreateApplicationRole;
 using TowerOps.Application.Commands.Roles.DeleteApplicationRole;
 using TowerOps.Application.Common;
@@ -28,7 +29,10 @@ public class RolesControllerTests
 
         var result = await controller.Delete("Admin", CancellationToken.None);
 
-        result.Should().BeOfType<BadRequestObjectResult>();
+        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
+        objectResult.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+        var payload = objectResult.Value.Should().BeOfType<ApiErrorResponse>().Subject;
+        payload.Code.Should().Be(ApiErrorCodes.RequestFailed);
     }
 
     [Fact]
