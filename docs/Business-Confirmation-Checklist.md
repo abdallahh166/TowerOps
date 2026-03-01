@@ -39,9 +39,9 @@ Source:
 | BC-03 | Implemented | Closed `#49` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | `portal.view_workorders` vs `portal.manage_workorders` split enforced |
 | BC-04 | Implemented | Closed `#50` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | Standardized structured error envelope across API responses |
 | BC-07 | Implemented | Closed `#53` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | Unified pagination/sort contract and sort-field allowlists |
-| BC-05 | Planned | Closed `#51` | [#58](https://github.com/abdallahh166/TowerOps/issues/58) | Decision approved. Implementation pending (retention, legal hold, export flow). |
-| BC-06 | Planned | Closed `#52` | [#59](https://github.com/abdallahh166/TowerOps/issues/59) | Decision approved. Implementation pending (quarantine pipeline and malware scanning). |
-| BC-08 | Planned | Closed `#54` | [#60](https://github.com/abdallahh166/TowerOps/issues/60) | Decision approved. Implementation pending (SLA start rules and threshold config by WO type). |
+| BC-05 | Planned | Open `#62` | TBD | Decision approved. Pending implementation (retention, legal hold, export flow). Supersedes delivery tracking from `#58`. |
+| BC-06 | Planned | Open `#64` | TBD | Decision approved. Pending implementation (quarantine pipeline and malware scanning). Supersedes delivery tracking from `#59`. |
+| BC-08 | Implemented | Closed `#63` | [#65](https://github.com/abdallahh166/TowerOps/pull/65) | Implemented and merged: CM/PM SLA start rules, type-based at-risk thresholds, UTC authority, engineer completion metadata, and migrations. |
 
 ## After Each Decision
 1. Update `Status` to `Approved` or `Rejected`.
