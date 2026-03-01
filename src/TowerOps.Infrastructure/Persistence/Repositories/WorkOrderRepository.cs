@@ -16,6 +16,25 @@ public class WorkOrderRepository : Repository<WorkOrder, Guid>, IWorkOrderReposi
         return await _dbSet.FirstOrDefaultAsync(w => w.WoNumber == woNumber, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<WorkOrder>> GetByUserOwnershipAsNoTrackingAsync(
+        Guid userId,
+        int take = 1000,
+        CancellationToken cancellationToken = default)
+    {
+        if (userId == Guid.Empty)
+            return Array.Empty<WorkOrder>();
+
+        var safeTake = Math.Clamp(take, 1, 10000);
+        var userIdText = userId.ToString();
+
+        return await _dbSet
+            .AsNoTracking()
+            .Where(w => w.AssignedEngineerId == userId || w.CreatedBy == userIdText)
+            .OrderByDescending(w => w.CreatedAt)
+            .Take(safeTake)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<WorkOrder>> GetOpenForSlaEvaluationAsync(
         int take,
         CancellationToken cancellationToken = default)

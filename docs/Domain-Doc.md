@@ -39,6 +39,7 @@ Branding note:
 - `Client`
 - `PasswordResetToken`
 - `UnusedAsset`
+- `UserDataExportRequest`
 
 ## Value Objects
 - Identifiers: `SiteCode`, `VisitNumber`, `MaterialCode`
@@ -53,6 +54,8 @@ Branding note:
 - Site ownership affects responsibility scope (`Host` => `Full`, otherwise `EquipmentOnly`).
 - Equipment-only sites cannot create tower-infrastructure work orders.
 - Signature capture enforces single-capture constraints and payload validation.
+- Entities support legal-hold flags (`IsUnderLegalHold`) to block retention purge while disputes are active.
+- `UserDataExportRequest` tracks user-scoped JSON export lifecycle (`Pending/Completed/Expired/Failed`) with expiry.
 - Domain exceptions carry message keys for localization.
 
 ## Visit Type Canonical Model

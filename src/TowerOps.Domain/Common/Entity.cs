@@ -13,6 +13,9 @@ public abstract class Entity<TId> where TId : notnull
     public bool IsDeleted { get; protected set; }
     public DateTime? DeletedAt { get; protected set; }
     public string? DeletedBy { get; protected set; }
+    public bool IsUnderLegalHold { get; protected set; }
+    public DateTime? LegalHoldAppliedAtUtc { get; protected set; }
+    public string? LegalHoldReason { get; protected set; }
 
     protected Entity() { }
 
@@ -27,6 +30,25 @@ public abstract class Entity<TId> where TId : notnull
         IsDeleted = true;
         DeletedAt = DateTime.UtcNow;
         DeletedBy = deletedBy;
+    }
+
+    public void ApplyLegalHold(string reason, string updatedBy)
+    {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Legal hold reason is required.", nameof(reason));
+
+        IsUnderLegalHold = true;
+        LegalHoldAppliedAtUtc = DateTime.UtcNow;
+        LegalHoldReason = reason.Trim();
+        MarkAsUpdated(updatedBy);
+    }
+
+    public void ReleaseLegalHold(string updatedBy)
+    {
+        IsUnderLegalHold = false;
+        LegalHoldAppliedAtUtc = null;
+        LegalHoldReason = null;
+        MarkAsUpdated(updatedBy);
     }
 
     protected void MarkAsUpdated(string updatedBy)

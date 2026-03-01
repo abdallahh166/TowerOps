@@ -218,6 +218,15 @@ Policies evaluate permission claims (`PermissionConstants.ClaimType`), not hardc
 - `PATCH /{userId}/deactivate` (`CanManageUsers`)
 - `PATCH /{userId}/unlock-account` (`CanManageUsers`)
 
+### DataExportsController (`/api/data-exports`) class policy: `Authorize`
+- `POST /me`
+  - creates authenticated user's operational data export snapshot (JSON)
+  - returns export request metadata (`requestId`, `requestedAtUtc`, `expiresAtUtc`, `status`)
+- `GET /me/{requestId}`
+  - downloads the previously requested JSON export for the same authenticated user
+  - request expires based on `Privacy:Export:TtlDays` (default 30)
+  - returns `application/json` file payload
+
 ### OfficesController (`/api/offices`) class policy: `CanManageOffices`
 - `POST /`
 - `GET /{officeId}`

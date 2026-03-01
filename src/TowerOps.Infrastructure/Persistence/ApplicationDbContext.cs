@@ -20,6 +20,7 @@ using TowerOps.Domain.Entities.Sites;
 using TowerOps.Domain.Entities.Sync;
 using TowerOps.Domain.Entities.SystemSettings;
 using TowerOps.Domain.Entities.UnusedAssets;
+using TowerOps.Domain.Entities.UserDataExports;
 using TowerOps.Domain.Entities.Users;
 using TowerOps.Domain.Entities.Escalations;
 using TowerOps.Domain.Entities.Visits;
@@ -85,6 +86,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<SyncConflict> SyncConflicts => Set<SyncConflict>();
     public DbSet<Asset> Assets => Set<Asset>();
     public DbSet<UnusedAsset> UnusedAssets => Set<UnusedAsset>();
+    public DbSet<UserDataExportRequest> UserDataExportRequests => Set<UserDataExportRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

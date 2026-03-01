@@ -48,6 +48,7 @@ Configured in `DependencyInjection.cs`:
 - `Materials`: CRUD + stock add/reserve/consume
 - `DailyPlans`: create/assign/remove/suggest/publish
 - `Assets`: register/service/fault/replace
+- `Privacy`: authenticated self-service operational data export requests/download
 - `Sync`: ingest offline batches and process conflicts
 - `Reports`: scorecard/checklist/bdt/data-collection exports
 - `AuditLogs` and `ApprovalRecords`: explicit audit/approval persistence commands
@@ -77,6 +78,7 @@ The following command contracts are checked by `tools/check_doc_drift.py` and mu
 - `ExportBDTCommand`
 - `ExportDataCollectionCommand`
 - `ExportScorecardCommand`
+- `RequestMyOperationalDataExportCommand`
 
 ### Query modules
 - `Portal`: client-scoped dashboard/sites/workorders/visits/SLA/evidence
@@ -84,7 +86,7 @@ The following command contracts are checked by `tools/check_doc_drift.py` and mu
 - `Analytics`: performance, trends, issue analytics
 - `Reports`: visit/report retrieval and export payloads
 - `Signatures`: visit/work-order signature retrieval
-- `Users`, `Sites`, `Visits`, `WorkOrders`, `Escalations`, `Materials`, `Offices`, `Roles`, `Settings`, `DailyPlans`, `Assets`, `Sync`
+- `Users`, `Sites`, `Visits`, `WorkOrders`, `Escalations`, `Materials`, `Offices`, `Roles`, `Settings`, `DailyPlans`, `Assets`, `Sync`, `Privacy`
 
 ## Business Logic Boundaries
 - Handlers enforce use-case policy and orchestration.
