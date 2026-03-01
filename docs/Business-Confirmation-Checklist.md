@@ -11,6 +11,8 @@ Source:
 - `In Review`: discussion started
 - `Approved`: business approved and documented
 - `Rejected`: explicitly declined
+- `Implemented`: approved and delivered in code (PR merged)
+- `In Delivery`: approved and implemented in PR, pending merge checks
 
 ## Decision Tracker
 | ID | Topic | Decision Required | Impact | Owner | Due Date | Status | Decision Notes | Linked Ticket |
@@ -27,6 +29,18 @@ Source:
 ## Decision Session Plan (Proposed)
 1. Session A (Completed): BC-01, BC-02, BC-03, BC-04, BC-07.
 2. Session B (2026-03-05): BC-05, BC-06, BC-08.
+
+## Implementation Tracker
+| ID | Delivery Status | GitHub Issue | Implementation PR | Notes |
+|---|---|---|---|---|
+| BC-01 | In Delivery | Closed `#47` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | Refresh token rotation, revoke-on-logout, revoke-all on password change, 15m/7d policy applied |
+| BC-02 | In Delivery | Closed `#48` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | Progressive lockout, manual admin unlock endpoint, MFA setup/verify + Admin/Manager enforcement |
+| BC-03 | In Delivery | Closed `#49` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | `portal.view_workorders` vs `portal.manage_workorders` split enforced |
+| BC-04 | In Delivery | Closed `#50` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | Standardized structured error envelope across API responses |
+| BC-07 | In Delivery | Closed `#53` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | Unified pagination/sort contract and sort-field allowlists |
+| BC-05 | Open | Open `#51` | TBD | Awaiting legal/compliance decision |
+| BC-06 | Open | Open `#52` | TBD | Awaiting platform/security decision |
+| BC-08 | Open | Open `#54` | TBD | Awaiting operations/product decision |
 
 ## After Each Decision
 1. Update `Status` to `Approved` or `Rejected`.
@@ -46,3 +60,4 @@ Source:
   - `docs/Domain-Doc.md`
   - `docs/Documentation-Gap-Report.md`
 - Related implementation tickets are linked and prioritized.
+- BC-01/02/03/04/07 move from `In Delivery` to `Implemented` once PR `#56` is merged.
