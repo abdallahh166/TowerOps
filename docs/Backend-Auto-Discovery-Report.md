@@ -192,7 +192,7 @@ Reference files:
 Source of truth:
 - `docs/Business-Confirmation-Checklist.md`
 
-### 3.1 Confirmed decisions (approved policy, implementation pending/partial)
+### 3.1 Confirmed decisions (approved policy)
 1. BC-01 Session policy (`#47`)
    - Access token TTL 15 minutes.
    - Refresh token TTL 7 days, rotating per use.
@@ -213,13 +213,13 @@ Source of truth:
    - Standard response: `{ data, pagination }`.
    - `sortBy` must be server allowlist-validated.
 
-### 3.2 Business clarification still required
+### 3.2 Implementation status for approved decisions
 1. BC-05 Data retention and privacy (`#51`)
-   - photos, signatures, audit logs, export data retention windows and deletion/export policy.
+   - Approved, implementation pending in tracking issue `#62`.
 2. BC-06 Upload security policy (`#52`)
-   - malware scanning/content sanitization requirements before persistence.
+   - Approved and implemented in PR `#66`, linked delivery issue `#64` closed.
 3. BC-08 SLA governance finalization (`#54`)
-   - final at-risk, breach, and compliance cutoffs.
+   - Approved and implemented in PR `#65`, linked delivery issue `#63` closed.
 
 ---
 
