@@ -40,9 +40,9 @@ This report captures documentation areas that still need follow-up to keep docs 
 - Recommendation: Add runbooks under `docs/ops/`.
 
 ### 6) Business confirmations and implementation closure
-- Gap: BC-05 is in delivery (retention/privacy/legal hold/export code added, pending final PR merge and production rollout validation). BC-06 and BC-08 are implemented.
-- Impact: Medium (final validation/merge window) for BC-05, low for BC-06/08.
-- Recommendation: Complete BC-05 merge, run staging retention dry-run, and close remaining tracking issue.
+- Status: BC-05, BC-06, and BC-08 are implemented and merged.
+- Impact: Low (remaining work is operational rollout validation, not implementation closure).
+- Recommendation: Run staging retention dry-run verification and archive BC delivery tickets as complete.
 - Tracking file: `docs/Business-Confirmation-Checklist.md`
 - Issue tracking:
   - BC-01: `#47`

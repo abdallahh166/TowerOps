@@ -39,7 +39,7 @@ Source:
 | BC-03 | Implemented | Closed `#49` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | `portal.view_workorders` vs `portal.manage_workorders` split enforced |
 | BC-04 | Implemented | Closed `#50` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | Standardized structured error envelope across API responses |
 | BC-07 | Implemented | Closed `#53` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | Unified pagination/sort contract and sort-field allowlists |
-| BC-05 | In Delivery | Open `#62` | TBD | Implementation in progress: legal-hold flags + retention cleanup worker + self-service data export API/commands/migration/tests added on feature branch, pending PR merge. Supersedes delivery tracking from `#58`. |
+| BC-05 | Implemented | Closed `#62` | [#68](https://github.com/abdallahh166/TowerOps/pull/68) | Implemented and merged: legal-hold flags, retention cleanup worker, self-service authenticated data export API, migration, tests, and docs updates. Supersedes delivery tracking from `#58`. |
 | BC-06 | Implemented | Closed `#64` | [#66](https://github.com/abdallahh166/TowerOps/pull/66) | Implemented and merged: quarantine-first uploads, magic-byte + extension validation, malware scan worker, and approved-only portal/report file serving. |
 | BC-08 | Implemented | Closed `#63` | [#65](https://github.com/abdallahh166/TowerOps/pull/65) | Implemented and merged: CM/PM SLA start rules, type-based at-risk thresholds, UTC authority, engineer completion metadata, and migrations. |
 
