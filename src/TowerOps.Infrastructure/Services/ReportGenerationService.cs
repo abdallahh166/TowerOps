@@ -146,7 +146,7 @@ public class ReportGenerationService : IReportGenerationService
                 row.RelativeItem().Border(1).Padding(10).Column(col =>
                 {
                     col.Item().AlignCenter().Text("Photos").Bold();
-                    col.Item().AlignCenter().Text(visit.Photos?.Count.ToString() ?? "0").FontSize(20).FontColor(Colors.Blue.Medium);
+                    col.Item().AlignCenter().Text(visit.Photos?.Count(p => p.FileStatus == UploadedFileStatus.Approved).ToString() ?? "0").FontSize(20).FontColor(Colors.Blue.Medium);
                 });
 
                 row.RelativeItem().Border(1).Padding(10).Column(col =>

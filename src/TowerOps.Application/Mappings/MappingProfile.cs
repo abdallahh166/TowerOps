@@ -41,6 +41,8 @@ public class MappingProfile : Profile
         CreateMap<VisitPhoto, VisitPhotoDto>()
             .ForMember(d => d.FileUrl, opt => opt.MapFrom(s => s.FilePath))
             .ForMember(d => d.ThumbnailUrl, opt => opt.MapFrom(s => s.ThumbnailPath))
+            .ForMember(d => d.IsPendingApproval, opt => opt.MapFrom(s => s.FileStatus == Domain.Enums.UploadedFileStatus.Pending))
+            .ForMember(d => d.QuarantineReason, opt => opt.MapFrom(s => s.QuarantineReason))
             .ForMember(d => d.CapturedAt, opt => opt.MapFrom(s => s.CapturedAtUtc ?? s.CreatedAt));
 
         CreateMap<VisitReading, VisitReadingDto>();

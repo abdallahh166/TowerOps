@@ -34,6 +34,17 @@ public class VisitPhotoConfiguration : IEntityTypeConfiguration<VisitPhoto>
             .IsRequired()
             .HasMaxLength(500);
 
+        builder.Property(p => p.FileStatus)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .HasDefaultValue(TowerOps.Domain.Enums.UploadedFileStatus.Approved);
+
+        builder.Property(p => p.ScanCompletedAtUtc);
+
+        builder.Property(p => p.QuarantineReason)
+            .HasMaxLength(500);
+
         builder.Property(p => p.ThumbnailPath)
             .HasMaxLength(500);
 
@@ -63,5 +74,6 @@ public class VisitPhotoConfiguration : IEntityTypeConfiguration<VisitPhoto>
         builder.HasIndex(p => p.VisitId);
         builder.HasIndex(p => p.Type);
         builder.HasIndex(p => p.Category);
+        builder.HasIndex(p => p.FileStatus);
     }
 }

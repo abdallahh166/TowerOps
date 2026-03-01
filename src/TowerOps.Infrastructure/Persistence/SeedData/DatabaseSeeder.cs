@@ -509,6 +509,16 @@ public class DatabaseSeeder
             CreateSetting("Asset:WarrantyAlertDaysBeforeExpiry", "30", "Asset", "int", "Days before warranty expiry alert", false, seededBy),
             CreateSetting("Asset:AutoRegisterFromImport", "true", "Asset", "bool", "Auto-register assets during import", false, seededBy),
 
+            // Upload Security
+            CreateSetting("UploadSecurity:QuarantineContainer", "quarantine", "UploadSecurity", "string", "Container/prefix for newly uploaded files pending malware scan", false, seededBy),
+            CreateSetting("UploadSecurity:MalwareScan:Provider", "ClamAV", "UploadSecurity", "string", "Malware scanner provider (ClamAV or AzureDefender)", false, seededBy),
+            CreateSetting("UploadSecurity:ClamAV:Host", string.Empty, "UploadSecurity", "string", "ClamAV host for INSTREAM scanning", false, seededBy),
+            CreateSetting("UploadSecurity:ClamAV:Port", "3310", "UploadSecurity", "int", "ClamAV TCP port", false, seededBy),
+            CreateSetting("UploadSecurity:ClamAV:TimeoutSeconds", "10", "UploadSecurity", "int", "ClamAV scan timeout in seconds", false, seededBy),
+            CreateSetting("UploadSecurity:Scan:Enabled", "true", "UploadSecurity", "bool", "Enable upload malware scan background worker", false, seededBy),
+            CreateSetting("UploadSecurity:Scan:IntervalSeconds", "60", "UploadSecurity", "int", "Upload scan polling interval seconds", false, seededBy),
+            CreateSetting("UploadSecurity:Scan:BatchSize", "100", "UploadSecurity", "int", "Pending uploads scanned per cycle", false, seededBy),
+
             // Import
             CreateSetting("Import:SkipInvalidRows", "true", "Import", "bool", "Skip invalid rows during imports", false, seededBy),
             CreateSetting("Import:MaxRows", "5000", "Import", "int", "Maximum rows per import file", false, seededBy),

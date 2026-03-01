@@ -12,6 +12,9 @@ namespace TowerOps.Domain.Entities.Visits
         public string ItemName { get; private set; } = string.Empty;
         public string FileName { get; private set; } = string.Empty;
         public string FilePath { get; private set; } = string.Empty;
+        public UploadedFileStatus FileStatus { get; private set; }
+        public DateTime? ScanCompletedAtUtc { get; private set; }
+        public string? QuarantineReason { get; private set; }
         public string? ThumbnailPath { get; private set; }
         public string? Description { get; private set; }
         public DateTime? CapturedAtUtc { get; private set; }
@@ -27,6 +30,7 @@ namespace TowerOps.Domain.Entities.Visits
             string itemName,
             string fileName,
             string filePath,
+            UploadedFileStatus fileStatus,
             string? thumbnailPath = null,
             string? description = null,
             Location? location = null)
@@ -37,6 +41,7 @@ namespace TowerOps.Domain.Entities.Visits
             ItemName = itemName;
             FileName = fileName;
             FilePath = filePath;
+            FileStatus = fileStatus;
             ThumbnailPath = thumbnailPath;
             Description = description;
             CapturedAtUtc = DateTime.UtcNow;
@@ -52,7 +57,19 @@ namespace TowerOps.Domain.Entities.Visits
             string fileName,
             string filePath)
         {
-            return new VisitPhoto(visitId, type, category, itemName, fileName, filePath);
+            // Legacy/default creation path is marked approved for backward compatibility.
+            return new VisitPhoto(visitId, type, category, itemName, fileName, filePath, UploadedFileStatus.Approved);
+        }
+
+        public static VisitPhoto CreatePendingUpload(
+            Guid visitId,
+            PhotoType type,
+            PhotoCategory category,
+            string itemName,
+            string fileName,
+            string filePath)
+        {
+            return new VisitPhoto(visitId, type, category, itemName, fileName, filePath, UploadedFileStatus.Pending);
         }
 
         // ✅ Setters
@@ -93,6 +110,22 @@ namespace TowerOps.Domain.Entities.Visits
         public void UpdateFilePath(string newPath, string updatedBy)
         {
             FilePath = newPath;
+            MarkAsUpdated(updatedBy);
+        }
+
+        public void MarkApproved(string updatedBy)
+        {
+            FileStatus = UploadedFileStatus.Approved;
+            ScanCompletedAtUtc = DateTime.UtcNow;
+            QuarantineReason = null;
+            MarkAsUpdated(updatedBy);
+        }
+
+        public void MarkQuarantined(string reason, string updatedBy)
+        {
+            FileStatus = UploadedFileStatus.Quarantined;
+            ScanCompletedAtUtc = DateTime.UtcNow;
+            QuarantineReason = reason;
             MarkAsUpdated(updatedBy);
         }
 

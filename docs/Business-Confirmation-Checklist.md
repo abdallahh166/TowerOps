@@ -40,7 +40,7 @@ Source:
 | BC-04 | Implemented | Closed `#50` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | Standardized structured error envelope across API responses |
 | BC-07 | Implemented | Closed `#53` | [#56](https://github.com/abdallahh166/TowerOps/pull/56) | Unified pagination/sort contract and sort-field allowlists |
 | BC-05 | Planned | Open `#62` | TBD | Decision approved. Pending implementation (retention, legal hold, export flow). Supersedes delivery tracking from `#58`. |
-| BC-06 | Planned | Open `#64` | TBD | Decision approved. Pending implementation (quarantine pipeline and malware scanning). Supersedes delivery tracking from `#59`. |
+| BC-06 | In Delivery | Open `#64` | TBD (`feat/bc-06-quarantine-upload`) | Quarantine-first upload pipeline, magic-byte validation, malware scan worker, and approved-only portal/report serving implemented on feature branch; pending PR merge. |
 | BC-08 | Implemented | Closed `#63` | [#65](https://github.com/abdallahh166/TowerOps/pull/65) | Implemented and merged: CM/PM SLA start rules, type-based at-risk thresholds, UTC authority, engineer completion metadata, and migrations. |
 
 ## After Each Decision

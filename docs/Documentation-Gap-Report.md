@@ -40,7 +40,7 @@ This report captures documentation areas that still need follow-up to keep docs 
 - Recommendation: Add runbooks under `docs/ops/`.
 
 ### 6) Business confirmations and implementation closure
-- Gap: Session A business decisions were approved (BC-01/02/03/04/07), but corresponding code implementation is still open in parts.
+- Gap: BC-05 remains pending implementation (retention/privacy). BC-06 is in delivery branch and pending merge.
 - Impact: High (security and contract drift risk if frontend proceeds before backend closure).
 - Recommendation: Track approved policies as mandatory implementation scope in phase PR slices before frontend dependency freeze.
 - Tracking file: `docs/Business-Confirmation-Checklist.md`

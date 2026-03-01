@@ -62,6 +62,13 @@ public enum PhotoType
     Issue = 5
 }
 
+public enum UploadedFileStatus
+{
+    Pending = 1,
+    Approved = 2,
+    Quarantined = 3
+}
+
 public enum PhotoCategory
 {
     // Shelter
