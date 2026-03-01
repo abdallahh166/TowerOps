@@ -37,6 +37,12 @@ public class WorkOrderConfiguration : IEntityTypeConfiguration<WorkOrder>
             .HasConversion<string>()
             .HasMaxLength(10);
 
+        builder.Property(w => w.WorkOrderType)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(10)
+            .HasDefaultValue(WorkOrderType.CM);
+
         builder.Property(w => w.Scope)
             .IsRequired()
             .HasConversion<string>()
@@ -53,6 +59,11 @@ public class WorkOrderConfiguration : IEntityTypeConfiguration<WorkOrder>
 
         builder.Property(w => w.AssignedBy)
             .HasMaxLength(200);
+
+        builder.Property(w => w.SlaStartAtUtc)
+            .IsRequired();
+
+        builder.Property(w => w.ScheduledVisitDateUtc);
 
         builder.OwnsOne(w => w.ClientSignature, sig =>
         {
@@ -124,5 +135,6 @@ public class WorkOrderConfiguration : IEntityTypeConfiguration<WorkOrder>
         builder.HasIndex(w => w.SiteCode);
         builder.HasIndex(w => w.OfficeCode);
         builder.HasIndex(w => w.CreatedAt);
+        builder.HasIndex(w => w.SlaStartAtUtc);
     }
 }

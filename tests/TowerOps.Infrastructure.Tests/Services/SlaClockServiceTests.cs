@@ -26,6 +26,12 @@ public class SlaClockServiceTests
         _settingsServiceMock
             .Setup(s => s.GetAsync("SLA:P3:ResponseMinutes", 1440, It.IsAny<CancellationToken>()))
             .ReturnsAsync(1440);
+        _settingsServiceMock
+            .Setup(s => s.GetAsync("SLA:CM:AtRiskThresholdPercent", 80, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(80);
+        _settingsServiceMock
+            .Setup(s => s.GetAsync("SLA:PM:AtRiskThresholdPercent", 80, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(80);
 
         _service = new SlaClockService(
             _settingsServiceMock.Object,
@@ -60,10 +66,11 @@ public class SlaClockServiceTests
     }
 
     [Fact]
-    public async Task EvaluateStatus_ShouldReturnAtRisk_WhenWithinThirtyMinutesToDeadline()
+    public async Task EvaluateStatus_ShouldReturnAtRisk_WhenPastConfiguredThreshold()
     {
         var workOrder = WorkOrder.Create("WO-SLA-2", "S-2", "CAI", SlaClass.P1, "Issue");
-        SetResponseDeadline(workOrder, DateTime.UtcNow.AddMinutes(15));
+        SetSlaStartAt(workOrder, DateTime.UtcNow.AddMinutes(-50));
+        SetResponseDeadline(workOrder, DateTime.UtcNow.AddMinutes(10)); // 60-min window, 83% elapsed.
 
         var status = await _service.EvaluateStatusAsync(workOrder);
 
@@ -96,8 +103,8 @@ public class SlaClockServiceTests
     {
         var strictSettingsMock = new Mock<ISystemSettingsService>(MockBehavior.Strict);
         strictSettingsMock
-            .Setup(s => s.GetAsync("SLA:AtRiskThresholdPercent", 70, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(70);
+            .Setup(s => s.GetAsync("SLA:CM:AtRiskThresholdPercent", 80, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(80);
 
         var service = new SlaClockService(
             strictSettingsMock.Object,
@@ -115,6 +122,36 @@ public class SlaClockServiceTests
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
+    }
+
+    [Fact]
+    public async Task EvaluateStatus_ShouldUsePmThresholdForPmWorkOrders()
+    {
+        var settings = new Mock<ISystemSettingsService>();
+        settings
+            .Setup(s => s.GetAsync("SLA:PM:AtRiskThresholdPercent", 80, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(90);
+
+        var service = new SlaClockService(
+            settings.Object,
+            new MemoryCache(new MemoryCacheOptions()));
+
+        var scheduled = DateTime.UtcNow.AddMinutes(-60);
+        var workOrder = WorkOrder.Create(
+            "WO-SLA-PM-1",
+            "S-PM-1",
+            "CAI",
+            SlaClass.P1,
+            "Issue",
+            WorkOrderScope.ClientEquipment,
+            WorkOrderType.PM,
+            scheduled,
+            responseMinutes: 100,
+            resolutionMinutes: 200);
+
+        var status = await service.EvaluateStatusAsync(workOrder);
+
+        status.Should().Be(SlaStatus.OnTime);
     }
 
     [Fact]
@@ -136,5 +173,12 @@ public class SlaClockServiceTests
         typeof(WorkOrder)
             .GetProperty("ResponseDeadlineUtc")!
             .SetValue(workOrder, responseDeadlineUtc);
+    }
+
+    private static void SetSlaStartAt(WorkOrder workOrder, DateTime slaStartAtUtc)
+    {
+        typeof(WorkOrder)
+            .GetProperty("SlaStartAtUtc")!
+            .SetValue(workOrder, slaStartAtUtc);
     }
 }

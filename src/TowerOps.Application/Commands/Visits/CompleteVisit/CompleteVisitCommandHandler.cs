@@ -33,6 +33,11 @@ public class CompleteVisitCommandHandler : IRequestHandler<CompleteVisitCommand,
                 visit.AddEngineerNotes(request.EngineerNotes);
             }
 
+            if (request.EngineerReportedCompletionTimeUtc.HasValue)
+            {
+                visit.SetEngineerReportedCompletionTime(request.EngineerReportedCompletionTimeUtc.Value);
+            }
+
             visit.CompleteVisit();
 
             await _visitRepository.UpdateAsync(visit, cancellationToken);

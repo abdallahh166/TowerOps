@@ -138,6 +138,18 @@ public class VisitTests
         visit.DomainEvents.Should().Contain(e => e.GetType().Name == "VisitApprovedEvent");
     }
 
+    [Fact]
+    public void SetEngineerReportedCompletionTime_ShouldPersistUtcMetadata()
+    {
+        var visit = CreateTestVisit();
+        var reportedLocal = new DateTime(2026, 3, 1, 10, 0, 0, DateTimeKind.Local);
+
+        visit.SetEngineerReportedCompletionTime(reportedLocal);
+
+        visit.EngineerReportedCompletionTimeUtc.Should().NotBeNull();
+        visit.EngineerReportedCompletionTimeUtc!.Value.Kind.Should().Be(DateTimeKind.Utc);
+    }
+
     private Visit CreateTestVisit()
     {
         return Visit.Create(

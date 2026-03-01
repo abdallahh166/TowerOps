@@ -90,19 +90,28 @@ public class WorkOrderRepository : Repository<WorkOrder, Guid>, IWorkOrderReposi
         SlaClass? slaClass,
         DateTime? fromDateUtc,
         DateTime? toDateUtc,
-        int atRiskThresholdPercent,
+        int cmAtRiskThresholdPercent,
+        int pmAtRiskThresholdPercent,
         DateTime nowUtc,
         CancellationToken cancellationToken = default)
     {
-        var thresholdFraction = Math.Clamp(atRiskThresholdPercent, 1, 99) / 100d;
+        var cmThresholdFraction = Math.Clamp(cmAtRiskThresholdPercent, 1, 99) / 100d;
+        var pmThresholdFraction = Math.Clamp(pmAtRiskThresholdPercent, 1, 99) / 100d;
 
         return await ApplyKpiFilters(officeCode, slaClass, fromDateUtc, toDateUtc)
             .Where(wo =>
                 wo.Status != WorkOrderStatus.Closed &&
                 wo.Status != WorkOrderStatus.Cancelled &&
                 nowUtc <= wo.ResponseDeadlineUtc &&
-                (EF.Functions.DateDiffMinute(wo.CreatedAt, nowUtc) * 1d) >=
-                (EF.Functions.DateDiffMinute(wo.CreatedAt, wo.ResponseDeadlineUtc) * thresholdFraction))
+                (
+                    (wo.WorkOrderType == WorkOrderType.CM &&
+                     (EF.Functions.DateDiffMinute(wo.SlaStartAtUtc, nowUtc) * 1d) >=
+                     (EF.Functions.DateDiffMinute(wo.SlaStartAtUtc, wo.ResponseDeadlineUtc) * cmThresholdFraction))
+                    ||
+                    (wo.WorkOrderType == WorkOrderType.PM &&
+                     (EF.Functions.DateDiffMinute(wo.SlaStartAtUtc, nowUtc) * 1d) >=
+                     (EF.Functions.DateDiffMinute(wo.SlaStartAtUtc, wo.ResponseDeadlineUtc) * pmThresholdFraction))
+                ))
             .CountAsync(cancellationToken);
     }
 

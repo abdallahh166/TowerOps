@@ -7,4 +7,5 @@ public record CompleteVisitCommand : ICommand
 {
     public Guid VisitId { get; init; }
     public string? EngineerNotes { get; init; }
+    public DateTime? EngineerReportedCompletionTimeUtc { get; init; }
 }
