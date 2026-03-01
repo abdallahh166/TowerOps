@@ -102,7 +102,8 @@ public static class VisitsContractMapper
         => new()
         {
             VisitId = visitId,
-            EngineerNotes = request.EngineerNotes
+            EngineerNotes = request.EngineerNotes,
+            EngineerReportedCompletionTimeUtc = request.EngineerReportedCompletionTimeUtc
         };
 
     public static SubmitVisitCommand ToSubmitCommand(this Guid visitId)

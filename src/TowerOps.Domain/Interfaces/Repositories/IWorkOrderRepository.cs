@@ -32,7 +32,8 @@ public interface IWorkOrderRepository : IRepository<WorkOrder, Guid>
         SlaClass? slaClass,
         DateTime? fromDateUtc,
         DateTime? toDateUtc,
-        int atRiskThresholdPercent,
+        int cmAtRiskThresholdPercent,
+        int pmAtRiskThresholdPercent,
         DateTime nowUtc,
         CancellationToken cancellationToken = default);
     Task<decimal> GetClosedMeanTimeToRepairHoursAsync(

@@ -22,6 +22,8 @@ public static class WorkOrdersContractMapper
             WoNumber = request.WoNumber,
             SiteCode = request.SiteCode,
             OfficeCode = request.OfficeCode,
+            WorkOrderType = request.WorkOrderType,
+            ScheduledVisitDateUtc = request.ScheduledVisitDateUtc,
             SlaClass = request.SlaClass,
             Scope = request.Scope,
             IssueDescription = request.IssueDescription

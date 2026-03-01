@@ -76,6 +76,7 @@ public class VisitConfiguration : IEntityTypeConfiguration<Visit>
 
         builder.Property(v => v.CheckInTimeUtc);
         builder.Property(v => v.CheckOutTimeUtc);
+        builder.Property(v => v.EngineerReportedCompletionTimeUtc);
 
         // Owned Type: TimeRange
         builder.OwnsOne(v => v.ActualDuration, duration =>

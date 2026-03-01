@@ -23,6 +23,42 @@ public class WorkOrderTests
     }
 
     [Fact]
+    public void Create_PmWithoutScheduledVisitDate_ShouldThrowDomainException()
+    {
+        Action act = () => WorkOrder.Create(
+            woNumber: "WO-PM-001",
+            siteCode: "S-PM-001",
+            officeCode: "TNT",
+            slaClass: SlaClass.P2,
+            issueDescription: "Planned maintenance",
+            workOrderType: WorkOrderType.PM);
+
+        act.Should().Throw<DomainException>()
+            .WithMessage("*Scheduled visit date is required for PM work orders*");
+    }
+
+    [Fact]
+    public void Create_PmWithScheduledVisitDate_ShouldUseScheduledDateAsSlaStart()
+    {
+        var scheduled = new DateTime(2026, 3, 5, 8, 0, 0, DateTimeKind.Utc);
+
+        var workOrder = WorkOrder.Create(
+            woNumber: "WO-PM-002",
+            siteCode: "S-PM-002",
+            officeCode: "TNT",
+            slaClass: SlaClass.P1,
+            issueDescription: "Planned maintenance",
+            workOrderType: WorkOrderType.PM,
+            scheduledVisitDateUtc: scheduled,
+            responseMinutes: 60,
+            resolutionMinutes: 240);
+
+        workOrder.SlaStartAtUtc.Should().Be(scheduled);
+        workOrder.ResponseDeadlineUtc.Should().Be(scheduled.AddMinutes(60));
+        workOrder.ResolutionDeadlineUtc.Should().Be(scheduled.AddMinutes(240));
+    }
+
+    [Fact]
     public void Assign_FromCreated_ShouldMoveToAssigned()
     {
         var workOrder = WorkOrder.Create("WO-1002", "S-TNT-002", "TNT", SlaClass.P3, "Checklist mismatch");

@@ -1,6 +1,7 @@
 namespace TowerOps.Application.Commands.WorkOrders.CreateWorkOrder;
 
 using FluentValidation;
+using TowerOps.Domain.Enums;
 
 public class CreateWorkOrderCommandValidator : AbstractValidator<CreateWorkOrderCommand>
 {
@@ -21,5 +22,9 @@ public class CreateWorkOrderCommandValidator : AbstractValidator<CreateWorkOrder
         RuleFor(x => x.IssueDescription)
             .NotEmpty().WithMessage("Issue description is required")
             .MaximumLength(2000);
+
+        RuleFor(x => x.ScheduledVisitDateUtc)
+            .NotNull().WithMessage("Scheduled visit date is required for PM work orders")
+            .When(x => x.WorkOrderType == WorkOrderType.PM);
     }
 }

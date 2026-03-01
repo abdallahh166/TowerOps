@@ -18,6 +18,7 @@ public record VisitDto
     public DateTime ScheduledDate { get; init; }
     public DateTime? ActualStartTime { get; init; }
     public DateTime? ActualEndTime { get; init; }
+    public DateTime? EngineerReportedCompletionTimeUtc { get; init; }
     public string? Duration { get; init; }
     public VisitStatus Status { get; init; }
     public VisitType Type { get; init; }

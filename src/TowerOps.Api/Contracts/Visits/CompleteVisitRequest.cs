@@ -6,5 +6,6 @@ public record CompleteVisitRequest
 {
     [MaxLength(2000)]
     public string? EngineerNotes { get; init; }
+    public DateTime? EngineerReportedCompletionTimeUtc { get; init; }
 }
 

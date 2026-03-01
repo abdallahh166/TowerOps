@@ -18,6 +18,10 @@ namespace TowerOps.Application.Commands.Visits.CompleteVisit
             RuleFor(x => x.EngineerNotes)
                 .MaximumLength(1000)
                 .WithMessage("Engineer notes cannot exceed 1000 characters");
+
+            RuleFor(x => x.EngineerReportedCompletionTimeUtc)
+                .Must(x => !x.HasValue || x.Value.Year >= 2000)
+                .WithMessage("Engineer reported completion time must be a valid UTC timestamp");
         }
     }
 }

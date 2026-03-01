@@ -27,6 +27,7 @@ public sealed class Visit : AggregateRoot<Guid>
     public int? PlannedOrder { get; private set; }
     public DateTime? ActualStartTime { get; private set; }
     public DateTime? ActualEndTime { get; private set; }
+    public DateTime? EngineerReportedCompletionTimeUtc { get; private set; }
     public TimeRange? ActualDuration { get; private set; }
     
     // Status
@@ -220,6 +221,16 @@ public sealed class Visit : AggregateRoot<Guid>
         Status = VisitStatus.Completed;
 
         AddDomainEvent(new VisitCompletedEvent(Id, SiteId, EngineerId, ActualDuration));
+    }
+
+    public void SetEngineerReportedCompletionTime(DateTime engineerReportedCompletionTimeUtc)
+    {
+        EngineerReportedCompletionTimeUtc = engineerReportedCompletionTimeUtc.Kind switch
+        {
+            DateTimeKind.Utc => engineerReportedCompletionTimeUtc,
+            DateTimeKind.Local => engineerReportedCompletionTimeUtc.ToUniversalTime(),
+            _ => DateTime.SpecifyKind(engineerReportedCompletionTimeUtc, DateTimeKind.Utc)
+        };
     }
 
     public void Submit()

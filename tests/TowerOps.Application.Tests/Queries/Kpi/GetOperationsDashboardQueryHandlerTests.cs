@@ -143,13 +143,16 @@ public class GetOperationsDashboardQueryHandlerTests
                 It.IsAny<DateTime?>(),
                 It.IsAny<DateTime?>(),
                 It.IsAny<int>(),
+                It.IsAny<int>(),
                 It.IsAny<DateTime>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(0);
 
         var settingsService = new Mock<ISystemSettingsService>();
-        settingsService.Setup(x => x.GetAsync("SLA:AtRiskThresholdPercent", 70, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(70);
+        settingsService.Setup(x => x.GetAsync("SLA:CM:AtRiskThresholdPercent", 80, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(80);
+        settingsService.Setup(x => x.GetAsync("SLA:PM:AtRiskThresholdPercent", 80, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(80);
 
         var visitRepo = new Mock<IVisitRepository>();
         visitRepo.Setup(x => x.CountAsync(It.IsAny<ISpecification<Visit>>(), It.IsAny<CancellationToken>()))
@@ -169,6 +172,53 @@ public class GetOperationsDashboardQueryHandlerTests
         visitRepo.Verify(x => x.FindAsNoTrackingAsync(It.IsAny<ISpecification<Visit>>(), It.IsAny<CancellationToken>()), Times.Never);
         workOrderRepo.Verify(x => x.CountAsync(It.IsAny<ISpecification<WorkOrder>>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
         visitRepo.Verify(x => x.CountAsync(It.IsAny<ISpecification<Visit>>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldResolveSeparateAtRiskThresholdsForCmAndPm()
+    {
+        var workOrderRepo = new Mock<IWorkOrderRepository>();
+        workOrderRepo.Setup(x => x.CountAsync(It.IsAny<ISpecification<WorkOrder>>(), It.IsAny<CancellationToken>())).ReturnsAsync(0);
+        workOrderRepo.Setup(x => x.CountClosedAsync(It.IsAny<string?>(), It.IsAny<SlaClass?>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>())).ReturnsAsync(0);
+        workOrderRepo.Setup(x => x.CountClosedWithReworkOrReopenedHistoryAsync(It.IsAny<string?>(), It.IsAny<SlaClass?>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>())).ReturnsAsync(0);
+        workOrderRepo.Setup(x => x.CountClosedWithReopenedHistoryAsync(It.IsAny<string?>(), It.IsAny<SlaClass?>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>())).ReturnsAsync(0);
+        workOrderRepo.Setup(x => x.GetClosedMeanTimeToRepairHoursAsync(It.IsAny<string?>(), It.IsAny<SlaClass?>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>())).ReturnsAsync(0m);
+        workOrderRepo.Setup(x => x.CountAtRiskAsync(
+                It.IsAny<string?>(),
+                It.IsAny<SlaClass?>(),
+                It.IsAny<DateTime?>(),
+                It.IsAny<DateTime?>(),
+                75,
+                90,
+                It.IsAny<DateTime>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(0);
+
+        var settingsService = new Mock<ISystemSettingsService>();
+        settingsService.Setup(x => x.GetAsync("SLA:CM:AtRiskThresholdPercent", 80, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(75);
+        settingsService.Setup(x => x.GetAsync("SLA:PM:AtRiskThresholdPercent", 80, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(90);
+
+        var visitRepo = new Mock<IVisitRepository>();
+        visitRepo.Setup(x => x.CountAsync(It.IsAny<ISpecification<Visit>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(0);
+
+        var sut = new GetOperationsDashboardQueryHandler(workOrderRepo.Object, visitRepo.Object, settingsService.Object);
+        var result = await sut.Handle(new GetOperationsDashboardQuery(), CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        settingsService.Verify(x => x.GetAsync("SLA:CM:AtRiskThresholdPercent", 80, It.IsAny<CancellationToken>()), Times.Once);
+        settingsService.Verify(x => x.GetAsync("SLA:PM:AtRiskThresholdPercent", 80, It.IsAny<CancellationToken>()), Times.Once);
+        workOrderRepo.Verify(x => x.CountAtRiskAsync(
+            It.IsAny<string?>(),
+            It.IsAny<SlaClass?>(),
+            It.IsAny<DateTime?>(),
+            It.IsAny<DateTime?>(),
+            75,
+            90,
+            It.IsAny<DateTime>(),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     private static (Mock<IWorkOrderRepository> Repo, Mock<ISystemSettingsService> SettingsService) CreateWorkOrderRepoForKpiTests(
@@ -202,6 +252,7 @@ public class GetOperationsDashboardQueryHandlerTests
                 It.IsAny<DateTime?>(),
                 It.IsAny<DateTime?>(),
                 It.IsAny<int>(),
+                It.IsAny<int>(),
                 It.IsAny<DateTime>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(atRiskWorkOrders);
@@ -216,8 +267,10 @@ public class GetOperationsDashboardQueryHandlerTests
             .ReturnsAsync(mttrHours);
 
         var settingsService = new Mock<ISystemSettingsService>();
-        settingsService.Setup(x => x.GetAsync("SLA:AtRiskThresholdPercent", 70, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(70);
+        settingsService.Setup(x => x.GetAsync("SLA:CM:AtRiskThresholdPercent", 80, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(80);
+        settingsService.Setup(x => x.GetAsync("SLA:PM:AtRiskThresholdPercent", 80, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(80);
 
         return (repo, settingsService);
     }

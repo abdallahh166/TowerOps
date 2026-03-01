@@ -56,9 +56,14 @@ public sealed class GetOperationsDashboardQueryHandler : IRequestHandler<GetOper
                 nowUtc: nowUtc),
             cancellationToken);
 
-        var atRiskThresholdPercent = await _systemSettingsService.GetAsync(
-            "SLA:AtRiskThresholdPercent",
-            70,
+        var cmAtRiskThresholdPercent = await _systemSettingsService.GetAsync(
+            "SLA:CM:AtRiskThresholdPercent",
+            80,
+            cancellationToken);
+
+        var pmAtRiskThresholdPercent = await _systemSettingsService.GetAsync(
+            "SLA:PM:AtRiskThresholdPercent",
+            80,
             cancellationToken);
 
         var atRiskWorkOrders = await _workOrderRepository.CountAtRiskAsync(
@@ -66,7 +71,8 @@ public sealed class GetOperationsDashboardQueryHandler : IRequestHandler<GetOper
             request.SlaClass,
             request.FromDateUtc,
             request.ToDateUtc,
-            atRiskThresholdPercent,
+            cmAtRiskThresholdPercent,
+            pmAtRiskThresholdPercent,
             nowUtc,
             cancellationToken);
 

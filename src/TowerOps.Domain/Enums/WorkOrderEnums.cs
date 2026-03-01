@@ -27,6 +27,12 @@ public enum WorkOrderScope
     TowerInfrastructure = 2
 }
 
+public enum WorkOrderType
+{
+    CM = 1,
+    PM = 2
+}
+
 public enum SlaStatus
 {
     OnTime = 1,

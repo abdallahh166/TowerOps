@@ -14,6 +14,7 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public string SiteCode { get; private set; } = string.Empty;
     public string OfficeCode { get; private set; } = string.Empty;
     public SlaClass SlaClass { get; private set; }
+    public WorkOrderType WorkOrderType { get; private set; }
     public WorkOrderScope Scope { get; private set; }
     public WorkOrderStatus Status { get; private set; }
     public string IssueDescription { get; private set; } = string.Empty;
@@ -23,6 +24,8 @@ public sealed class WorkOrder : AggregateRoot<Guid>
     public DateTime? AssignedAtUtc { get; private set; }
     public string? AssignedBy { get; private set; }
 
+    public DateTime SlaStartAtUtc { get; private set; }
+    public DateTime? ScheduledVisitDateUtc { get; private set; }
     public DateTime ResponseDeadlineUtc { get; private set; }
     public DateTime ResolutionDeadlineUtc { get; private set; }
     public Signature? ClientSignature { get; private set; }
@@ -37,8 +40,10 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         string siteCode,
         string officeCode,
         SlaClass slaClass,
+        WorkOrderType workOrderType,
         WorkOrderScope scope,
         string issueDescription,
+        DateTime? scheduledVisitDateUtc = null,
         int? responseMinutes = null,
         int? resolutionMinutes = null) : base(Guid.NewGuid())
     {
@@ -46,16 +51,19 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         SiteCode = siteCode;
         OfficeCode = officeCode;
         SlaClass = slaClass;
+        WorkOrderType = workOrderType;
         Scope = scope;
         IssueDescription = issueDescription;
         Status = WorkOrderStatus.Created;
 
         var now = DateTime.UtcNow;
+        ScheduledVisitDateUtc = NormalizeUtcOrNull(scheduledVisitDateUtc);
+        SlaStartAtUtc = ResolveSlaStartAtUtc(workOrderType, ScheduledVisitDateUtc, now);
         var effectiveResponseMinutes = responseMinutes ?? GetDefaultResponseMinutes(slaClass);
         var effectiveResolutionMinutes = resolutionMinutes ?? GetDefaultResolutionMinutes(slaClass);
 
-        ResponseDeadlineUtc = now.AddMinutes(effectiveResponseMinutes);
-        ResolutionDeadlineUtc = now.AddMinutes(effectiveResolutionMinutes);
+        ResponseDeadlineUtc = SlaStartAtUtc.AddMinutes(effectiveResponseMinutes);
+        ResolutionDeadlineUtc = SlaStartAtUtc.AddMinutes(effectiveResolutionMinutes);
     }
 
     public static WorkOrder Create(
@@ -65,6 +73,8 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         SlaClass slaClass,
         string issueDescription,
         WorkOrderScope scope = WorkOrderScope.ClientEquipment,
+        WorkOrderType workOrderType = WorkOrderType.CM,
+        DateTime? scheduledVisitDateUtc = null,
         int? responseMinutes = null,
         int? resolutionMinutes = null)
     {
@@ -80,13 +90,20 @@ public sealed class WorkOrder : AggregateRoot<Guid>
         if (string.IsNullOrWhiteSpace(issueDescription))
             throw new DomainException("Issue description is required", "WorkOrder.IssueDescription.Required");
 
+        if (workOrderType == WorkOrderType.PM && !scheduledVisitDateUtc.HasValue)
+            throw new DomainException(
+                "Scheduled visit date is required for PM work orders",
+                "WorkOrder.SlaStart.ScheduledVisitDateRequiredForPm");
+
         return new WorkOrder(
             woNumber,
             siteCode,
             officeCode,
             slaClass,
+            workOrderType,
             scope,
             issueDescription,
+            scheduledVisitDateUtc,
             responseMinutes,
             resolutionMinutes);
     }
@@ -228,6 +245,34 @@ public sealed class WorkOrder : AggregateRoot<Guid>
             SlaClass.P2 => 480,
             SlaClass.P3 => 1440,
             _ => 2880
+        };
+    }
+
+    private static DateTime ResolveSlaStartAtUtc(
+        WorkOrderType workOrderType,
+        DateTime? scheduledVisitDateUtc,
+        DateTime nowUtc)
+    {
+        return workOrderType switch
+        {
+            WorkOrderType.CM => nowUtc,
+            WorkOrderType.PM when scheduledVisitDateUtc.HasValue => scheduledVisitDateUtc.Value,
+            _ => throw new DomainException(
+                "Scheduled visit date is required for PM work orders",
+                "WorkOrder.SlaStart.ScheduledVisitDateRequiredForPm")
+        };
+    }
+
+    private static DateTime? NormalizeUtcOrNull(DateTime? value)
+    {
+        if (!value.HasValue)
+            return null;
+
+        return value.Value.Kind switch
+        {
+            DateTimeKind.Utc => value.Value,
+            DateTimeKind.Local => value.Value.ToUniversalTime(),
+            _ => DateTime.SpecifyKind(value.Value, DateTimeKind.Utc)
         };
     }
 }

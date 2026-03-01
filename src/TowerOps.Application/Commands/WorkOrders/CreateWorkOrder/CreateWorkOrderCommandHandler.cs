@@ -54,7 +54,10 @@ public class CreateWorkOrderCommandHandler : IRequestHandler<CreateWorkOrderComm
             return Result.Failure<WorkOrderDto>("TowerInfrastructure scope is not allowed for equipment-only sites.");
         }
 
-        var (responseMinutes, resolutionMinutes) = await ResolveSlaMinutesAsync(request.SlaClass, cancellationToken);
+        var (responseMinutes, resolutionMinutes) = await ResolveSlaMinutesAsync(
+            request.WorkOrderType,
+            request.SlaClass,
+            cancellationToken);
 
         var workOrder = WorkOrder.Create(
             request.WoNumber,
@@ -63,6 +66,8 @@ public class CreateWorkOrderCommandHandler : IRequestHandler<CreateWorkOrderComm
             request.SlaClass,
             request.IssueDescription,
             request.Scope,
+            request.WorkOrderType,
+            request.ScheduledVisitDateUtc,
             responseMinutes,
             resolutionMinutes);
 
@@ -84,10 +89,13 @@ public class CreateWorkOrderCommandHandler : IRequestHandler<CreateWorkOrderComm
     }
 
     private async Task<(int ResponseMinutes, int ResolutionMinutes)> ResolveSlaMinutesAsync(
+        WorkOrderType workOrderType,
         SlaClass slaClass,
         CancellationToken cancellationToken)
     {
-        var (responseKey, defaultResponse, resolutionKey, defaultResolution) = slaClass switch
+        var typePrefix = workOrderType == WorkOrderType.PM ? "PM" : "CM";
+
+        var (legacyResponseKey, defaultResponse, legacyResolutionKey, defaultResolution) = slaClass switch
         {
             SlaClass.P1 => ("SLA:P1:ResponseMinutes", 60, "SLA:P1:ResolutionMinutes", 240),
             SlaClass.P2 => ("SLA:P2:ResponseMinutes", 240, "SLA:P2:ResolutionMinutes", 480),
@@ -96,8 +104,20 @@ public class CreateWorkOrderCommandHandler : IRequestHandler<CreateWorkOrderComm
             _ => ("SLA:P3:ResponseMinutes", 1440, "SLA:P3:ResolutionMinutes", 1440)
         };
 
-        var responseMinutes = await _systemSettingsService.GetAsync(responseKey, defaultResponse, cancellationToken);
-        var resolutionMinutes = await _systemSettingsService.GetAsync(resolutionKey, defaultResolution, cancellationToken);
+        var typeResponseKey = $"SLA:{typePrefix}:{slaClass}:ResponseMinutes";
+        var typeResolutionKey = $"SLA:{typePrefix}:{slaClass}:ResolutionMinutes";
+
+        var responseMinutes = await _systemSettingsService.GetAsync(typeResponseKey, defaultResponse, cancellationToken);
+        if (responseMinutes <= 0)
+        {
+            responseMinutes = await _systemSettingsService.GetAsync(legacyResponseKey, defaultResponse, cancellationToken);
+        }
+
+        var resolutionMinutes = await _systemSettingsService.GetAsync(typeResolutionKey, defaultResolution, cancellationToken);
+        if (resolutionMinutes <= 0)
+        {
+            resolutionMinutes = await _systemSettingsService.GetAsync(legacyResolutionKey, defaultResolution, cancellationToken);
+        }
 
         if (responseMinutes <= 0)
             responseMinutes = defaultResponse;
