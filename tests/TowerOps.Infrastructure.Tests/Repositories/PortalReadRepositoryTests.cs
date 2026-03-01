@@ -34,8 +34,8 @@ public class PortalReadRepositoryTests
 
         var sut = new PortalReadRepository(context);
 
-        var firstPage = await sut.GetSitesAsync("ORANGE", null, pageNumber: 1, pageSize: 1000);
-        var secondPage = await sut.GetSitesAsync("ORANGE", null, pageNumber: 2, pageSize: 1000);
+        var firstPage = await sut.GetSitesAsync("ORANGE", null, pageNumber: 1, pageSize: 1000, sortBy: "siteCode", sortDescending: false);
+        var secondPage = await sut.GetSitesAsync("ORANGE", null, pageNumber: 2, pageSize: 1000, sortBy: "siteCode", sortDescending: false);
 
         firstPage.Should().HaveCount(200);
         secondPage.Should().HaveCount(50);
@@ -71,7 +71,7 @@ public class PortalReadRepositoryTests
 
         var sut = new PortalReadRepository(context);
 
-        var results = await sut.GetWorkOrdersAsync("ORANGE", pageNumber: 1, pageSize: 50);
+        var results = await sut.GetWorkOrdersAsync("ORANGE", pageNumber: 1, pageSize: 50, sortBy: "createdAt", sortDescending: true);
 
         results.Should().HaveCount(3);
         results.Should().OnlyContain(x => x.SiteCode.StartsWith("ORA", StringComparison.OrdinalIgnoreCase));
@@ -112,7 +112,7 @@ public class PortalReadRepositoryTests
 
         var sut = new PortalReadRepository(context);
 
-        var results = await sut.GetVisitsAsync("ORANGE", orangeSite.SiteCode.Value, pageNumber: 1, pageSize: 50, anonymizeEngineers: true);
+        var results = await sut.GetVisitsAsync("ORANGE", orangeSite.SiteCode.Value, pageNumber: 1, pageSize: 50, sortBy: "scheduledDate", sortDescending: true, anonymizeEngineers: true);
 
         results.Should().HaveCount(1);
         results[0].VisitNumber.Should().Be("V-ORA-1");

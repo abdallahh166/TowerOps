@@ -20,7 +20,7 @@ public sealed class ChecklistTemplatesController : ApiControllerBase
     {
         var fileBytes = await ReadExcelBytesOrNullAsync(request.File, cancellationToken);
         if (fileBytes is null)
-            return BadRequest("Excel file is required.");
+            return Failure("Excel file is required.");
 
         var result = await Mediator.Send(request.ToImportCommand(fileBytes), cancellationToken);
         return HandleResult(result);

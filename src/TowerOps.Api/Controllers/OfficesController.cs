@@ -45,14 +45,35 @@ public sealed class OfficesController : ApiControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] bool? onlyActive,
-        [FromQuery] int? pageNumber,
-        [FromQuery] int? pageSize,
-        CancellationToken cancellationToken)
+        [FromQuery(Name = "page")] int page = 1,
+        [FromQuery] int pageSize = 25,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string sortDir = "desc",
+        CancellationToken cancellationToken = default)
     {
+        var safePage = page < 1 ? 1 : page;
+        var safePageSize = Math.Clamp(pageSize, 1, 100);
+
+        if (!TryResolveSort(
+                sortBy,
+                sortDir,
+                new[] { "code", "name", "region", "isActive", "createdAt" },
+                defaultSortBy: "code",
+                out var resolvedSortBy,
+                out var sortDescending,
+                out var sortError))
+        {
+            return sortError!;
+        }
+
         var result = await Mediator.Send(
-            OfficesContractMapper.ToGetAllQuery(onlyActive, pageNumber, pageSize),
+            OfficesContractMapper.ToGetAllQuery(onlyActive, safePage, safePageSize, resolvedSortBy, sortDescending),
             cancellationToken);
-        return HandleResult(result);
+
+        if (!result.IsSuccess || result.Value is null)
+            return HandleResult(result);
+
+        return Ok(result.Value.ToPagedResponse());
     }
 
     [HttpGet("region/{region}")]

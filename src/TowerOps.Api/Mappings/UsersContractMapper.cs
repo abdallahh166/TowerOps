@@ -6,6 +6,7 @@ using TowerOps.Application.Commands.Users.ChangeUserRole;
 using TowerOps.Application.Commands.Users.DeactivateUser;
 using TowerOps.Application.Commands.Users.DeleteUser;
 using TowerOps.Application.Commands.Users.CreateUser;
+using TowerOps.Application.Commands.Users.UnlockUserAccount;
 using TowerOps.Application.Commands.Users.UpdateUser;
 using TowerOps.Application.Queries.Users.GetUserById;
 using TowerOps.Application.Queries.Users.GetUserPerformance;
@@ -64,6 +65,12 @@ public static class UsersContractMapper
         };
 
     public static DeactivateUserCommand ToDeactivateCommand(this Guid userId)
+        => new()
+        {
+            UserId = userId
+        };
+
+    public static UnlockUserAccountCommand ToUnlockAccountCommand(this Guid userId)
         => new()
         {
             UserId = userId

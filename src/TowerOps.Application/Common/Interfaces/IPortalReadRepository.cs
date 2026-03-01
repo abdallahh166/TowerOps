@@ -16,12 +16,25 @@ public interface IPortalReadRepository
         string? siteCode,
         int pageNumber,
         int pageSize,
+        string sortBy,
+        bool sortDescending,
+        CancellationToken cancellationToken = default);
+
+    Task<int> CountSitesAsync(
+        string clientCode,
+        string? siteCode,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<PortalWorkOrderDto>> GetWorkOrdersAsync(
         string clientCode,
         int pageNumber,
         int pageSize,
+        string sortBy,
+        bool sortDescending,
+        CancellationToken cancellationToken = default);
+
+    Task<int> CountWorkOrdersAsync(
+        string clientCode,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<PortalVisitDto>> GetVisitsAsync(
@@ -29,7 +42,14 @@ public interface IPortalReadRepository
         string siteCode,
         int pageNumber,
         int pageSize,
+        string sortBy,
+        bool sortDescending,
         bool anonymizeEngineers,
+        CancellationToken cancellationToken = default);
+
+    Task<int> CountVisitsAsync(
+        string clientCode,
+        string siteCode,
         CancellationToken cancellationToken = default);
 
     Task<PortalVisitEvidenceDto?> GetVisitEvidenceAsync(

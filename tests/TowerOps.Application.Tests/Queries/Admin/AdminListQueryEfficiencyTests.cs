@@ -36,19 +36,22 @@ public class AdminListQueryEfficiencyTests
         officeRepository
             .Setup(r => r.FindAsNoTrackingAsync(It.IsAny<ISpecification<Office>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ISpecification<Office> spec, CancellationToken _) => Apply(spec, offices).ToList());
+        officeRepository
+            .Setup(r => r.CountAsync(It.IsAny<ISpecification<Office>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ISpecification<Office> spec, CancellationToken _) => Count(spec, offices));
 
         var sut = new GetAllOfficesQueryHandler(officeRepository.Object, Mapper);
 
         var result = await sut.Handle(new GetAllOfficesQuery
         {
             OnlyActive = true,
-            PageNumber = 0,
+            Page = 0,
             PageSize = 999
         }, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Count.Should().BeLessThanOrEqualTo(200);
+        result.Value!.Items.Count.Should().BeLessThanOrEqualTo(100);
 
         officeRepository.Verify(r => r.FindAsNoTrackingAsync(It.IsAny<ISpecification<Office>>(), It.IsAny<CancellationToken>()), Times.Once);
         officeRepository.Verify(r => r.GetAllAsNoTrackingAsync(It.IsAny<CancellationToken>()), Times.Never);
@@ -72,18 +75,21 @@ public class AdminListQueryEfficiencyTests
         roleRepository
             .Setup(r => r.FindAsNoTrackingAsync(It.IsAny<ISpecification<ApplicationRole>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ISpecification<ApplicationRole> spec, CancellationToken _) => Apply(spec, roles).ToList());
+        roleRepository
+            .Setup(r => r.CountAsync(It.IsAny<ISpecification<ApplicationRole>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ISpecification<ApplicationRole> spec, CancellationToken _) => Count(spec, roles));
 
         var sut = new GetAllApplicationRolesQueryHandler(roleRepository.Object);
 
         var result = await sut.Handle(new GetAllApplicationRolesQuery
         {
-            PageNumber = 1,
+            Page = 1,
             PageSize = 500
         }, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Count.Should().BeLessThanOrEqualTo(200);
+        result.Value!.Items.Count.Should().BeLessThanOrEqualTo(100);
 
         roleRepository.Verify(r => r.FindAsNoTrackingAsync(It.IsAny<ISpecification<ApplicationRole>>(), It.IsAny<CancellationToken>()), Times.Once);
         roleRepository.Verify(r => r.GetAllAsNoTrackingAsync(It.IsAny<CancellationToken>()), Times.Never);
@@ -116,21 +122,26 @@ public class AdminListQueryEfficiencyTests
         settingsRepository
             .Setup(r => r.FindAsNoTrackingAsync(It.IsAny<ISpecification<SystemSetting>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ISpecification<SystemSetting> spec, CancellationToken _) => Apply(spec, settings).ToList());
+        settingsRepository
+            .Setup(r => r.CountAsync(It.IsAny<ISpecification<SystemSetting>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ISpecification<SystemSetting> spec, CancellationToken _) => Count(spec, settings));
 
         var encryptionService = new Mock<ISettingsEncryptionService>();
         var sut = new GetAllSystemSettingsQueryHandler(settingsRepository.Object, encryptionService.Object);
 
         var result = await sut.Handle(new GetAllSystemSettingsQuery
         {
-            PageNumber = 1,
+            Page = 1,
             PageSize = 999,
+            SortBy = "key",
+            SortDescending = false,
             MaskEncryptedValues = true
         }, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Count.Should().BeLessThanOrEqualTo(200);
-        result.Value.Where(s => s.IsEncrypted).Select(s => s.Value).Should().OnlyContain(v => v == "***");
+        result.Value!.Items.Count.Should().BeLessThanOrEqualTo(100);
+        result.Value.Items.Where(s => s.IsEncrypted).Select(s => s.Value).Should().OnlyContain(v => v == "***");
 
         settingsRepository.Verify(r => r.FindAsNoTrackingAsync(It.IsAny<ISpecification<SystemSetting>>(), It.IsAny<CancellationToken>()), Times.Once);
         settingsRepository.Verify(r => r.GetAllAsNoTrackingAsync(It.IsAny<CancellationToken>()), Times.Never);
@@ -177,5 +188,16 @@ public class AdminListQueryEfficiencyTests
         }
 
         return query.ToList();
+    }
+
+    private static int Count<T>(ISpecification<T> specification, IEnumerable<T> source)
+    {
+        IQueryable<T> query = source.AsQueryable();
+        if (specification.Criteria is not null)
+        {
+            query = query.Where(specification.Criteria);
+        }
+
+        return query.Count();
     }
 }

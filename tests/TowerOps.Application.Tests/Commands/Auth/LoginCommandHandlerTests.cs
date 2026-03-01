@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Moq;
 using TowerOps.Application.Commands.Auth.Login;
 using TowerOps.Application.Common.Interfaces;
+using TowerOps.Domain.Entities.RefreshTokens;
 using TowerOps.Domain.Entities.Users;
 using TowerOps.Domain.Enums;
 using TowerOps.Domain.Interfaces.Repositories;
@@ -27,7 +28,7 @@ public class LoginCommandHandlerTests
 
         var userRepository = new Mock<IUserRepository>();
         userRepository
-            .Setup(r => r.GetByEmailAsNoTrackingAsync("login@example.com", It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByEmailAsync("login@example.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         var jwtService = new Mock<IJwtTokenService>();
@@ -35,10 +36,33 @@ public class LoginCommandHandlerTests
             .Setup(s => s.GenerateTokenAsync(user, It.IsAny<CancellationToken>()))
             .ReturnsAsync(("token", DateTime.UtcNow.AddMinutes(60)));
 
+        var refreshTokenRepository = new Mock<IRefreshTokenRepository>();
+        RefreshToken? persistedRefreshToken = null;
+        refreshTokenRepository
+            .Setup(r => r.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()))
+            .Callback<RefreshToken, CancellationToken>((token, _) => persistedRefreshToken = token)
+            .Returns(Task.CompletedTask);
+
+        var refreshTokenService = new Mock<IRefreshTokenService>();
+        refreshTokenService.Setup(s => s.GenerateToken()).Returns("refresh-token-value");
+        refreshTokenService.Setup(s => s.HashToken("refresh-token-value")).Returns("HASHED-REFRESH");
+        refreshTokenService.Setup(s => s.GetRefreshTokenExpiryUtc()).Returns(DateTime.UtcNow.AddDays(7));
+
+        var unitOfWork = new Mock<IUnitOfWork>();
+        unitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+        var mfaService = new Mock<IMfaService>();
+        var emailService = new Mock<IEmailService>();
+
         var handler = new LoginCommandHandler(
             userRepository.Object,
+            refreshTokenRepository.Object,
             jwtService.Object,
-            hasher);
+            refreshTokenService.Object,
+            mfaService.Object,
+            emailService.Object,
+            hasher,
+            unitOfWork.Object);
 
         var result = await handler.Handle(new LoginCommand
         {
@@ -49,5 +73,12 @@ public class LoginCommandHandlerTests
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.RequiresPasswordChange.Should().BeTrue();
+        result.Value.RefreshToken.Should().Be("refresh-token-value");
+        persistedRefreshToken.Should().NotBeNull();
+        persistedRefreshToken!.TokenHash.Should().Be("HASHED-REFRESH");
+        persistedRefreshToken.UserId.Should().Be(user.Id);
+
+        refreshTokenRepository.Verify(r => r.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()), Times.Once);
+        unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using TowerOps.Api.Contracts.Common;
 using TowerOps.Api.Contracts.Settings;
 using TowerOps.Api.Controllers;
 using TowerOps.Application.Common;
@@ -23,39 +24,45 @@ public class SettingsControllerTests
         var sender = new Mock<ISender>();
         sender
             .Setup(s => s.Send(It.IsAny<GetAllSystemSettingsQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success<IReadOnlyList<SystemSettingDto>>(new List<SystemSettingDto>
-            {
-                new()
+            .ReturnsAsync(Result.Success(new PaginatedList<SystemSettingDto>(
+                new List<SystemSettingDto>
                 {
-                    Key = "Notifications:Twilio:AuthToken",
-                    Group = "Notifications",
-                    DataType = "secret",
-                    IsEncrypted = true,
-                    Value = "***",
-                    UpdatedAtUtc = DateTime.UtcNow,
-                    UpdatedBy = "admin"
+                    new()
+                    {
+                        Key = "Notifications:Twilio:AuthToken",
+                        Group = "Notifications",
+                        DataType = "secret",
+                        IsEncrypted = true,
+                        Value = "***",
+                        UpdatedAtUtc = DateTime.UtcNow,
+                        UpdatedBy = "admin"
+                    },
+                    new()
+                    {
+                        Key = "SLA:P1:ResponseMinutes",
+                        Group = "SLA",
+                        DataType = "int",
+                        IsEncrypted = false,
+                        Value = "60",
+                        UpdatedAtUtc = DateTime.UtcNow,
+                        UpdatedBy = "admin"
+                    }
                 },
-                new()
-                {
-                    Key = "SLA:P1:ResponseMinutes",
-                    Group = "SLA",
-                    DataType = "int",
-                    IsEncrypted = false,
-                    Value = "60",
-                    UpdatedAtUtc = DateTime.UtcNow,
-                    UpdatedBy = "admin"
-                }
-            }));
+                count: 2,
+                pageNumber: 1,
+                pageSize: 25)));
 
         var controller = BuildController(sender.Object);
 
-        var result = await controller.GetAll(null, null, CancellationToken.None);
+        var result = await controller.GetAll(1, 25, null, "desc", CancellationToken.None);
 
         var ok = result.Should().BeOfType<OkObjectResult>().Subject;
-        var grouped = ok.Value.Should().BeAssignableTo<Dictionary<string, List<SystemSettingResponse>>>().Subject;
+        var response = ok.Value.Should().BeAssignableTo<PagedResponse<SystemSettingResponse>>().Subject;
 
-        grouped["Notifications"][0].Value.Should().Be("***");
-        grouped["SLA"][0].Value.Should().Be("60");
+        response.Data.Should().HaveCount(2);
+        response.Data.Single(x => x.Group == "Notifications").Value.Should().Be("***");
+        response.Data.Single(x => x.Group == "SLA").Value.Should().Be("60");
+        response.Pagination.Total.Should().Be(2);
     }
 
     private static SettingsController BuildController(ISender sender)

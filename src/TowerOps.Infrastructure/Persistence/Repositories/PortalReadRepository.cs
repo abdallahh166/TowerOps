@@ -90,6 +90,8 @@ public sealed class PortalReadRepository : IPortalReadRepository
         string? siteCode,
         int pageNumber,
         int pageSize,
+        string sortBy,
+        bool sortDescending,
         CancellationToken cancellationToken = default)
     {
         var normalizedClientCode = NormalizeClientCode(clientCode);
@@ -107,8 +109,9 @@ public sealed class PortalReadRepository : IPortalReadRepository
             sitesQuery = sitesQuery.Where(s => s.SiteCode.Value == siteCode.Trim());
         }
 
-        var pagedSites = await sitesQuery
-            .OrderBy(s => s.SiteCode.Value)
+        var orderedSitesQuery = ApplySiteOrdering(sitesQuery, sortBy, sortDescending);
+
+        var pagedSites = await orderedSitesQuery
             .Select(s => new
             {
                 s.Id,
@@ -181,10 +184,30 @@ public sealed class PortalReadRepository : IPortalReadRepository
             .ToList();
     }
 
+    public Task<int> CountSitesAsync(
+        string clientCode,
+        string? siteCode,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedClientCode = NormalizeClientCode(clientCode);
+        var sitesQuery = _context.Sites
+            .AsNoTracking()
+            .Where(s => s.ClientCode == normalizedClientCode);
+
+        if (!string.IsNullOrWhiteSpace(siteCode))
+        {
+            sitesQuery = sitesQuery.Where(s => s.SiteCode.Value == siteCode.Trim());
+        }
+
+        return sitesQuery.CountAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<PortalWorkOrderDto>> GetWorkOrdersAsync(
         string clientCode,
         int pageNumber,
         int pageSize,
+        string sortBy,
+        bool sortDescending,
         CancellationToken cancellationToken = default)
     {
         var normalizedClientCode = NormalizeClientCode(clientCode);
@@ -192,26 +215,42 @@ public sealed class PortalReadRepository : IPortalReadRepository
         var safePageSize = Math.Clamp(pageSize, 1, 200);
         var skip = (safePageNumber - 1) * safePageSize;
 
+        var baseQuery = from workOrder in _context.WorkOrders.AsNoTracking()
+                    join site in _context.Sites.AsNoTracking()
+                        on workOrder.SiteCode equals site.SiteCode.Value
+                    where site.ClientCode == normalizedClientCode
+                    select workOrder;
+
+        var orderedQuery = ApplyWorkOrderOrdering(baseQuery, sortBy, sortDescending)
+            .Select(workOrder => new PortalWorkOrderDto
+            {
+                WorkOrderId = workOrder.Id,
+                SiteCode = workOrder.SiteCode,
+                Status = workOrder.Status,
+                Priority = workOrder.SlaClass,
+                SlaDeadline = workOrder.ResolutionDeadlineUtc,
+                CreatedAt = workOrder.CreatedAt,
+                CompletedAt = workOrder.Status == WorkOrderStatus.Closed ? workOrder.UpdatedAt : null
+            });
+
+        return await orderedQuery
+            .Skip(skip)
+            .Take(safePageSize)
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<int> CountWorkOrdersAsync(
+        string clientCode,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedClientCode = NormalizeClientCode(clientCode);
         var query = from workOrder in _context.WorkOrders.AsNoTracking()
                     join site in _context.Sites.AsNoTracking()
                         on workOrder.SiteCode equals site.SiteCode.Value
                     where site.ClientCode == normalizedClientCode
-                    orderby workOrder.CreatedAt descending
-                    select new PortalWorkOrderDto
-                    {
-                        WorkOrderId = workOrder.Id,
-                        SiteCode = workOrder.SiteCode,
-                        Status = workOrder.Status,
-                        Priority = workOrder.SlaClass,
-                        SlaDeadline = workOrder.ResolutionDeadlineUtc,
-                        CreatedAt = workOrder.CreatedAt,
-                        CompletedAt = workOrder.Status == WorkOrderStatus.Closed ? workOrder.UpdatedAt : null
-                    };
+                    select workOrder.Id;
 
-        return await query
-            .Skip(skip)
-            .Take(safePageSize)
-            .ToListAsync(cancellationToken);
+        return query.CountAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<PortalVisitDto>> GetVisitsAsync(
@@ -219,6 +258,8 @@ public sealed class PortalReadRepository : IPortalReadRepository
         string siteCode,
         int pageNumber,
         int pageSize,
+        string sortBy,
+        bool sortDescending,
         bool anonymizeEngineers,
         CancellationToken cancellationToken = default)
     {
@@ -234,8 +275,10 @@ public sealed class PortalReadRepository : IPortalReadRepository
             join site in _context.Sites.AsNoTracking() on visit.SiteId equals site.Id
             where site.ClientCode == normalizedClientCode &&
                   site.SiteCode.Value == normalizedSiteCode
-            orderby visit.ScheduledDate descending
-            select new PortalVisitDto
+            select visit;
+
+        var ordered = ApplyVisitOrdering(query, sortBy, sortDescending)
+            .Select(visit => new PortalVisitDto
             {
                 VisitId = visit.Id,
                 VisitNumber = visit.VisitNumber,
@@ -243,12 +286,29 @@ public sealed class PortalReadRepository : IPortalReadRepository
                 Type = visit.Type,
                 ScheduledDate = visit.ScheduledDate,
                 EngineerDisplayName = engineerName ?? visit.EngineerName
-            };
+            });
 
-        return await query
+        return await ordered
             .Skip(skip)
             .Take(safePageSize)
             .ToListAsync(cancellationToken);
+    }
+
+    public Task<int> CountVisitsAsync(
+        string clientCode,
+        string siteCode,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedClientCode = NormalizeClientCode(clientCode);
+        var normalizedSiteCode = string.IsNullOrWhiteSpace(siteCode) ? string.Empty : siteCode.Trim();
+
+        var query = from visit in _context.Visits.AsNoTracking()
+                    join site in _context.Sites.AsNoTracking() on visit.SiteId equals site.Id
+                    where site.ClientCode == normalizedClientCode &&
+                          site.SiteCode.Value == normalizedSiteCode
+                    select visit.Id;
+
+        return query.CountAsync(cancellationToken);
     }
 
     public async Task<PortalVisitEvidenceDto?> GetVisitEvidenceAsync(
@@ -400,5 +460,48 @@ public sealed class PortalReadRepository : IPortalReadRepository
     private static string NormalizeClientCode(string clientCode)
     {
         return clientCode.Trim().ToUpperInvariant();
+    }
+
+    private static IQueryable<Domain.Entities.Sites.Site> ApplySiteOrdering(
+        IQueryable<Domain.Entities.Sites.Site> query,
+        string sortBy,
+        bool sortDescending)
+    {
+        return sortBy.Trim().ToLowerInvariant() switch
+        {
+            "name" => sortDescending ? query.OrderByDescending(s => s.Name) : query.OrderBy(s => s.Name),
+            "status" => sortDescending ? query.OrderByDescending(s => s.Status) : query.OrderBy(s => s.Status),
+            "region" => sortDescending ? query.OrderByDescending(s => s.Region) : query.OrderBy(s => s.Region),
+            _ => sortDescending ? query.OrderByDescending(s => s.SiteCode.Value) : query.OrderBy(s => s.SiteCode.Value)
+        };
+    }
+
+    private static IQueryable<Domain.Entities.WorkOrders.WorkOrder> ApplyWorkOrderOrdering(
+        IQueryable<Domain.Entities.WorkOrders.WorkOrder> query,
+        string sortBy,
+        bool sortDescending)
+    {
+        return sortBy.Trim().ToLowerInvariant() switch
+        {
+            "status" => sortDescending ? query.OrderByDescending(w => w.Status) : query.OrderBy(w => w.Status),
+            "priority" => sortDescending ? query.OrderByDescending(w => w.SlaClass) : query.OrderBy(w => w.SlaClass),
+            "sitecode" => sortDescending ? query.OrderByDescending(w => w.SiteCode) : query.OrderBy(w => w.SiteCode),
+            "sladeadline" => sortDescending ? query.OrderByDescending(w => w.ResolutionDeadlineUtc) : query.OrderBy(w => w.ResolutionDeadlineUtc),
+            _ => sortDescending ? query.OrderByDescending(w => w.CreatedAt) : query.OrderBy(w => w.CreatedAt)
+        };
+    }
+
+    private static IQueryable<Domain.Entities.Visits.Visit> ApplyVisitOrdering(
+        IQueryable<Domain.Entities.Visits.Visit> query,
+        string sortBy,
+        bool sortDescending)
+    {
+        return sortBy.Trim().ToLowerInvariant() switch
+        {
+            "status" => sortDescending ? query.OrderByDescending(v => v.Status) : query.OrderBy(v => v.Status),
+            "type" => sortDescending ? query.OrderByDescending(v => v.Type) : query.OrderBy(v => v.Type),
+            "visitnumber" => sortDescending ? query.OrderByDescending(v => v.VisitNumber) : query.OrderBy(v => v.VisitNumber),
+            _ => sortDescending ? query.OrderByDescending(v => v.ScheduledDate) : query.OrderBy(v => v.ScheduledDate)
+        };
     }
 }

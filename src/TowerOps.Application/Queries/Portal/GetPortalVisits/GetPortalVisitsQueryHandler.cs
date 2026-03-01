@@ -6,7 +6,7 @@ using TowerOps.Domain.Interfaces.Repositories;
 
 namespace TowerOps.Application.Queries.Portal.GetPortalVisits;
 
-public sealed class GetPortalVisitsQueryHandler : IRequestHandler<GetPortalVisitsQuery, Result<IReadOnlyList<PortalVisitDto>>>
+public sealed class GetPortalVisitsQueryHandler : IRequestHandler<GetPortalVisitsQuery, Result<PaginatedList<PortalVisitDto>>>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IUserRepository _userRepository;
@@ -25,11 +25,11 @@ public sealed class GetPortalVisitsQueryHandler : IRequestHandler<GetPortalVisit
         _portalReadRepository = portalReadRepository;
     }
 
-    public async Task<Result<IReadOnlyList<PortalVisitDto>>> Handle(GetPortalVisitsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<PortalVisitDto>>> Handle(GetPortalVisitsQuery request, CancellationToken cancellationToken)
     {
         var portalUser = await _userRepository.GetByIdAsNoTrackingAsync(_currentUserService.UserId, cancellationToken);
         if (portalUser is null || !portalUser.IsClientPortalUser || string.IsNullOrWhiteSpace(portalUser.ClientCode))
-            return Result.Failure<IReadOnlyList<PortalVisitDto>>("Portal access is not enabled for this user.");
+            return Result.Failure<PaginatedList<PortalVisitDto>>("Portal access is not enabled for this user.");
 
         var siteExistsForClient = await _portalReadRepository.SiteExistsForClientAsync(
             portalUser.ClientCode,
@@ -37,20 +37,29 @@ public sealed class GetPortalVisitsQueryHandler : IRequestHandler<GetPortalVisit
             cancellationToken);
 
         if (!siteExistsForClient)
-            return Result.Failure<IReadOnlyList<PortalVisitDto>>("Site not found.");
+            return Result.Failure<PaginatedList<PortalVisitDto>>("Site not found.");
 
         var anonymizeEngineers = await _settingsService.GetAsync("Portal:AnonymizeEngineers", true, cancellationToken);
-        var safePageNumber = request.PageNumber < 1 ? 1 : request.PageNumber;
-        var safePageSize = Math.Clamp(request.PageSize, 1, 200);
+        var safePageNumber = request.Page < 1 ? 1 : request.Page;
+        var safePageSize = Math.Clamp(request.PageSize, 1, 100);
+        var sortBy = string.IsNullOrWhiteSpace(request.SortBy) ? "scheduledDate" : request.SortBy.Trim();
+
+        var totalCount = await _portalReadRepository.CountVisitsAsync(
+            portalUser.ClientCode,
+            request.SiteCode,
+            cancellationToken);
 
         var result = await _portalReadRepository.GetVisitsAsync(
             portalUser.ClientCode,
             request.SiteCode,
             safePageNumber,
             safePageSize,
+            sortBy,
+            request.SortDescending,
             anonymizeEngineers,
             cancellationToken);
 
-        return Result.Success<IReadOnlyList<PortalVisitDto>>(result);
+        var paged = new PaginatedList<PortalVisitDto>(result.ToList(), totalCount, safePageNumber, safePageSize);
+        return Result.Success(paged);
     }
 }

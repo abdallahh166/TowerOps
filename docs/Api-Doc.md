@@ -42,7 +42,12 @@ Environment variables:
 
 ## Security Model
 ### Authentication
-- `POST /api/auth/login` is anonymous and returns JWT.
+- `POST /api/auth/login` is anonymous and returns JWT + refresh token.
+  - Request supports optional `mfaCode` (required for Admin/Manager accounts once MFA is enabled).
+- `POST /api/auth/refresh` rotates refresh token and returns a new token pair.
+- `POST /api/auth/logout` revokes the presented refresh token.
+- `POST /api/auth/mfa/setup` initializes TOTP MFA secret using email/password credentials.
+- `POST /api/auth/mfa/verify` verifies TOTP code and enables MFA for the account.
 - Other protected endpoints require bearer token.
 
 ### Authorization policies
@@ -92,6 +97,10 @@ Policies evaluate permission claims (`PermissionConstants.ClaimType`), not hardc
 - `POST /forgot-password` (`AllowAnonymous`)
 - `POST /reset-password` (`AllowAnonymous`)
 - `POST /change-password` (`Authorize`)
+- `POST /refresh` (`AllowAnonymous`)
+- `POST /logout` (`AllowAnonymous`)
+- `POST /mfa/setup` (`AllowAnonymous`)
+- `POST /mfa/verify` (`AllowAnonymous`)
 
 ### VisitsController (`/api/visits`) class policy: `CanViewVisits`
 - `GET /{visitId}`
@@ -207,11 +216,12 @@ Policies evaluate permission claims (`PermissionConstants.ClaimType`), not hardc
 - `PATCH /{userId}/role` (`CanManageUsers`)
 - `PATCH /{userId}/activate` (`CanManageUsers`)
 - `PATCH /{userId}/deactivate` (`CanManageUsers`)
+- `PATCH /{userId}/unlock-account` (`CanManageUsers`)
 
 ### OfficesController (`/api/offices`) class policy: `CanManageOffices`
 - `POST /`
 - `GET /{officeId}`
-- `GET /` (supports `onlyActive`, `pageNumber`, `pageSize`; `pageSize` capped at 200)
+- `GET /` (supports `onlyActive`, `page`, `pageSize`, `sortBy`, `sortDir`; `pageSize` capped at 100)
 - `GET /region/{region}`
 - `GET /{officeId}/statistics`
 - `PUT /{officeId}`
@@ -239,11 +249,11 @@ Policies evaluate permission claims (`PermissionConstants.ClaimType`), not hardc
 
 ### ClientPortalController (`/api/portal`) class policy: `CanViewPortal`
 - `GET /dashboard`
-- `GET /sites`
+- `GET /sites` (supports `page`, `pageSize`, `sortBy`, `sortDir`)
 - `GET /sites/{siteCode}`
-- `GET /workorders`
+- `GET /workorders` (supports `page`, `pageSize`, `sortBy`, `sortDir`)
 - `GET /sla-report`
-- `GET /visits/{siteCode}`
+- `GET /visits/{siteCode}` (supports `page`, `pageSize`, `sortBy`, `sortDir`)
 - `GET /visits/{visitId}/evidence`
 - `PATCH /workorders/{id}/accept` (`CanManagePortalWorkOrders`)
 - `PATCH /workorders/{id}/reject` (`CanManagePortalWorkOrders`)
@@ -263,18 +273,40 @@ Policies evaluate permission claims (`PermissionConstants.ClaimType`), not hardc
 - `GET /conflicts/{engineerId}`
 
 ### SettingsController (`/api/settings`) class policy: `CanManageSettings`
-- `GET /` (supports `pageNumber`, `pageSize`; `pageSize` capped at 200)
+- `GET /` (supports `page`, `pageSize`, `sortBy`, `sortDir`; `pageSize` capped at 100)
 - `GET /{group}`
 - `PUT /`
 - `POST /test/{service}`
 
 ### RolesController (`/api/roles`) class policy: `CanManageSettings`
-- `GET /` (supports `pageNumber`, `pageSize`; `pageSize` capped at 200)
+- `GET /` (supports `page`, `pageSize`, `sortBy`, `sortDir`; `pageSize` capped at 100)
 - `GET /permissions`
 - `GET /{id}`
 - `POST /`
 - `PUT /{id}`
 - `DELETE /{id}`
+
+## Pagination Contract
+List endpoints that support paging return:
+```json
+{
+  "data": [],
+  "pagination": {
+    "page": 1,
+    "pageSize": 25,
+    "total": 0,
+    "totalPages": 0,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  }
+}
+```
+
+Query parameters for paged list endpoints:
+- `page` (default `1`)
+- `pageSize` (default `25`, max `100`)
+- `sortBy` (endpoint allowlist enforced)
+- `sortDir` (`asc` or `desc`, default `desc`)
 
 ## Error Handling and Localization
 - Exceptions are normalized by `ExceptionHandlingMiddleware`.

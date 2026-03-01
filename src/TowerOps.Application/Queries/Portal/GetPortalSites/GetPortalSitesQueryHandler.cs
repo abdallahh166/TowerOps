@@ -6,7 +6,7 @@ using TowerOps.Domain.Interfaces.Repositories;
 
 namespace TowerOps.Application.Queries.Portal.GetPortalSites;
 
-public sealed class GetPortalSitesQueryHandler : IRequestHandler<GetPortalSitesQuery, Result<IReadOnlyList<PortalSiteDto>>>
+public sealed class GetPortalSitesQueryHandler : IRequestHandler<GetPortalSitesQuery, Result<PaginatedList<PortalSiteDto>>>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IUserRepository _userRepository;
@@ -22,22 +22,31 @@ public sealed class GetPortalSitesQueryHandler : IRequestHandler<GetPortalSitesQ
         _portalReadRepository = portalReadRepository;
     }
 
-    public async Task<Result<IReadOnlyList<PortalSiteDto>>> Handle(GetPortalSitesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<PortalSiteDto>>> Handle(GetPortalSitesQuery request, CancellationToken cancellationToken)
     {
         var portalUser = await _userRepository.GetByIdAsNoTrackingAsync(_currentUserService.UserId, cancellationToken);
         if (portalUser is null || !portalUser.IsClientPortalUser || string.IsNullOrWhiteSpace(portalUser.ClientCode))
-            return Result.Failure<IReadOnlyList<PortalSiteDto>>("Portal access is not enabled for this user.");
+            return Result.Failure<PaginatedList<PortalSiteDto>>("Portal access is not enabled for this user.");
 
-        var safePageNumber = request.PageNumber < 1 ? 1 : request.PageNumber;
-        var safePageSize = Math.Clamp(request.PageSize, 1, 200);
+        var safePageNumber = request.Page < 1 ? 1 : request.Page;
+        var safePageSize = Math.Clamp(request.PageSize, 1, 100);
+        var sortBy = string.IsNullOrWhiteSpace(request.SortBy) ? "siteCode" : request.SortBy.Trim();
 
-        var result = await _portalReadRepository.GetSitesAsync(
+        var totalCount = await _portalReadRepository.CountSitesAsync(
+            portalUser.ClientCode,
+            request.SiteCode,
+            cancellationToken);
+
+        var data = await _portalReadRepository.GetSitesAsync(
             portalUser.ClientCode,
             request.SiteCode,
             safePageNumber,
             safePageSize,
+            sortBy,
+            request.SortDescending,
             cancellationToken);
 
-        return Result.Success(result);
+        var paged = new PaginatedList<PortalSiteDto>(data.ToList(), totalCount, safePageNumber, safePageSize);
+        return Result.Success(paged);
     }
 }

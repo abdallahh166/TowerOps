@@ -29,7 +29,7 @@ public sealed class SyncController : ApiControllerBase
         }
 
         if (string.IsNullOrWhiteSpace(engineerId))
-            return BadRequest("EngineerId is required.");
+            return Failure("EngineerId is required.");
 
         var result = await Mediator.Send(request.ToCommand(engineerId), cancellationToken);
         return HandleResult(result);

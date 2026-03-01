@@ -57,6 +57,7 @@ public static class DependencyInjection
         services.AddScoped<ISystemSettingsRepository, SystemSettingsRepository>();
         services.AddScoped<IApplicationRoleRepository, ApplicationRoleRepository>();
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IClientRepository, ClientRepository>();
         services.AddScoped<IDailyPlanRepository, DailyPlanRepository>();
         services.AddScoped<ISyncQueueRepository, SyncQueueRepository>();
@@ -99,6 +100,8 @@ public static class DependencyInjection
         services.AddScoped<ISettingsEncryptionService, SettingsEncryptionService>();
         services.AddScoped<ISystemSettingsService, SystemSettingsService>();
         services.AddScoped<IOtpService, OtpService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+        services.AddScoped<IMfaService, MfaService>();
         services.AddSingleton<IOperationalMetrics, OperationalMetrics>();
         services.AddScoped<SlaEvaluationProcessor>();
 
