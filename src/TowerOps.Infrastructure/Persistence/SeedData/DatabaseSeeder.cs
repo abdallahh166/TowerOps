@@ -519,6 +519,18 @@ public class DatabaseSeeder
             CreateSetting("UploadSecurity:Scan:IntervalSeconds", "60", "UploadSecurity", "int", "Upload scan polling interval seconds", false, seededBy),
             CreateSetting("UploadSecurity:Scan:BatchSize", "100", "UploadSecurity", "int", "Pending uploads scanned per cycle", false, seededBy),
 
+            // Privacy / retention
+            CreateSetting("Privacy:Retention:OperationalYears", "5", "Privacy", "int", "Operational data minimum retention in years", false, seededBy),
+            CreateSetting("Privacy:Retention:SignatureYears", "7", "Privacy", "int", "Signature evidence retention in years", false, seededBy),
+            CreateSetting("Privacy:Retention:AuditLogYears", "7", "Privacy", "int", "Audit log retention in years", false, seededBy),
+            CreateSetting("Privacy:Retention:SoftDeleteGraceDays", "90", "Privacy", "int", "Soft-delete grace period before hard purge", false, seededBy),
+            CreateSetting("Privacy:Retention:CleanupEnabled", "true", "Privacy", "bool", "Enable background retention cleanup worker", false, seededBy),
+            CreateSetting("Privacy:Retention:CleanupIntervalHours", "24", "Privacy", "int", "Retention cleanup polling interval in hours", false, seededBy),
+            CreateSetting("Privacy:Retention:CleanupBatchSize", "200", "Privacy", "int", "Maximum records processed per cleanup cycle", false, seededBy),
+            CreateSetting("Privacy:Jurisdiction:Strategy", "Strictest", "Privacy", "string", "Applies strictest retention policy among active client contracts", false, seededBy),
+            CreateSetting("Privacy:Export:TtlDays", "30", "Privacy", "int", "Days an export request remains downloadable", false, seededBy),
+            CreateSetting("Privacy:Export:MaxItemsPerCollection", "2000", "Privacy", "int", "Maximum items included per collection in user export payload", false, seededBy),
+
             // Import
             CreateSetting("Import:SkipInvalidRows", "true", "Import", "bool", "Skip invalid rows during imports", false, seededBy),
             CreateSetting("Import:MaxRows", "5000", "Import", "int", "Maximum rows per import file", false, seededBy),

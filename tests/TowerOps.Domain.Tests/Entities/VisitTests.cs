@@ -150,6 +150,27 @@ public class VisitTests
         visit.EngineerReportedCompletionTimeUtc!.Value.Kind.Should().Be(DateTimeKind.Utc);
     }
 
+    [Fact]
+    public void RemovePhoto_ShouldSoftDeletePhoto_InsteadOfRemovingFromCollection()
+    {
+        var visit = CreateTestVisit();
+        var photo = VisitPhoto.Create(
+            visit.Id,
+            PhotoType.Before,
+            PhotoCategory.Other,
+            "Before Snapshot",
+            "before.jpg",
+            "/files/before.jpg");
+
+        visit.AddPhoto(photo);
+
+        visit.RemovePhoto(photo.Id);
+
+        visit.Photos.Should().ContainSingle();
+        visit.Photos.Single().IsDeleted.Should().BeTrue();
+        visit.GetPhotosByType(PhotoType.Before).Should().BeEmpty();
+    }
+
     private Visit CreateTestVisit()
     {
         return Visit.Create(

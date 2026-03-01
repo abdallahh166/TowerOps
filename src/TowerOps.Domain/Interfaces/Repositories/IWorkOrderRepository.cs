@@ -6,6 +6,10 @@ using TowerOps.Domain.Enums;
 public interface IWorkOrderRepository : IRepository<WorkOrder, Guid>
 {
     Task<WorkOrder?> GetByWoNumberAsync(string woNumber, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<WorkOrder>> GetByUserOwnershipAsNoTrackingAsync(
+        Guid userId,
+        int take = 1000,
+        CancellationToken cancellationToken = default);
     Task<IReadOnlyList<WorkOrder>> GetOpenForSlaEvaluationAsync(
         int take,
         CancellationToken cancellationToken = default);

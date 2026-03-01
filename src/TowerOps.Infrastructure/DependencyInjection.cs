@@ -64,6 +64,7 @@ public static class DependencyInjection
         services.AddScoped<ISyncConflictRepository, SyncConflictRepository>();
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IUnusedAssetRepository, UnusedAssetRepository>();
+        services.AddScoped<IUserDataExportRequestRepository, UserDataExportRequestRepository>();
         services.AddScoped<IPortalReadRepository, PortalReadRepository>();
 
         // Domain event dispatcher
@@ -107,6 +108,7 @@ public static class DependencyInjection
         services.AddSingleton<IOperationalMetrics, OperationalMetrics>();
         services.AddScoped<SlaEvaluationProcessor>();
         services.AddScoped<UploadScanProcessor>();
+        services.AddScoped<DataRetentionProcessor>();
 
         // Domain Services with Infrastructure dependencies (Repository-dependent)
         services.AddScoped<IVisitNumberGeneratorService, VisitNumberGeneratorService>();
@@ -115,6 +117,7 @@ public static class DependencyInjection
         services.AddScoped<IGeoCheckInService, GeoCheckInService>();
         services.AddHostedService<SlaEvaluationHostedService>();
         services.AddHostedService<UploadScanHostedService>();
+        services.AddHostedService<DataRetentionHostedService>();
 
         // HttpContextAccessor for CurrentUserService
         services.AddHttpContextAccessor();

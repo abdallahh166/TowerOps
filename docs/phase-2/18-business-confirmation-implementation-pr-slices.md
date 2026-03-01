@@ -97,19 +97,19 @@ Acceptance Criteria:
 - All list endpoints return identical pagination structure.
 - Unknown `sortBy` returns validation error.
 
-## Deferred Pending Business Closure (P1)
+## P1 Delivery (Post-Decision Execution)
 
 ## BC-05 Data Retention and Privacy
 Issue: [#51](https://github.com/abdallahh166/TowerOps/issues/51)  
-Status: waiting legal/compliance approval.
+Status: approved decision; implementation tracked in [#62](https://github.com/abdallahh166/TowerOps/issues/62) and currently in delivery.
 
 ## BC-06 Upload Security Policy
 Issue: [#52](https://github.com/abdallahh166/TowerOps/issues/52)  
-Status: waiting platform/security approval.
+Status: implemented and merged.
 
 ## BC-08 SLA Definition Finalization
 Issue: [#54](https://github.com/abdallahh166/TowerOps/issues/54)  
-Status: waiting operations/product approval.
+Status: implemented and merged.
 
 ## Execution Order
 1. PR-BC-03 (low-risk permission split)
