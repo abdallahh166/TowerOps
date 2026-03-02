@@ -8,7 +8,7 @@ Source decisions:
 
 ## Priority
 - P0: BC-01, BC-02, BC-03, BC-04, BC-07
-- P1: BC-05, BC-06, BC-08 (pending business closure)
+- P1: BC-05, BC-06, BC-08 (implemented; keep for traceability)
 
 ## PR-Slice Plan
 
@@ -101,7 +101,7 @@ Acceptance Criteria:
 
 ## BC-05 Data Retention and Privacy
 Issue: [#51](https://github.com/abdallahh166/TowerOps/issues/51)  
-Status: approved decision; implementation tracked in [#62](https://github.com/abdallahh166/TowerOps/issues/62) and currently in delivery.
+Status: implemented and merged in [#68](https://github.com/abdallahh166/TowerOps/pull/68). Delivery tracking issue [#62](https://github.com/abdallahh166/TowerOps/issues/62) is closed.
 
 ## BC-06 Upload Security Policy
 Issue: [#52](https://github.com/abdallahh166/TowerOps/issues/52)  
