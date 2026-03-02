@@ -94,3 +94,15 @@ These are not rollback blockers and did not fail migration execution, but should
 
 - `Staging smoke test (Auth, Visits, WorkOrders, Import, Portal) executed` -> PASS
 - `Rollback and migration verification signed off` -> PASS
+
+## 6) External Staging Follow-up (2026-03-02)
+
+An external staging validation attempt against `https://towerops.runasp.net` is currently blocked by deployment/routing issues:
+- `GET /health` -> `404`
+- `POST /api/auth/login` -> IIS HTML `404 - File or directory not found`
+
+Tracking:
+- blocker issue `#70`: `https://github.com/abdallahh166/TowerOps/issues/70`
+- detailed verification file: `docs/phase-2/19-bc05-staging-rollout-verification.md`
+
+Until `#70` is resolved and external smoke is re-run successfully, final runtime GO remains blocked.

@@ -77,3 +77,16 @@ Decision notes: Local smoke suite is PASS. Final GO is blocked until staging dep
 
 Executed commands match:
 - `docs/phase-2/15-staging-smoke-and-rollback-verification.md`
+
+## I) External Staging Runtime Validation (2026-03-02)
+
+- Status: `BLOCKED`
+- Blocker issue: `#70` (`https://github.com/abdallahh166/TowerOps/issues/70`)
+- Evidence: `docs/phase-2/19-bc05-staging-rollout-verification.md`
+
+Observed:
+- `GET https://towerops.runasp.net/health` -> `404`
+- `POST https://towerops.runasp.net/api/auth/login` -> IIS HTML `404`
+
+Decision impact:
+- Final GO remains `NO-GO` until blocker `#70` is closed and external runtime smoke passes.

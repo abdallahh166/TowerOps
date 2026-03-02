@@ -28,6 +28,7 @@ These documents are intended to match current code behavior:
 - `docs/phase-2/16-release-notes-v1.0.0-rc1.md`
 - `docs/phase-2/17-go-no-go-checklist.md`
 - `docs/phase-2/18-business-confirmation-implementation-pr-slices.md`
+- `docs/phase-2/19-bc05-staging-rollout-verification.md`
 
 ## Historical / Planning Snapshots
 These remain useful for context but can diverge from runtime implementation:
